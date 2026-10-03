@@ -1,0 +1,21 @@
+name = "cricket-live-push"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Static assets (Live + Scorer PWAs)
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# One Durable Object class for all matches
+[[durable_objects.bindings]]
+name = "MATCH"
+class_name = "MatchDO"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["MatchDO"]
+
+[vars]
+ENVIRONMENT = "production"
