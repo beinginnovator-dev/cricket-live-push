@@ -396,9 +396,6 @@
     }
     .emoji-rail .er{min-width:38px;padding:4px 6px}
     .emoji-rail .er .e{font-size:16px}
-    .team-card .score{line-height:1.15}
-    .team-card .score .sc-main{display:block;font-size:22px;font-weight:900;letter-spacing:.02em}
-    .team-card .score .sc-ov{display:block;font-size:20px;font-weight:700;color:#94a3b8;margin-top:2px}
   </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
@@ -604,13 +601,11 @@
         <div class="subtabs">
           <button type="button" class="subtab on" id="st-teams" onclick="setSumSub('teams')">Teams</button>
           <button type="button" class="subtab" id="st-sum" onclick="setSumSub('sum')">Match summary</button>
-          <button type="button" class="subtab" id="st-viewers" onclick="setSumSub('viewers')">Viewers</button>
           <button type="button" class="subtab" id="st-orange" onclick="setSumSub('orange')">Orange cap</button>
           <button type="button" class="subtab" id="st-purple" onclick="setSumSub('purple')">Purple cap</button>
         </div>
         <div id="sum-teams"></div>
         <div id="sum-sum" class="hidden"></div>
-        <div id="sum-viewers" class="hidden"></div>
         <div id="sum-orange" class="hidden"></div>
         <div id="sum-purple" class="hidden"></div>
         <div id="sum-owners" class="hidden"></div>
@@ -758,7 +753,6 @@
           if(!payload) return;
           __fbBanner(m.name||'Fan', payload);
           if(isF||em){ var em2=em||(isF?t.replace('__FLOAT__',''):''); if(em2) __fbBubbles(em2); }
-          try{ __recordActivity(m.id, m.name, t, em||(isF?t.replace('__FLOAT__',''):'')); }catch(eAct){}
         });
       }catch(e){ console.log('fbApply',e); }
     }
@@ -782,7 +776,6 @@
               });
             }catch(e){}
           }
-          try{ __ingestActivityList(d.floats||[]); }catch(eIn){}
           __fbApply(d.floats||[]);
         })
         .catch(function(){});
@@ -1149,100 +1142,11 @@
       postDraft(picked);
     }
     function setSumSub(s){
-      ['teams','sum','viewers','orange','purple'].forEach(function(x){
+      ['teams','sum','orange','purple'].forEach(function(x){
         var b=$('st-'+x),p=$('sum-'+x);
         if(b)b.classList.toggle('on',s===x);
         if(p)p.classList.toggle('hidden',s!==x);
       });
-      if(s==='viewers'){ try{ paintViewersSummary(); }catch(e){} }
-    }
-    // Track viewers + activity for Summary → Viewers tab
-    var __viewerMap = Object.create(null); // id -> {id,name,firstSeen,lastSeen,online,emojis:{},messages:[]}
-    function __touchViewer(id, name, online){
-      if(!id) return;
-      id=String(id);
-      var now=Date.now();
-      var v=__viewerMap[id];
-      if(!v){
-        v={id:id,name:name||'Fan',firstSeen:now,lastSeen:now,online:!!online,emojis:Object.create(null),messages:[]};
-        __viewerMap[id]=v;
-      } else {
-        if(name) v.name=name;
-        v.lastSeen=now;
-        if(online!=null) v.online=!!online;
-      }
-      return v;
-    }
-    function __recordActivity(id, name, text, emoji, ts){
-      if(!id && !name) return;
-      var v=__touchViewer(id||('n:'+name), name||'Fan', true);
-      if(!v) return;
-      var em=String(emoji||'').trim();
-      var t=String(text||'').replace(/^__FLOAT__/,'').trim();
-      // pure emoji float: text may be __FLOAT__🔥 or just emoji
-      if(!em && t && t.length<=4){ em=t; }
-      if(em){ v.emojis[em]=(v.emojis[em]|0)+1; }
-      if(t && t!==em){
-        v.messages.push({text:t, emoji:em||'', ts:ts||Date.now()});
-        if(v.messages.length>40) v.messages=v.messages.slice(-40);
-      } else if(em && !t){
-        // still log emoji-only as lightweight message line for activity log
-        v.messages.push({text:em, emoji:em, ts:ts||Date.now()});
-        if(v.messages.length>40) v.messages=v.messages.slice(-40);
-      }
-    }
-    // Build activity from float/chat history without animating
-    function __ingestActivityList(list){
-      try{
-        (list||[]).forEach(function(m){
-          if(!m) return;
-          var mid=String(m.mid||((m.id||'')+'-'+(m.ts||'')+'-'+(m.text||'')+'-'+(m.emoji||'')));
-          if(!window.__actSeen) window.__actSeen=Object.create(null);
-          if(window.__actSeen[mid]) return;
-          window.__actSeen[mid]=1;
-          __recordActivity(m.id, m.name, m.text, m.emoji, m.ts);
-        });
-      }catch(e){}
-    }
-    function paintViewersSummary(){
-      var el=$('sum-viewers'); if(!el) return;
-      var rows=Object.keys(__viewerMap).map(function(k){return __viewerMap[k]});
-      rows.sort(function(a,b){ return (b.online?1:0)-(a.online?1:0) || (b.lastSeen|0)-(a.lastSeen|0); });
-      if(!rows.length){ el.innerHTML='<div class="empty">No viewers yet</div>'; return; }
-      function fmtT(ts){
-        try{ var d=new Date(ts); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }catch(e){ return '—'; }
-      }
-      var html='<div style="padding:8px 4px;font-size:12px;color:#94a3b8">Online / offline · visit &amp; last seen · Activity</div>';
-      rows.forEach(function(v){
-        var emKeys=Object.keys(v.emojis||{});
-        var emTotal=0; emKeys.forEach(function(k){ emTotal+=v.emojis[k]|0; });
-        html+='<div style="display:flex;align-items:center;gap:8px;padding:10px 8px;border-bottom:1px solid rgba(148,163,184,.12)">';
-        html+='<span style="width:8px;height:8px;border-radius:50%;background:'+(v.online?'#34d399':'#64748b')+';flex-shrink:0"></span>';
-        html+='<div style="flex:1;min-width:0"><div style="font-weight:800;color:#e2e8f0">'+esc(v.name||'Fan')+'</div>';
-        html+='<div style="font-size:11px;color:#94a3b8">'+(v.online?'Online':'Offline')+' · in '+fmtT(v.firstSeen)+' · last '+fmtT(v.lastSeen)+'</div></div>';
-        html+='<button type="button" class="icon-btn" style="font-size:11px" onclick="showViewerActivity(\''+esc(v.id).replace(/'/g,"\\'")+'\')">Activity</button>';
-        html+='</div>';
-      });
-      el.innerHTML=html;
-    }
-    function showViewerActivity(id){
-      var v=__viewerMap[id]; if(!v){ alert('No activity'); return; }
-      var emKeys=Object.keys(v.emojis||{});
-      var emHtml=emKeys.length?emKeys.map(function(k){ return k+' ×'+(v.emojis[k]|0); }).join(' · '):'No emojis';
-      var msgHtml=(v.messages||[]).length?(v.messages.slice().reverse().map(function(m){
-        return '<div style="padding:6px 0;border-bottom:1px solid rgba(148,163,184,.1)">'+(m.emoji?esc(m.emoji)+' ':'')+esc(m.text||'')+'</div>';
-      }).join('')):'<div class="empty">No messages</div>';
-      var box=document.createElement('div');
-      box.style.cssText='position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px';
-      box.onclick=function(e){ if(e.target===box) box.remove(); };
-      box.innerHTML='<div style="background:#0f172a;border:1px solid rgba(148,163,184,.3);border-radius:14px;padding:16px;max-width:340px;width:100%;max-height:80vh;overflow:auto;color:#e2e8f0">'+
-        '<div style="font-weight:900;color:#fbbf24;margin-bottom:8px">'+esc(v.name||'Fan')+' · Activity</div>'+
-        '<div style="font-size:12px;color:#94a3b8;margin-bottom:10px">'+(v.online?'Online':'Offline')+'</div>'+
-        '<div style="font-size:12px;font-weight:800;color:#7dd3fc;margin-bottom:4px">Emojis</div>'+
-        '<div style="font-size:14px;margin-bottom:12px">'+emHtml+'</div>'+
-        '<div style="font-size:12px;font-weight:800;color:#7dd3fc;margin-bottom:4px">Messages</div>'+msgHtml+
-        '<button type="button" style="width:100%;margin-top:12px;padding:10px;border:0;border-radius:10px;background:#1e293b;color:#e2e8f0;font-weight:800;cursor:pointer" onclick="this.closest(\'div[style*=fixed]\').remove()">Close</button></div>';
-      document.body.appendChild(box);
     }
     var cheerTarget='striker';
     function setCheerTarget(t){
@@ -1639,7 +1543,7 @@
         if(!rows.length){ el.innerHTML='<div class="empty">No viewers yet</div>'; return; }
         var html='<div style="overflow:auto;max-height:280px"><table class="stats" style="font-size:12px"><thead><tr><th>#</th><th>Viewer</th><th class="num">Coins</th>'+(__adminKey?'<th></th>':'')+'</tr></thead><tbody>';
         rows.forEach(function(r,i){
-          html+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(r.name||'Fan')+'</td><td class="num">🪙 '+(r.points|0)+'</td>';
+          html+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(r.name||'Fan')+'</td><td class="num">'+(r.points|0)+'</td>';
           if(__adminKey){
             html+='<td style="white-space:nowrap"><button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminResetCoinsOne(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Reset</button> ';
             html+='<button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminBlockViewer(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Block</button></td>';
@@ -1928,44 +1832,19 @@
         if(sr0===50)ev='fifty';
         if(sr0===100)ev='hundred';
       }catch(eM){}
-      // Key by balls+runs+event — NOT ts (ts updates every publish and was replaying the same FOUR/TWO forever)
-      var ek=(data.balls|0)+':'+(data.runs|0)+':'+(data.wickets|0)+':'+(ev||'')+':'+(data.strikerRuns|0);
-      if(ev && ek!==lastEventKey){
+      var ek=data.ts+':'+(ev||'')+':'+(data.strikerRuns|0);
+      if(ev&&ek!==lastEventKey){
         lastEventKey=ek;
-        // Never replay event bursts after match ends, or while points overlay is showing
-        if(!data.matchEnded && Date.now()>=skipEventAnimUntil){
-          try{ playAnim(ev,data); }catch(eA){}
-        }
+        if(Date.now()>=skipEventAnimUntil)playAnim(ev,data);
       }
       try{refreshPtsUI()}catch(eUp){}
       $('v-match-type').textContent=(data.matchType||'MATCH').toUpperCase();
       var line=data.innings===1?('1st innings · '+(data.battingTeamName||'')+' '+(data.runs|0)+' runs in '+(data.balls|0)+' balls'+((data.wickets|0)>0?(' for '+data.wickets+' wicket'+((data.wickets>1)?'s':'')):'')+(data.crr?(' · CRR '+data.crr):'')):('Innings '+data.innings+(data.targetScore!=null?(' · Target '+data.targetScore):''));
       $('v-match-line').textContent=line;$('v-crr').textContent=(data.crr!=null?Number(data.crr).toFixed(2):'0.00');
       $('v-team-a').textContent=data.teamA||'Team A';$('v-team-b').textContent=data.teamB||'Team B';
-      function scoreHtml(runs, wkts, overs){
-        return '<span class="sc-main">'+(runs|0)+' / '+(wkts|0)+'</span><span class="sc-ov">('+esc(String(overs!=null?overs:'—'))+')</span>';
-      }
-      if(data.battingSide==='A'){
-        $('v-score-a').innerHTML=scoreHtml(data.runs, data.wickets, oversFromBalls(data.balls));
-        $('v-role-a').textContent='Batting';
-        if(data.innings>=2&&data.firstInningsScore!=null){
-          $('v-score-b').innerHTML=scoreHtml(data.firstInningsScore, data.firstInningsWickets, data.firstInningsOvers||'—');
-          $('v-role-b').textContent='Bowling';
-        } else {
-          $('v-score-b').textContent='Yet to bat';
-          $('v-role-b').textContent='Bowling';
-        }
-      } else {
-        $('v-score-b').innerHTML=scoreHtml(data.runs, data.wickets, oversFromBalls(data.balls));
-        $('v-role-b').textContent='Batting';
-        if(data.firstInningsScore!=null){
-          $('v-score-a').innerHTML=scoreHtml(data.firstInningsScore, data.firstInningsWickets, data.firstInningsOvers||'—');
-          $('v-role-a').textContent='Bowling';
-        } else {
-          $('v-score-a').textContent='Yet to bat';
-          $('v-role-a').textContent='Bowling';
-        }
-      }
+      var liveScore=(data.runs|0)+'-'+(data.wickets|0);
+      if(data.battingSide==='A'){$('v-score-a').textContent=liveScore+' ('+oversFromBalls(data.balls)+')';$('v-role-a').textContent='Batting';if(data.innings>=2&&data.firstInningsScore!=null){$('v-score-b').textContent=data.firstInningsScore+'-'+(data.firstInningsWickets|0)+' ('+(data.firstInningsOvers||'—')+')';$('v-role-b').textContent='Bowling'}else{$('v-score-b').textContent='Yet to bat';$('v-role-b').textContent='Bowling'}}
+      else{$('v-score-b').textContent=liveScore+' ('+oversFromBalls(data.balls)+')';$('v-role-b').textContent='Batting';if(data.firstInningsScore!=null){$('v-score-a').textContent=data.firstInningsScore+'-'+(data.firstInningsWickets|0)+' ('+(data.firstInningsOvers||'—')+')';$('v-role-a').textContent='Bowling'}else{$('v-score-a').textContent='Yet to bat';$('v-role-a').textContent='Bowling'}}
       $('v-inns').innerHTML='Innings <b>'+(data.innings||1)+'</b> · '+esc(data.inningsLabel||'');
       (function(){var r=data.strikerRuns|0,b=data.strikerBalls|0,s=b>0?((r*100)/b).toFixed(1):'0.0';var el=$('v-striker-st');if(el)el.innerHTML=r+' ('+b+')<div class="substat-board">SR '+s+'</div>';})();
       (function(){
@@ -1987,32 +1866,7 @@
       balls.forEach(function(b){var s=String(b).toLowerCase();if(s==='w'){overLegal++}else if(s==='wd'||s==='nb'||s==='wide'){overRuns+=1}else{var n=parseInt(s,10);if(!isNaN(n)){overRuns+=n;overLegal++}}});
       ov.runs=overRuns;ov.legal=overLegal;
       $('v-over-balls').innerHTML=balls.length?balls.map(function(b){var cls='ob';var s=String(b);if(s==='W'||s==='w')cls+=' w';else if(s==='4')cls+=' b4';else if(s==='6')cls+=' b6';return'<span class="'+cls+'">'+esc(s)+'</span>'}).join(''):'<span class="over-msg">No balls yet this over</span>';
-      (function(){
-        var msg='';
-        if(balls.length){
-          msg='This over: '+overRuns+' run'+(overRuns===1?'':'s')+' off '+overLegal+' legal';
-          var ballsLeft=Math.max(0, 6-overLegal);
-          msg+=' · '+ballsLeft+' ball'+(ballsLeft===1?'':'s')+' left';
-        }
-        // Chase: runs to win + balls left in match (approx)
-        try{
-          if((data.innings|0)>=2 && data.targetScore!=null){
-            var need=Math.max(0, (data.targetScore|0) - (data.runs|0));
-            var maxBalls=(data.maxOvers|0)*6;
-            var ballsGone=data.balls|0;
-            var matchBallsLeft=maxBalls>0?Math.max(0, maxBalls-ballsGone):null;
-            if(need>0){
-              msg+=(msg?' · ':'')+need+' to win';
-              if(matchBallsLeft!=null) msg+=' · '+matchBallsLeft+' balls left';
-            } else if(data.matchEnded){
-              msg+=(msg?' · ':'')+(data.resultText||'Match over');
-            } else {
-              msg+=(msg?' · ':'')+'Target reached';
-            }
-          }
-        }catch(eT){}
-        $('v-over-msg').textContent=msg;
-      })();
+      $('v-over-msg').textContent=balls.length?('This over: '+overRuns+' run'+(overRuns===1?'':'s')+' off '+overLegal+' legal ball'+(overLegal===1?'':'s')):'';
       var lines=((ttsLang==='hi')?(data.commentaryHi||data.commentary):data.commentary||[]).slice().filter(Boolean).reverse();
       $('comm-list').innerHTML=lines.length?lines.map(function(line,i){var parts=formatCommentaryLine(line);var html='';if(i===0)html+='<div class="t">LATEST</div>';if(parts.title)html+='<div class="title">'+highlightEventWords(parts.title)+'</div>';if(parts.body)html+='<div class="body">'+highlightEventWords(parts.body)+'</div>';if(!parts.title&&!parts.body)html+=highlightEventWords(line);return'<div class="feed-item">'+html+'</div>'}).join(''):'<div class="empty">No commentary yet</div>';
       speakNewCommentary(data);
@@ -2201,7 +2055,6 @@
     async function sendMatchEmoji(emoji){
       var name=getChatName()||'Fan';
       try{bumpEmojiRail(emoji,1)}catch(e0){}
-      try{ __recordActivity(uid(), name, '__FLOAT__'+emoji, emoji, Date.now()); }catch(eAct){}
       // Local: one side-lane bubble only (score stays clear)
       try{ if(typeof __fbBubbles==='function') __fbBubbles(emoji); else spawnEmojiBubbles(emoji,1); }catch(e1){}
       try{ if(typeof __fbBanner==='function') __fbBanner(name, emoji); else floatCheerBanner(name, emoji); }catch(e2){}
@@ -2287,7 +2140,6 @@
       if(!text&&!emoji)return;
       try{ if(!window.__myFloatMids) window.__myFloatMids={}; window.__myFloatMids['recent']=1; setTimeout(function(){try{delete window.__myFloatMids['recent']}catch(e){}},6000);}catch(eR){}
       try{ floatCheerBanner(name, (emoji?emoji+' ':'')+text); }catch(eF){}
-      try{ __recordActivity(uid(), name, text, emoji, Date.now()); }catch(eAct){}
       var body={id:uid(),name:name,text:text,emoji:emoji,match:LIVE_MATCH||'current'};
       try{ sendFloatOverWs(Object.assign({type:'float'}, body)); }catch(eW){}
       try{
@@ -2309,8 +2161,21 @@
     
     var lastOverBannerBalls=-1;
     async function maybeShowOverLeaders(data){
-      // Gold-coin floating banners removed — coins stay in Viewers Coins list only
-      return;
+      try{
+        var balls=data&&(data.balls|0);
+        if(!balls || balls%6!==0) return;
+        if(balls===lastOverBannerBalls) return;
+        lastOverBannerBalls=balls;
+        if(!API_BASE)return;
+        var r=await fetch(API_BASE+'/fans');
+        if(!r.ok)return;
+        var d=await r.json();
+        var fans=(d.fans||d.list||d.rows||[]).slice().sort(function(a,b){return (b.points|0)-(a.points|0)});
+        var top=fans.slice(0,3);
+        if(!top.length)return;
+        var msg='🥇 '+top.map(function(f,i){return (i+1)+'. '+(f.name||'Fan')+' ('+(f.points|0)+'🪙)'}).join(' · ');
+        floatCheerBanner('Over '+(Math.floor(balls/6))+' leaders', msg, 'gold');
+      }catch(e){}
     }
 
     
@@ -2444,23 +2309,16 @@
         var n = (count!=null ? count : list.length) | 0;
         var el = $('viewer-count');
         if(el) el.textContent = '👁 ' + n;
+        // detect new joiners
         var nowMap = {};
-        var onlineIds = Object.create(null);
         list.forEach(function(v){
           var id = v.id || v.name || '';
           nowMap[id] = v;
-          onlineIds[id]=1;
-          try{ __touchViewer(id, v.name||'Fan', true); }catch(eT){}
           if(id && !__knownViewers[id] && Object.keys(__knownViewers).length>0){
             try{ floatCheerBanner(v.name||'Viewer', 'joined the match 👋'); }catch(e){}
           }
         });
-        // mark others offline
-        try{
-          Object.keys(__viewerMap).forEach(function(id){
-            if(!onlineIds[id]) __viewerMap[id].online=false;
-          });
-        }catch(eOff){}
+        // first successful presence: seed without notifications
         if(Object.keys(__knownViewers).length===0 && list.length){
           list.forEach(function(v){ __knownViewers[v.id||v.name||''] = 1; });
         } else {
@@ -2468,7 +2326,6 @@
         }
         var names = $('viewer-names');
         if(names) names.textContent = list.map(function(v){return v.name||'Fan'}).slice(0,8).join(', ');
-        try{ if($('sum-viewers') && !$('sum-viewers').classList.contains('hidden')) paintViewersSummary(); }catch(ePV){}
       }catch(e){ console.log('renderViewers', e); }
     }
 
@@ -2714,20 +2571,99 @@
       if(br){ br.classList.add('coin-rules-btn'); if(!seen) br.classList.add('blink'); }
     }catch(eBoot){}
     try{window.__seedFloatSkip=true;setTimeout(function(){window.__seedFloatSkip=false},800)}catch(e){}
-    // FREE-TIER SAFE intervals (was 1s and burned Durable Object daily quota)
-    // Score ~3s, floats ~5s (also on score poll), chat ~8s, presence ~20s
+    
+// ===== SCORE PUSH via WebSocket (match-specific DO) =====
+    var __scoreWs = null, __scoreWsRetry = 0, __scoreWsOk = false;
+    function connectScoreWs(){
+      if(!API_BASE || typeof WebSocket === 'undefined') return;
+      try{
+        if(__scoreWs && (__scoreWs.readyState===0 || __scoreWs.readyState===1)) return;
+        var proto = (location.protocol==='https:') ? 'wss:' : 'ws:';
+        var match = (typeof LIVE_MATCH!=='undefined' && LIVE_MATCH) ? LIVE_MATCH : 'current';
+        var url = proto + '//' + location.host + '/ws?match=' + encodeURIComponent(match);
+        __scoreWs = new WebSocket(url);
+        __scoreWs.onopen = function(){
+          __scoreWsRetry = 0;
+          __scoreWsOk = true;
+          try{ setLiveDot(0); }catch(e){}
+          try{ __scoreWs.send(JSON.stringify({type:'ping'})); }catch(e){}
+        };
+        __scoreWs.onmessage = function(ev){
+          try{
+            var msg = JSON.parse(ev.data);
+            if(!msg) return;
+            if(msg.type === 'pong') return;
+            if(msg.type === 'score' || msg.runs != null || (msg.data && msg.data.runs != null)){
+              try{ applyData(msg); }catch(e){}
+              return;
+            }
+            if(msg.type === 'float' || msg.emoji || msg.text){
+              try{ applyFloats([msg]); }catch(e){}
+            }
+          }catch(e){}
+        };
+        __scoreWs.onclose = function(){
+          __scoreWsOk = false;
+          var delay = Math.min(15000, 800 + (__scoreWsRetry++ * 700));
+          setTimeout(function(){ try{ connectScoreWs(); }catch(e){} }, delay);
+        };
+        __scoreWs.onerror = function(){ try{ __scoreWs.close(); }catch(e){} };
+      }catch(e){ console.log('scoreWs', e); }
+    }
+    // ===== end SCORE PUSH =====
+
+// PUSH-FIRST boot: WebSocket for score + floats, light polling as backup only
     poll();
-    setInterval(function(){ try{ if(!document.hidden) poll(); }catch(e){} }, 3000);
-    try{connectFloatWs()}catch(eWSboot){}
-    setInterval(function(){ pollBusy=false; if(failCount>2 && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)){ lastTs=''; failCount=Math.max(0,failCount-1);} }, 8000);
+    try{ connectScoreWs(); }catch(e){}
+    try{ connectFloatWs(); }catch(e){}
+
+    setInterval(function(){
+      try{
+        if(document.hidden) return;
+        if(window.__cfLimitUntil && Date.now() < window.__cfLimitUntil) return;
+        if(typeof __scoreWsOk !== 'undefined' && __scoreWsOk && (Date.now() % 16000) > 8000) return;
+        poll();
+      }catch(e){}
+    }, 8000);
+
+    setInterval(function(){
+      pollBusy = false;
+      if(failCount > 2 && !(window.__cfLimitUntil && Date.now() < window.__cfLimitUntil)){
+        lastTs = '';
+        failCount = Math.max(0, failCount - 1);
+      }
+    }, 10000);
+
     try{ heartbeat(); }catch(eH){}
-    setInterval(function(){ try{ if(!document.hidden && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)) heartbeat(); }catch(e){} }, 20000);
+    setInterval(function(){
+      try{
+        if(!document.hidden && !(window.__cfLimitUntil && Date.now() < window.__cfLimitUntil))
+          heartbeat();
+      }catch(e){}
+    }, 20000);
+
     try{ pollChat(); }catch(eC){}
-    setInterval(function(){ try{ if(!document.hidden && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)) pollChat(); }catch(e){} }, 8000);
-    // floats come with live-public; light backup poll only
+    setInterval(function(){
+      try{
+        if(!document.hidden && !(window.__cfLimitUntil && Date.now() < window.__cfLimitUntil))
+          pollChat();
+      }catch(e){}
+    }, 10000);
+
     try{ pollFloats(); }catch(eF){}
-    setInterval(function(){ try{ if(!document.hidden && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)) pollFloats(); }catch(e){} }, 5000);
-    setInterval(function(){try{if($('panel-fan')&&!$('panel-fan').classList.contains('hidden'))loadFansRank()}catch(e){}},15000);
+    setInterval(function(){
+      try{
+        if(!document.hidden && !(window.__cfLimitUntil && Date.now() < window.__cfLimitUntil))
+          pollFloats();
+      }catch(e){}
+    }, 12000);
+
+    setInterval(function(){
+      try{
+        if($('panel-fan') && !$('panel-fan').classList.contains('hidden'))
+          loadFansRank();
+      }catch(e){}
+    }, 15000);
   </script>
 </body>
 </html>
