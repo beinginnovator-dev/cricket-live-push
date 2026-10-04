@@ -1,10 +1,9 @@
-name = "cricket-pwa-cloudflare"
+name = "cricket-live-push"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 
-# CRITICAL: worker must run BEFORE static assets, otherwise /live is
-# served as live.html and POST /live returns 405 (API never reached).
+# Worker must run BEFORE static assets so /api/* is not swallowed by HTML files
 [assets]
 directory = "./public"
 binding = "ASSETS"
@@ -16,8 +15,12 @@ html_handling = "none"
 name = "LIVE_ROOM"
 class_name = "LiveRoom"
 
-# This Worker was already deployed with the declarative `exports` flow.
-# Do NOT use [[migrations]] — Cloudflare rejects reverting to migrations (code 100403).
+# Declarative exports (required — this worker already used exports flow)
 [exports.LiveRoom]
 type = "durable-object"
 storage = "sqlite"
+
+# Tombstone: retire old demo class MatchDO that was provisioned earlier
+[exports.MatchDO]
+type = "durable-object"
+state = "deleted"

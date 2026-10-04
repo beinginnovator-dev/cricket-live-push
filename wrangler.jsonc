@@ -1,5 +1,5 @@
 {
-  "name": "cricket-pwa-cloudflare",
+  "name": "cricket-live-push",
   "main": "worker.js",
   "compatibility_date": "2024-11-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -19,6 +19,10 @@
     "LiveRoom": {
       "type": "durable-object",
       "storage": "sqlite"
+    },
+    "MatchDO": {
+      "type": "durable-object",
+      "state": "deleted"
     }
   }
 }
