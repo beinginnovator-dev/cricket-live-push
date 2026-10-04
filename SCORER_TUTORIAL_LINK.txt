@@ -1,0 +1,9 @@
+Optional: add a Tutorial button in Scorer
+
+In public/index.html (scorer), add near Settings / Help menu:
+
+  <a href="/tutorial.html" style="display:block;margin:8px 12px;padding:12px;border-radius:10px;background:#10b981;color:#042f2e;font-weight:900;text-align:center;text-decoration:none">
+    📘 App tutorial
+  </a>
+
+Or open directly: https://YOUR-WORKER.workers.dev/tutorial.html
