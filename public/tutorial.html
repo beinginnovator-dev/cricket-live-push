@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<meta name="theme-color" content="#0f172a"/>
+<title>Scorer Tutorial · How to use</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b1412;color:#e8f5f0;min-height:100dvh;overflow-x:hidden}
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(148,163,184,.15)}
+.top h1{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#7da89d}
+.top a{color:#34d399;text-decoration:none;font-weight:800;font-size:13px}
+.progress{height:4px;background:#1e293b}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,#10b981,#34d399);width:0%;transition:width .4s ease}
+.stage{padding:20px 16px 100px;max-width:28rem;margin:0 auto}
+.card{background:linear-gradient(165deg,#0f172a,#1e293b 55%,#0f172a);border:1px solid rgba(148,163,184,.2);border-radius:1rem;padding:18px 16px;box-shadow:0 12px 32px rgba(0,0,0,.35);min-height:320px}
+.step-no{font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#fbbf24;margin-bottom:8px}
+.card h2{font-size:20px;font-weight:900;margin-bottom:10px;line-height:1.25}
+.card p{font-size:14px;color:#cbd5e1;line-height:1.55;margin-bottom:12px}
+.bullets{list-style:none;margin:0 0 12px}
+.bullets li{position:relative;padding:8px 0 8px 28px;font-size:14px;color:#e2e8f0;border-bottom:1px solid rgba(148,163,184,.1)}
+.bullets li::before{content:attr(data-n);position:absolute;left:0;top:8px;width:20px;height:20px;border-radius:50%;background:#10b981;color:#042f2e;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.demo{margin-top:14px;border-radius:12px;background:rgba(15,23,42,.85);border:1px dashed rgba(52,211,153,.35);padding:14px;min-height:90px;position:relative;overflow:hidden}
+.demo .label{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:8px}
+.anim-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{padding:8px 12px;border-radius:10px;background:#1e293b;border:1px solid rgba(148,163,184,.25);font-weight:800;font-size:13px;opacity:0;transform:translateY(12px);animation:popIn .5s ease forwards}
+.chip.on{background:#10b981;color:#042f2e;border-color:#34d399}
+.chip.w{background:#7f1d1d;color:#fecaca}
+.chip.gold{background:#78350f;color:#fde68a;border-color:#fbbf24}
+@keyframes popIn{to{opacity:1;transform:translateY(0)}}
+.pulse-dot{width:10px;height:10px;border-radius:50%;background:#34d399;box-shadow:0 0 12px #34d399;animation:pulse 1.2s infinite;display:inline-block;margin-right:6px}
+@keyframes pulse{50%{opacity:.35}}
+.nav{position:fixed;bottom:0;left:0;right:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:rgba(11,20,18,.95);border-top:1px solid rgba(148,163,184,.15);display:flex;gap:10px;max-width:28rem;margin:0 auto}
+.nav button{flex:1;border:0;border-radius:12px;padding:14px;font-weight:900;font-size:14px;cursor:pointer}
+.nav .back{background:rgba(30,41,59,.9);color:#e2e8f0;border:1px solid rgba(148,163,184,.25)}
+.nav .next{background:#10b981;color:#042f2e}
+.nav .next:disabled{opacity:.4}
+.hidden{display:none!important}
+.illu{font-size:42px;text-align:center;margin:8px 0 14px;animation:floatY 2.4s ease-in-out infinite}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.tip{font-size:12px;color:#94a3b8;font-style:italic;margin-top:8px}
+.dots{display:flex;gap:6px;justify-content:center;margin:12px 0 0}
+.dots span{width:8px;height:8px;border-radius:50%;background:#334155}
+.dots span.on{background:#34d399;box-shadow:0 0 8px #34d399}
+</style>
+</head>
+<body>
+  <div class="top">
+    <h1>📘 Scorer guide</h1>
+    <a href="/">Open Scorer</a>
+  </div>
+  <div class="progress"><i id="bar"></i></div>
+
+  <div class="stage" id="stage"></div>
+
+  <div class="nav">
+    <button class="back" id="btnBack" type="button">Back</button>
+    <button class="next" id="btnNext" type="button">Next</button>
+  </div>
+
+<script>
+var STEPS = [
+  {
+    no: 'Step 1 of 8',
+    title: 'Welcome to My Cricket Scorer',
+    icon: '🏏',
+    body: 'This short animated guide shows how to set up a match, score balls, and share the live link with viewers.',
+    bullets: ['Works offline as a PWA', 'Live score pushes to viewers', 'Stats & history saved on device'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">You will learn</div><div class="anim-row" id="d1"></div>';
+      var items = ['Settings','Teams','Toss','Scoring','Live link','Stats'];
+      items.forEach(function(t,i){
+        setTimeout(function(){
+          var s=document.createElement('span');
+          s.className='chip'+(i===3?' on':'');
+          s.textContent=t;
+          s.style.animationDelay=(i*0.08)+'s';
+          document.getElementById('d1').appendChild(s);
+        }, i*180);
+      });
+    }
+  },
+  {
+    no: 'Step 2 of 8',
+    title: 'Open Settings',
+    icon: '⚙️',
+    body: 'From the home screen, open Settings. Here you set default overs, wide/no-ball rules, and app preferences.',
+    bullets: ['Set overs (e.g. 20 for T20)', 'Wide / No-ball run rules', 'Language & sound options'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">Settings panel</div><div class="anim-row" id="d2"></div>';
+      ['Overs: 20','Wide = 1','Nb = 1','Sound ON'].forEach(function(t,i){
+        setTimeout(function(){
+          var s=document.createElement('span');
+          s.className='chip gold';
+          s.textContent=t;
+          document.getElementById('d2').appendChild(s);
+        }, i*220);
+      });
+    }
+  },
+  {
+    no: 'Step 3 of 8',
+    title: 'Create / select teams',
+    icon: '👥',
+    body: 'Add Team A and Team B. Enter player names so batting & bowling cards show the right striker and bowler.',
+    bullets: ['Create team → add players', 'Mark captain if needed', 'You can reuse teams later'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">Teams</div><div class="anim-row" id="d3"></div>';
+      ['Team A','Rohit','Virat','Team B','Bumrah','Shami'].forEach(function(t,i){
+        setTimeout(function(){
+          var s=document.createElement('span');
+          s.className='chip'+(t.indexOf('Team')===0?' gold':'');
+          s.textContent=t;
+          document.getElementById('d3').appendChild(s);
+        }, i*160);
+      });
+    }
+  },
+  {
+    no: 'Step 4 of 8',
+    title: 'Match settings',
+    icon: '📋',
+    body: 'Start a new match. Choose teams, overs, venue/date if you want, then continue to toss.',
+    bullets: ['Select batting & bowling sides after toss', 'Confirm overs for this match', 'Match is saved in History'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">New match</div><div class="anim-row" id="d4"></div>';
+      ['Team A vs Team B','20 overs','Start match'].forEach(function(t,i){
+        setTimeout(function(){
+          var s=document.createElement('span');
+          s.className='chip'+(i===2?' on':'');
+          s.textContent=t;
+          document.getElementById('d4').appendChild(s);
+        }, i*250);
+      });
+    }
+  },
+  {
+    no: 'Step 5 of 8',
+    title: 'Toss',
+    icon: '🪙',
+    body: 'Record the toss winner and their decision (bat or bowl). The app sets who bats first.',
+    bullets: ['Tap toss winner', 'Choose Bat or Bowl', 'Openers & opening bowler next'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">Toss</div><div class="anim-row" id="d5"></div>';
+      setTimeout(function(){
+        var a=document.createElement('span'); a.className='chip gold'; a.textContent='Team A won toss';
+        document.getElementById('d5').appendChild(a);
+      }, 200);
+      setTimeout(function(){
+        var b=document.createElement('span'); b.className='chip on'; b.textContent='Elected to Bat';
+        document.getElementById('d5').appendChild(b);
+      }, 700);
+    }
+  },
+  {
+    no: 'Step 6 of 8',
+    title: 'Scoring balls',
+    icon: '🎯',
+    body: 'On the scoring screen tap runs (0–6), Wicket, Wide or No-ball. Undo is available if you mis-tap.',
+    bullets: ['Legal balls advance the over', 'Wides / No-balls follow your rules', 'Striker & bowler update automatically'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">Score pad</div><div class="anim-row" id="d6"></div>';
+      ['0','1','2','4','6','W','Wd','Nb'].forEach(function(t,i){
+        setTimeout(function(){
+          var s=document.createElement('span');
+          s.className='chip'+(t==='W'?' w':(t==='4'||t==='6'?' on':''));
+          s.textContent=t;
+          document.getElementById('d6').appendChild(s);
+        }, i*140);
+      });
+    }
+  },
+  {
+    no: 'Step 7 of 8',
+    title: 'Share Live link',
+    icon: '📡',
+    body: 'Open Live / Share and copy the viewer link. Fans open it on their phone to see live score, emojis and chat.',
+    bullets: ['Same match id for scorer & viewers', 'Push updates are near-instant', 'Works as installable Live PWA'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">Live</div><div style="font-size:13px;color:#94a3b8"><span class="pulse-dot"></span>LIVE · viewers watching</div><div class="anim-row" id="d7" style="margin-top:10px"></div>';
+      setTimeout(function(){
+        var s=document.createElement('span'); s.className='chip on'; s.textContent='Copy live link';
+        document.getElementById('d7').appendChild(s);
+      }, 300);
+    }
+  },
+  {
+    no: 'Step 8 of 8',
+    title: 'Stats & History',
+    icon: '📊',
+    body: 'After the match (or mid-game), open Stats for batting/bowling tables. History keeps past matches on this device.',
+    bullets: ['Innings scorecards', 'Player-wise runs & wickets', 'Re-open a match from History'],
+    demo: function(el){
+      el.innerHTML = '<div class="label">History</div><div class="anim-row" id="d8"></div>';
+      ['Match 1 · Won','Match 2 · Lost','View scorecard'].forEach(function(t,i){
+        setTimeout(function(){
+          var s=document.createElement('span');
+          s.className='chip'+(i===2?' gold':'');
+          s.textContent=t;
+          document.getElementById('d8').appendChild(s);
+        }, i*220);
+      });
+    }
+  }
+];
+
+var i = 0;
+function render(){
+  var s = STEPS[i];
+  var pct = ((i+1)/STEPS.length)*100;
+  document.getElementById('bar').style.width = pct+'%';
+  document.getElementById('btnBack').style.visibility = i===0 ? 'hidden' : 'visible';
+  document.getElementById('btnNext').textContent = i===STEPS.length-1 ? 'Open Scorer' : 'Next';
+  var dots = STEPS.map(function(_,k){ return '<span class="'+(k===i?'on':'')+'"></span>'; }).join('');
+  var html = '<div class="card">'
+    + '<div class="step-no">'+s.no+'</div>'
+    + '<div class="illu">'+s.icon+'</div>'
+    + '<h2>'+s.title+'</h2>'
+    + '<p>'+s.body+'</p>'
+    + '<ul class="bullets">'+s.bullets.map(function(b,n){ return '<li data-n="'+(n+1)+'">'+b+'</li>'; }).join('')+'</ul>'
+    + '<div class="demo" id="demo"></div>'
+    + '<div class="dots">'+dots+'</div>'
+    + '<p class="tip">Swipe ideas only — use the real Scorer buttons when you play a match.</p>'
+    + '</div>';
+  document.getElementById('stage').innerHTML = html;
+  try{ s.demo(document.getElementById('demo')); }catch(e){}
+}
+document.getElementById('btnBack').onclick = function(){ if(i>0){ i--; render(); } };
+document.getElementById('btnNext').onclick = function(){
+  if(i < STEPS.length-1){ i++; render(); }
+  else { location.href = '/'; }
+};
+render();
+</script>
+</body>
+</html>
