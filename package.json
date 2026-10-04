@@ -1,0 +1,13 @@
+{
+  "name": "cricket-pwa-cloudflare",
+  "private": true,
+  "version": "1.0.1",
+  "description": "My Cricket Scorer PWA + Cloudflare Live API",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

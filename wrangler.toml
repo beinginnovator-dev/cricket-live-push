@@ -1,0 +1,23 @@
+name = "cricket-pwa-cloudflare"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# CRITICAL: worker must run BEFORE static assets, otherwise /live is
+# served as live.html and POST /live returns 405 (API never reached).
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+not_found_handling = "single-page-application"
+html_handling = "none"
+
+[[durable_objects.bindings]]
+name = "LIVE_ROOM"
+class_name = "LiveRoom"
+
+# This Worker was already deployed with the declarative `exports` flow.
+# Do NOT use [[migrations]] — Cloudflare rejects reverting to migrations (code 100403).
+[exports.LiveRoom]
+type = "durable-object"
+storage = "sqlite"

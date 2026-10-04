@@ -1,58 +1,46 @@
-# Cricket Live Push – Complete Package
+# Cricket PWA — fix v3 (deploy + live sync)
 
-Push-based real-time cricket scoring (Scorer + Live Viewer PWAs) on Cloudflare Workers + Durable Objects.
+## Deploy error you hit
 
-## Features
-- **Push architecture** (WebSocket) – no constant polling
-- One Durable Object per match
-- Live score + animations
-- Floating emojis
-- Simple chat
-- Separate installable PWAs for Scorer and Live
-- Works on Cloudflare Free tier for dozens of concurrent viewers
+```
+This Worker was last deployed using the declarative `exports` flow;
+reverting to `migrations` is not supported. [code: 100403]
+```
 
-## Quick Start (Local)
+**Fix:** `wrangler.toml` / `wrangler.jsonc` now use `exports` (not `migrations`).
+
+## Also fixed (live scores)
+
+- `run_worker_first = true` so API is not blocked by static `live.html`
+- Live API at `/api/live` and `/api/live-public`
+- Scorer + viewer updated to those paths
+
+## Replace on GitHub
+
+| File | Repo path |
+|------|-----------|
+| `wrangler.toml` | `wrangler.toml` |
+| `wrangler.jsonc` | `wrangler.jsonc` |
+| `worker.js` | `worker.js` |
+| `public/index.html` | `public/index.html` |
+| `public/live.html` | `public/live.html` |
+| `public/manifest.json` | `public/manifest.json` |
+| `public/sw.js` | `public/sw.js` |
+| `public/icon-*.png` | `public/icon-*.png` |
+
+Commit + push `main` → redeploy.
+
+## After green deploy
 
 ```bash
-npm install
-npx wrangler dev
+curl -s -X POST 'https://cricket-pwa-cloudflare.being-innovator.workers.dev/api/live?match=test1' \
+  -H 'Content-Type: application/json' \
+  -H 'X-Publisher-Key: PUBLISH_2026' \
+  -d '{"ts":1,"runs":3,"wickets":0,"balls":2,"teamA":"A","teamB":"B"}'
+# expect {"ok":true,"updatedAt":...}
+
+curl -s 'https://cricket-pwa-cloudflare.being-innovator.workers.dev/api/live-public?match=test1'
+# expect runs:3
 ```
 
-Then open:
-- Live:   http://localhost:8787/live/?match=demo1
-- Scorer: http://localhost:8787/scorer/?match=demo1
-
-## Deploy via GitHub → Cloudflare (Step-by-step)
-
-See the detailed guide below in this conversation, or follow:
-
-1. Push this folder to a GitHub repo
-2. Cloudflare Dashboard → Workers & Pages → Create → Connect Git repo
-3. Build settings: leave empty (no build command needed)
-4. Deploy
-
-After deploy your URLs will be:
-- `https://<worker>.<account>.workers.dev/live/?match=MATCH_ID`
-- `https://<worker>.<account>.workers.dev/scorer/?match=MATCH_ID`
-
-## Capacity (Push-based)
-
-| Concurrent Viewers | Free tier | Notes |
-|--------------------|-----------|-------|
-| 50–150             | Comfortable | Recommended |
-| 200–400            | Possible  | Still fine |
-| 500+               | Better on Paid ($5) | Very stable |
-
-## Project Structure
-
-```
-src/
-  index.ts          → Worker entry + routing
-  match-do.ts       → Durable Object (state + WebSocket hub)
-  types.ts
-public/
-  live/             → Viewer PWA
-  scorer/           → Scorer PWA
-wrangler.toml
-package.json
-```
+Then hard-refresh scorer, score 1 ball, open a **new** Viewer link.

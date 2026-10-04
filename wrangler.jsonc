@@ -1,0 +1,24 @@
+{
+  "name": "cricket-pwa-cloudflare",
+  "main": "worker.js",
+  "compatibility_date": "2024-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "single-page-application",
+    "html_handling": "none"
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "LIVE_ROOM", "class_name": "LiveRoom" }
+    ]
+  },
+  "exports": {
+    "LiveRoom": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}
