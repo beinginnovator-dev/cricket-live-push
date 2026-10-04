@@ -75,7 +75,8 @@ export class LiveRoom extends DurableObject {
     if (request.method === 'POST' && (url.pathname === '/live' || url.pathname === '/api/live')) {
       const body = await request.text();
       if (!body || body.length > 900000) return json({ ok:false, error:'Invalid payload' }, 413);
-      try { JSON.parse(body); } catch (_) { return json({ ok:false, error:'Invalid JSON' }, 400); }
+      let parsed;
+      try { parsed = JSON.parse(body); } catch (_) { return json({ ok:false, error:'Invalid JSON' }, 400); }
       const now = Date.now();
       this.ctx.storage.sql.exec(
         'CREATE TABLE IF NOT EXISTS live_state (id INTEGER PRIMARY KEY, payload TEXT NOT NULL, updated_at INTEGER NOT NULL)'
@@ -84,6 +85,17 @@ export class LiveRoom extends DurableObject {
         'INSERT INTO live_state (id,payload,updated_at) VALUES (1,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload, updated_at=excluded.updated_at',
         body, now
       );
+      // PUSH: broadcast new score to all WebSocket viewers of this match DO
+      try {
+        const core = (parsed && parsed.data && typeof parsed.data === 'object' && (parsed.data.ts || parsed.data.runs != null))
+          ? parsed.data
+          : parsed;
+        const out = Object.assign({ ok: true, data: core, updatedAt: now, type: 'score' }, core || {});
+        const payload = JSON.stringify(out);
+        for (const ws of this.ctx.getWebSockets()) {
+          try { ws.send(payload); } catch (_) {}
+        }
+      } catch (_) {}
       return json({ ok:true, updatedAt:now });
     }
 
@@ -369,9 +381,11 @@ export default {
       return json({ ok:true, service:'cricket-live-api', time:Date.now() }, 200, origin);
     }
 
-    // WebSocket: pass original request (must keep Upgrade header)
+    // WebSocket: match-specific DO when ?match= is present, else global (floats/chat)
     if (url.pathname === '/ws') {
-      const id = env.LIVE_ROOM.idFromName('__viewer_global__');
+      const match = (url.searchParams.get('match') || '').trim().slice(0, 80);
+      const name = match || '__viewer_global__';
+      const id = env.LIVE_ROOM.idFromName(name);
       const stub = env.LIVE_ROOM.get(id);
       return stub.fetch(request);
     }

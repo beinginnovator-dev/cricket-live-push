@@ -1,46 +1,37 @@
-# Cricket PWA — fix v3 (deploy + live sync)
+# Cricket PWA – Full package with Push (WebSocket)
 
-## Deploy error you hit
+This is your **original** Scorer + Live app, with Push upgrades applied.
 
-```
-This Worker was last deployed using the declarative `exports` flow;
-reverting to `migrations` is not supported. [code: 100403]
-```
+## What’s included
 
-**Fix:** `wrangler.toml` / `wrangler.jsonc` now use `exports` (not `migrations`).
+| Path | Description |
+|------|-------------|
+| `public/index.html` | Your full **Scorer** app |
+| `public/live.html` | Your full **Live** viewer + WebSocket score push |
+| `worker.js` | LiveRoom DO + score broadcast on every ball |
+| manifests, icons, sw, `_headers` | Same as your project |
+| `wrangler.toml` / `wrangler.jsonc` | Uses `exports` (no migrations) |
 
-## Also fixed (live scores)
+## URLs after deploy
 
-- `run_worker_first = true` so API is not blocked by static `live.html`
-- Live API at `/api/live` and `/api/live-public`
-- Scorer + viewer updated to those paths
+- Scorer: `https://YOUR-WORKER.workers.dev/` or `/index.html`
+- Live:   `https://YOUR-WORKER.workers.dev/live.html?match=MATCH_ID`
 
-## Replace on GitHub
+## Push behaviour
 
-| File | Repo path |
-|------|-----------|
-| `wrangler.toml` | `wrangler.toml` |
-| `wrangler.jsonc` | `wrangler.jsonc` |
-| `worker.js` | `worker.js` |
-| `public/index.html` | `public/index.html` |
-| `public/live.html` | `public/live.html` |
-| `public/manifest.json` | `public/manifest.json` |
-| `public/sw.js` | `public/sw.js` |
-| `public/icon-*.png` | `public/icon-*.png` |
+- Scorer posts a ball → worker stores it and **broadcasts** to all Live WebSockets for that match
+- Live page connects to `/ws?match=...` and updates instantly
+- Polling remains as slow backup (8s) if WebSocket drops
 
-Commit + push `main` → redeploy.
+## Deploy (phone / GitHub)
 
-## After green deploy
+1. Upload **all files** from this zip into your GitHub repo (replace existing)
+2. Commit + push `main`
+3. Cloudflare Workers/Pages linked to the repo will redeploy automatically  
+   **or** run `npx wrangler deploy` from a computer
 
-```bash
-curl -s -X POST 'https://cricket-pwa-cloudflare.being-innovator.workers.dev/api/live?match=test1' \
-  -H 'Content-Type: application/json' \
-  -H 'X-Publisher-Key: PUBLISH_2026' \
-  -d '{"ts":1,"runs":3,"wickets":0,"balls":2,"teamA":"A","teamB":"B"}'
-# expect {"ok":true,"updatedAt":...}
+## Important
 
-curl -s 'https://cricket-pwa-cloudflare.being-innovator.workers.dev/api/live-public?match=test1'
-# expect runs:3
-```
-
-Then hard-refresh scorer, score 1 ball, open a **new** Viewer link.
+- Use the **same** match id on Scorer and Live
+- Hard-refresh Live after first deploy (clear cache once)
+- Do **not** deploy the small “cricket-live-push” demo package — that was only a minimal example
