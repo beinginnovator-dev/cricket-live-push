@@ -1,0 +1,2733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, user-scalable=yes" />
+  <title>Live Match · Viewer</title>
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="Live cricket score viewer" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Live Cricket" />
+  <link rel="manifest" href="/manifest-live.json" />
+  
+  
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-live-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-live-512.png" />
+  <link rel="apple-touch-icon" href="/icon-live-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      var sw = 'sw.js';
+      try { sw = new URL('sw.js', location.href).href; } catch (e) {}
+      navigator.serviceWorker.register(new URL('/sw-live.js', location.origin).href, {scope: '/'});
+    });
+  }
+  window.__pwaDeferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    window.__pwaDeferredPrompt = e;
+    var b = document.getElementById('btn-install-live');
+    if (b) b.style.display = 'none';
+  });
+  window.addEventListener('appinstalled', function () {
+    window.__pwaDeferredPrompt = null;
+    var b = document.getElementById('btn-install-live');
+    if (b) b.style.display = 'none';
+  });
+  function installLivePwa(){ return; }
+  </script>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0b1412;color:#e8f5f0;min-height:100dvh}
+
+    .v-swipe-shell{position:relative;overflow:hidden;border-radius:1rem;touch-action:pan-y;overscroll-behavior-x:contain}
+    .v-swipe-track{display:flex;width:200%;transition:transform .42s cubic-bezier(.22,.61,.36,1);will-change:transform}
+    .v-swipe-track>.score-card,.v-swipe-track>.v-innings-stats{width:50%;flex:0 0 50%;min-width:50%;border-radius:1rem}
+    .v-innings-stats{background:linear-gradient(165deg,#0f172a,#1e293b 55%,#0f172a);border:1px solid rgba(148,163,184,.2);padding:10px 8px;overflow:auto;max-height:540px}
+    .v-swipe-title{text-align:center;color:#fbbf24;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:3px 0 9px}
+    .v-innings-stats .sec-title{padding:10px 8px 6px;font-size:11px}
+    .v-innings-stats table.stats{font-size:12px}
+    .v-innings-stats table.stats th{font-size:9px;padding:7px 4px}
+    .v-innings-stats table.stats td{font-size:11px;padding:7px 4px}
+    .v-swipe-hint{text-align:center;font-size:9px;color:#64748b;margin:5px 0 8px;letter-spacing:.04em}
+    .viewer-result{margin-top:10px;padding:14px 12px;border-radius:1rem;background:linear-gradient(135deg,#3b0764,#7c2d12 55%,#92400e);border:1px solid rgba(251,191,36,.45);box-shadow:0 12px 32px rgba(0,0,0,.3);text-align:center}
+    .viewer-result .vr-title{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#fde68a}
+    .viewer-result .vr-result{font-size:20px;font-weight:950;color:#fff;margin-top:5px}
+    .viewer-result .vr-score{font-size:12px;color:#e2e8f0;margin-top:7px;line-height:1.55}
+    .viewer-result .vr-mom{margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.15);font-size:13px;color:#fef3c7}
+    .viewer-result .vr-reason{font-size:12px;color:#e2e8f0;margin-top:4px}
+    .wrap{max-width:28rem;margin:0 auto;padding:12px 12px 28px}
+    .hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+    .hdr h1{font-size:13px;margin:0;letter-spacing:.12em;text-transform:uppercase;color:#7da89d}
+    .live-right{display:inline-flex;align-items:center;gap:8px}
+    .live-dot{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#34d399}
+    .live-dot.lost{color:#f87171}
+    .live-dot i{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 10px #34d399;animation:pulse 1.2s infinite}
+    .live-dot.lost i{background:#f87171;box-shadow:0 0 10px #f87171}
+    .glow-ball{width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0%,#f5f5f5 35%,#d4d4d4 70%,#a3a3a3 100%);box-shadow:0 0 8px rgba(255,255,255,.85),0 0 18px rgba(255,255,255,.45);animation:ballGlow 1.4s ease-in-out infinite;border:1px solid rgba(255,255,255,.5);position:relative}
+    .glow-ball::after{content:'';position:absolute;inset:18%;border:1px solid rgba(180,180,180,.5);border-radius:50%}
+    .glow-ball.paused{animation:none;opacity:.45;box-shadow:none}
+    @keyframes pulse{50%{opacity:.35}}
+    @keyframes ballGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.12);box-shadow:0 0 14px #fff,0 0 28px rgba(52,211,153,.5)}}
+    .score-card{background:linear-gradient(165deg,#0f172a,#1e293b 55%,#0f172a);border:1px solid rgba(148,163,184,.2);border-radius:1rem;padding:14px 12px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
+    .match-head{text-align:center;margin-bottom:10px}
+    .match-head .type{font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#fbbf24}
+    .match-head .line{font-size:11px;color:#94a3b8;margin-top:4px;line-height:1.35}
+    .crr-big{text-align:center;font-size:20px;font-weight:900;color:#fff;margin:8px 0 12px}
+    .crr-big span{color:#34d399}
+    .teams{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .team-card{background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.15);border-radius:.9rem;padding:12px 10px;text-align:center;min-height:88px;cursor:pointer}
+    .team-card:active{border-color:#34d399}
+    .team-card .name{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#fbbf24}
+    .team-card .name::after{content:' ⓘ';font-size:9px;opacity:.6}
+    .team-card .score{font-size:24px;font-weight:900;color:#34d399;text-shadow:0 0 14px rgba(52,211,153,.55);margin-top:6px;line-height:1.15}
+    .team-card .role{font-size:11px;color:#94a3b8;margin-top:4px}
+    .inns{text-align:center;font-size:12px;color:#94a3b8;margin:0 0 12px;padding-bottom:10px;border-bottom:1px solid rgba(148,163,184,.12)}
+    .inns b{color:#e2e8f0}
+    .players{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:stretch}
+    .pbox{background:rgba(15,23,42,.65);border:1px solid rgba(148,163,184,.15);border-radius:.75rem;padding:12px 10px;min-height:84px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .pbox .lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fbbf24}
+    .pbox .nm{font-size:14px;font-weight:800;margin-top:6px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pbox .st{font-size:18px;font-weight:900;color:#fff;margin-top:4px}
+    .pbox.bowl .lbl{color:#7dd3fc}
+    .status{margin-top:12px;text-align:center;font-size:12px;color:#cbd5e1}
+    .over-box{margin-top:12px;padding-top:10px;border-top:1px solid rgba(148,163,184,.12)}
+    .over-box .lbl{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;text-align:center}
+    .over-balls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;justify-content:center}
+    .ob{min-width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;background:#1e293b;color:#e2e8f0;border:1px solid rgba(148,163,184,.2)}
+    .ob.w{background:#7f1d1d;color:#fecaca;border-color:#ef4444}
+    .ob.b4{background:#065f46;color:#a7f3d0;border-color:#34d399}
+    .ob.b6{background:#0f766e;color:#99f6e4;border-color:#2dd4bf}
+    .over-msg{font-size:12px;color:#94a3b8;font-style:italic;text-align:center}
+    .viewer-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:8px 10px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.15);border-radius:.75rem;font-size:12px}
+    .viewer-bar .count{font-weight:800;color:#34d399}
+    .viewer-bar .names{color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
+    .tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:3px;margin:10px 0 8px}
+    .tab{border:1px solid rgba(148,163,184,.2);background:rgba(30,41,59,.75);color:#94a3b8;font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.03em;border-radius:999px;padding:6px 2px;cursor:pointer;line-height:1.2}
+    .fan-team-card{margin:10px 12px;padding:12px;border-radius:.75rem;background:rgba(30,41,59,.65);border:1px solid rgba(148,163,184,.18)}
+    .fan-team-card.top{border-color:#fbbf24;box-shadow:0 0 16px rgba(251,191,36,.25)}
+    .fan-team-card .owner{font-weight:900;color:#fbbf24;font-size:14px}
+    .fan-team-card .score{font-size:20px;font-weight:900;color:#34d399}
+    .fan-team-card .players{font-size:12px;color:#cbd5e1;margin-top:6px;line-height:1.45}
+    .fan-btn{width:100%;border:0;border-radius:10px;padding:12px;font-weight:900;font-size:13px;cursor:pointer;background:#10b981;color:#042f2e;margin:8px 0}
+    .fan-btn.sec{background:rgba(30,41,59,.9);color:#e2e8f0;border:1px solid rgba(148,163,184,.3)}
+    .winner-banner{margin:10px 12px;padding:12px;border-radius:.75rem;background:linear-gradient(135deg,#78350f,#fbbf24);color:#1c1917;font-weight:900;text-align:center}
+    .engage{margin-top:12px;padding-top:10px;border-top:1px solid rgba(148,163,184,.12)}
+    .engage .ttl{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px;text-align:center}
+    .engage .ttl.gold{color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,.35)}
+    .cheer-toggle{display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(148,163,184,.3);background:rgba(30,41,59,.9);color:#e2e8f0;border-radius:999px;padding:8px 10px;font-size:11px;font-weight:800;cursor:pointer;justify-content:center;flex:1;min-width:0}
+    .engage-row{display:flex;gap:8px;margin-top:8px;align-items:stretch}
+    .cheer-target{display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap}
+    .cheer-target button{border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.9);color:#94a3b8;border-radius:999px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer}
+    .cheer-target button.on{background:#10b981;color:#042f2e;border-color:#34d399}
+    .player-cheers{min-height:16px;margin-top:4px;font-size:13px;line-height:1.3;text-align:center;word-break:break-word}
+    .team-player-row{padding:8px 4px;border-bottom:1px solid rgba(148,163,184,.12)}
+    .team-player-row .pn{font-weight:700;color:#e2e8f0;font-size:13px}
+    .team-player-row .pc{margin-top:4px;font-size:13px;min-height:14px}
+    .cheer-more{display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+    .cheer-more.open{display:flex}
+    .share-over-btn.sm{width:auto;margin:6px 0 0;padding:6px 12px;font-size:11px;display:inline-block}
+    .fan-row{display:flex;gap:6px;align-items:center;padding:0 12px;flex-wrap:wrap}
+    .fan-row input{flex:1;min-width:120px;padding:8px 10px;border-radius:10px;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.9);color:#e2e8f0;font-weight:700;font-size:13px}
+    .fan-row .fan-btn{width:auto;margin:0;padding:8px 10px;font-size:11px;white-space:nowrap}
+    .fan-row .fan-btn.sec{padding:8px 10px}
+    .emoji-chip{display:inline-block;cursor:pointer;font-size:14px;margin-left:2px}
+    .cheer-detail{position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+    .cheer-detail .box{background:#0f172a;border:1px solid rgba(148,163,184,.3);border-radius:12px;padding:14px;max-width:320px;width:100%;max-height:70vh;overflow:auto;color:#e2e8f0}
+    .cheer-detail .box h4{margin:0 0 8px;color:#fbbf24;font-size:14px}
+    .cheer-detail .row{font-size:13px;padding:6px 0;border-bottom:1px solid rgba(148,163,184,.12)}
+    .pred-row,.react-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
+    .pred-btn,.react-btn{min-width:36px;height:34px;border-radius:10px;border:1px solid rgba(148,163,184,.3);background:rgba(30,41,59,.9);color:#e2e8f0;font-weight:900;font-size:13px;cursor:pointer;padding:0 10px}
+    .pred-btn.on{background:#10b981;color:#042f2e;border-color:#34d399}
+    .pred-btn.w{background:#7f1d1d;color:#fecaca}
+    .pred-btn.b4{background:#065f46;color:#a7f3d0}
+    .pred-btn.b6{background:#0f766e;color:#99f6e4}
+    .react-btn{font-size:18px;min-width:40px}
+    .pts-bar{text-align:center;font-size:12px;color:#94a3b8;margin:6px 0 0}
+    .pts-bar b{color:#fbbf24}
+    .pts-flash{color:#34d399;font-weight:900}
+    .pts-bad{color:#f87171;font-weight:900}
+    .react-float{position:fixed;left:50%;top:28%;transform:translateX(-50%);z-index:9500;font-size:28px;pointer-events:none;animation:floatUp 1.2s ease-out forwards}
+    .pts-burst{position:fixed;left:50%;top:32%;transform:translateX(-50%);z-index:9600;font-size:42px;font-weight:900;pointer-events:none;animation:ptsBurst 1.6s ease-out forwards;text-align:center;text-shadow:0 4px 20px rgba(0,0,0,.6)}
+    .pts-burst.up{color:#34d399}
+    .pts-burst.down{color:#f87171}
+    .pts-burst .pts-num{display:block;font-size:22px;margin-top:4px}
+    @keyframes ptsBurst{0%{opacity:0;transform:translate(-50%,24px) scale(.5)}15%{opacity:1;transform:translate(-50%,0) scale(1.15)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-50px) scale(.9)}}
+    @keyframes floatUp{0%{opacity:0;transform:translate(-50%,20px) scale(.8)}20%{opacity:1}100%{opacity:0;transform:translate(-50%,-40px) scale(1.2)}}
+    .pred-toggle{border-color:rgba(251,191,36,.45)!important;color:#fbbf24!important}
+    .pred-more{display:none;flex-direction:column;gap:8px;margin-top:8px}
+    .pred-more.open{display:flex}
+    .share-over-btn{width:100%;margin-top:8px;border:1px solid rgba(148,163,184,.25);background:rgba(16,185,129,.15);color:#34d399;font-weight:800;font-size:12px;border-radius:10px;padding:10px;cursor:pointer}
+    .rank-row{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(148,163,184,.1);font-size:14px}
+    .rank-row .rk{color:#fbbf24;font-weight:900;width:28px}
+    .rank-row .nm{flex:1;font-weight:700}
+    .rank-row .pt{color:#34d399;font-weight:900}
+    .tab.on{background:#10b981;color:#042f2e;border-color:#34d399;box-shadow:0 2px 10px rgba(16,185,129,.3)}
+    #anim-overlay .burst.one,#anim-overlay .burst.two{color:#e2e8f0;font-size:42px}
+    #anim-overlay .burst.fifty{color:#fbbf24;font-size:36px}
+    #anim-overlay .burst.hundred{color:#f59e0b;font-size:34px}
+    .bounce-ball{display:inline-block;animation:ballBounce .9s ease}
+    @keyframes ballBounce{0%{transform:translateY(40px) scale(.6);opacity:0}40%{transform:translateY(-12px) scale(1.15);opacity:1}70%{transform:translateY(6px) scale(.95)}100%{transform:translateY(0) scale(1);opacity:1}}
+    .team-card .name{color:#fbbf24!important;opacity:1!important}
+    .panel{background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.18);border-radius:1rem;min-height:220px;max-height:min(58vh,540px);overflow:auto;-webkit-overflow-scrolling:touch}
+    .panel.hidden{display:none}
+    .panel-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 0}
+    .panel-hdr .ttl{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7da89d}
+    .icon-btn{border:1px solid rgba(148,163,184,.3);background:rgba(30,41,59,.9);color:#e2e8f0;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer}
+    .icon-btn.on{background:#10b981;color:#042f2e;border-color:#34d399}
+    .feed-item{padding:12px 14px;border-bottom:1px solid rgba(148,163,184,.12);font-size:15px;line-height:1.45;color:#e2e8f0}
+    .feed-item:first-child{background:rgba(16,185,129,.12);border-left:3px solid #34d399}
+    .feed-item .t{font-size:10px;color:#34d399;font-weight:800;letter-spacing:.08em;margin-bottom:4px}
+    .feed-item .title{font-weight:800;color:#f8fafc;font-size:15px;margin-bottom:4px}
+    .feed-item .body{color:#cbd5e1;font-size:14px}
+    .hl{font-weight:900}.hl.four{color:#34d399}.hl.six{color:#2dd4bf}.hl.wicket{color:#f87171}.hl.run0,.hl.run1,.hl.run2{color:#ffffff}
+    .empty{padding:28px 16px;text-align:center;color:#64748b;font-size:14px}
+    table.stats{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+    table.stats th{text-align:left;padding:10px 6px;color:#7da89d;font-size:11px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid rgba(148,163,184,.2);position:sticky;top:0;background:#0f172a}
+    table.stats th.num,table.stats td.num{text-align:center}
+    table.stats td{padding:10px 6px;border-bottom:1px solid rgba(148,163,184,.1);vertical-align:middle;word-break:break-word;font-size:14px}
+    table.stats td.num{font-weight:700;color:#34d399;font-size:15px}
+    .sec-title{padding:14px 12px 8px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#fbbf24}
+    .sec-title.inn2{color:#7dd3fc}
+    .info-card{margin:12px;padding:12px;border-radius:.75rem;background:rgba(30,41,59,.6);border:1px solid rgba(148,163,184,.15)}
+    .info-card h3{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#fbbf24}
+    .info-card p{margin:0;font-size:14px;line-height:1.45;color:#e2e8f0;white-space:pre-wrap}
+    .cap-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid rgba(148,163,184,.1);font-size:14px}
+    .cap-row:last-child{border-bottom:0}
+    .cap-row .n{font-weight:700}.cap-row .v{color:#34d399;font-weight:800}
+    .wait-only{margin-top:48px;text-align:center;color:#94a3b8;font-size:14px;padding:0 16px}
+    .hidden{display:none!important}
+    #anim-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(0,0,0,.4);opacity:0;transition:opacity .15s}
+    #anim-overlay.show{opacity:1}
+    #anim-overlay .burst{font-size:48px;font-weight:900;text-align:center;text-shadow:0 0 28px currentColor;animation:popIn .85s ease-out}
+    #anim-overlay .burst.four{color:#34d399}#anim-overlay .burst.six{color:#2dd4bf}#anim-overlay .burst.wicket{color:#f87171;font-size:40px}
+    @keyframes popIn{0%{transform:scale(.3);opacity:0}35%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+    .subtabs{display:flex;gap:6px;padding:10px 10px 0;flex-wrap:wrap}
+    .subtab{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:6px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.25);color:#94a3b8;background:rgba(15,23,42,.6);cursor:pointer}
+    .subtab.on{background:#1e3a5f;color:#e2e8f0;border-color:#38bdf8}
+    .chat-list{padding:8px 0;min-height:120px}
+    .chat-msg{padding:8px 12px;border-bottom:1px solid rgba(148,163,184,.1);font-size:13px;display:flex;align-items:flex-start;gap:6px}
+    .chat-msg .body-wrap{flex:1;min-width:0}
+    .chat-msg .who{font-weight:800;color:#fbbf24;margin-right:6px}
+    .chat-msg .em{font-size:18px;margin-right:4px}
+    .chat-msg .edited-tag{font-size:10px;color:#64748b;font-style:italic;margin-left:4px}
+    .chat-msg .msg-actions{display:flex;gap:4px;flex-shrink:0}
+    .chat-msg .msg-actions button{font-size:11px;padding:3px 7px;border-radius:6px;border:1px solid rgba(148,163,184,.25);background:rgba(30,41,59,.9);color:#94a3b8;cursor:pointer}
+    .chat-msg .msg-actions button.danger{color:#f87171;border-color:rgba(248,113,113,.4)}
+    .chat-compose{position:sticky;bottom:0;background:#0f172a;padding:10px;border-top:1px solid rgba(148,163,184,.2)}
+    .emoji-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+    .emoji-row button{font-size:20px;background:rgba(30,41,59,.9);border:1px solid rgba(148,163,184,.2);border-radius:8px;padding:4px 8px;cursor:pointer}
+    .chat-row{display:flex;gap:6px}
+    .chat-row input{flex:1;border-radius:10px;border:1px solid rgba(148,163,184,.3);background:#1e293b;color:#e2e8f0;padding:10px;font-size:14px}
+    .chat-row button.send{background:#10b981;color:#042f2e;border:0;border-radius:10px;font-weight:800;padding:10px 14px;cursor:pointer}
+    .name-prompt{padding:12px;font-size:13px;color:#94a3b8}
+    .name-prompt input{width:100%;margin:8px 0;padding:10px;border-radius:10px;border:1px solid rgba(148,163,184,.3);background:#1e293b;color:#fff}
+    .admin-row{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 12px;font-size:11px;color:#94a3b8;border-bottom:1px solid rgba(148,163,184,.1)}
+    .admin-row button{font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid rgba(248,113,113,.4);background:rgba(127,29,29,.4);color:#fecaca;cursor:pointer}
+    .modal-ov{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}
+    .modal-ov.hidden{display:none}
+    .modal-box{background:#0f172a;border:1px solid rgba(148,163,184,.25);border-radius:1rem 1rem 0 0;max-width:28rem;width:100%;max-height:78vh;overflow:auto;padding:14px 4px 20px}
+    .modal-box .mh{display:flex;align-items:center;justify-content:space-between;padding:0 14px 10px;border-bottom:1px solid rgba(148,163,184,.15);margin-bottom:6px}
+    .modal-box .mh h2{font-size:14px;margin:0;color:#fbbf24;text-transform:uppercase;letter-spacing:.06em}
+    .modal-box .mh button{background:none;border:0;color:#94a3b8;font-size:20px;cursor:pointer;line-height:1}
+    .fow-row{display:flex;justify-content:space-between;gap:8px;padding:8px 14px;border-bottom:1px solid rgba(148,163,184,.08);font-size:13px}
+    .fow-row .a{color:#e2e8f0}.fow-row .b{color:#94a3b8;text-align:right}
+  
+    /* ---- UI v7 optimisations ---- */
+    .hdr h1{display:none}
+    .glow-ball{display:none!important}
+    .inns-row .cheer-toggle.sm{border-radius:999px;line-height:1.1}
+    .engage-panel{margin-top:8px;padding:10px;border-radius:.75rem;background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.2)}
+    .treasure-flash{text-align:center;padding:14px 8px;animation:treasurePulse 1.2s ease-in-out infinite}
+    .treasure-flash .box{font-size:36px;filter:drop-shadow(0 0 12px rgba(251,191,36,.7))}
+    .treasure-flash .coins{font-size:13px;color:#fbbf24;font-weight:900;margin-top:4px}
+    @keyframes treasurePulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
+    .coin-rules-btn.blink{animation:coinBlink 1s ease-in-out infinite;box-shadow:0 0 12px rgba(251,191,36,.55)}
+    @keyframes coinBlink{0%,100%{outline:2px solid transparent}50%{outline:2px solid #fbbf24}}
+    .float-banner{position:fixed;left:50%;top:72px;transform:translateX(-50%);z-index:9200;pointer-events:none;
+      background:linear-gradient(90deg,rgba(16,185,129,.95),rgba(59,130,246,.95));color:#fff;font-weight:800;font-size:13px;
+      padding:8px 16px;border-radius:999px;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+      box-shadow:0 8px 24px rgba(0,0,0,.4);animation:bannerFly 2.1s ease-out forwards}
+    .float-banner.gold{background:linear-gradient(90deg,rgba(251,191,36,.95),rgba(245,158,11,.95));color:#1c1917}
+    .float-banner .who{opacity:.9;font-size:10px;margin-right:6px;text-transform:uppercase;letter-spacing:.04em}
+    @keyframes bannerFly{0%{opacity:0;transform:translate(-50%,18px) scale(.92)}15%{opacity:1;transform:translate(-50%,0) scale(1)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-36px) scale(1.04)}}
+    .emoji-rail{pointer-events:auto}
+    .emoji-rail .er{cursor:pointer;transition:transform .12s ease}
+    .emoji-rail .er:active{transform:scale(1.12)}
+    .crr-banner-anchor{position:relative;min-height:0}
+    .emoji-rail{position:fixed;right:4px;top:28%;z-index:9100;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+    .emoji-rail .er{background:rgba(15,23,42,.82);border:1px solid rgba(148,163,184,.25);border-radius:999px;padding:6px 7px;text-align:center;min-width:40px;
+      box-shadow:0 4px 14px rgba(0,0,0,.25);backdrop-filter:blur(8px)}
+    .emoji-rail .er .e{font-size:16px;line-height:1} .emoji-rail .er .n{font-size:10px;font-weight:900;color:#fbbf24;margin-top:2px}
+    table.stats tr.neon td{color:#34d399!important;font-weight:900;text-shadow:0 0 10px rgba(52,211,153,.45)}
+    table.stats tr.dim td{color:#e2e8f0!important;font-weight:600}
+    table.stats .substat{display:block;font-size:10px;font-weight:700;color:#94a3b8;margin-top:2px}
+    table.stats tr.neon .substat{color:#6ee7b7}
+    .comm-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 12px 0}
+    .comm-tools select,.comm-tools button{border:1px solid rgba(148,163,184,.3);background:rgba(30,41,59,.9);color:#e2e8f0;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:800}
+    #chat-list{display:none!important}
+    .cheer-compose-only{display:flex;gap:6px;align-items:center;margin-top:6px}
+    .cheer-compose-only input{flex:1;padding:8px 10px;border-radius:10px;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,.9);color:#e2e8f0;font-weight:700;font-size:13px}
+    .panel{max-height:min(48vh,440px)}
+
+    #cheer-more,#pred-more{display:none}
+    #cheer-more.open,#pred-more.open{display:block!important}
+    .inns-row{padding:0 36px 8px} /* keep buttons clear of emoji rail */
+    .inns-row .cheer-toggle.sm{max-width:34%}
+    .emoji-rail{right:2px;top:34%}
+    .float-banner{
+      position:fixed;left:50%;z-index:9200;pointer-events:none;
+      top:auto;bottom:42%;
+      background:linear-gradient(90deg,rgba(16,185,129,.95),rgba(59,130,246,.95));
+      color:#fff;font-weight:800;font-size:13px;padding:8px 16px;border-radius:999px;
+      white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+      box-shadow:0 8px 24px rgba(0,0,0,.4);
+      animation:bannerFlyUp 2s ease-out forwards;
+    }
+    .float-banner.gold{background:linear-gradient(90deg,rgba(251,191,36,.95),rgba(245,158,11,.95));color:#1c1917}
+    @keyframes bannerFlyUp{
+      0%{opacity:0;transform:translate(-50%,40px) scale(.92)}
+      12%{opacity:1;transform:translate(-50%,0) scale(1)}
+      55%{opacity:1;transform:translate(-50%,-90px) scale(1)}
+      100%{opacity:0;transform:translate(-50%,-160px) scale(1.03)}
+    }
+    .coin-disclaimer{font-size:10px;color:#94a3b8;line-height:1.4;margin-top:10px;padding-top:8px;border-top:1px solid rgba(148,163,184,.2)}
+
+  
+    .substat-board{display:block;font-size:10px;font-weight:700;color:#6ee7b7;margin-top:3px;letter-spacing:.02em}
+    .emoji-bubble{position:fixed;z-index:9300;pointer-events:none;font-size:28px;
+      filter:drop-shadow(0 4px 8px rgba(0,0,0,.35));animation:emojiBubble 3s ease-out forwards}
+    @keyframes emojiBubble{
+      0%{opacity:0;transform:translateY(24px) scale(.55)}
+      12%{opacity:1;transform:translateY(0) scale(1.2)}
+      45%{opacity:1;transform:translateY(-50px) scale(1)}
+      100%{opacity:0;transform:translateY(-150px) scale(1.25)}
+    }
+    .coin-disclaimer{font-size:11px;color:#e2e8f0!important;line-height:1.45;margin-top:10px;padding-top:8px;border-top:1px solid rgba(148,163,184,.35);font-weight:600}
+  
+    /* horizontal reaction bar above This Over */
+    .emoji-rail, #emoji-rail{
+      position:static!important;right:auto!important;top:auto!important;
+      display:flex!important;flex-direction:row!important;flex-wrap:wrap;
+      justify-content:center;align-items:center;gap:6px;
+      margin:8px 0 4px;padding:6px 4px;pointer-events:auto;z-index:5;
+      background:rgba(15,23,42,.55);border:1px solid rgba(148,163,184,.2);
+      border-radius:999px;
+    }
+    .emoji-rail .er{
+      background:rgba(30,41,59,.95);border:1px solid rgba(148,163,184,.3);
+      border-radius:999px;padding:5px 8px;text-align:center;min-width:42px;
+      box-shadow:none;cursor:pointer;pointer-events:auto;
+      display:flex;flex-direction:column;align-items:center;gap:1px;
+    }
+    .emoji-rail .er .e{font-size:18px;line-height:1}
+    .emoji-rail .er .n{font-size:10px;font-weight:900;color:#fbbf24;line-height:1}
+    .emoji-rail .er:active{transform:scale(1.12)}
+    .float-banner{
+      position:fixed;left:50%;z-index:9200;pointer-events:none;
+      top:auto;bottom:38%;
+      background:linear-gradient(90deg,rgba(16,185,129,.96),rgba(59,130,246,.96));
+      color:#fff;font-weight:900;font-size:16px;padding:10px 18px;border-radius:999px;
+      white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
+      box-shadow:0 10px 28px rgba(0,0,0,.45);
+      animation:bannerFlyUp 4.5s linear forwards;
+    }
+    .float-banner.gold{background:linear-gradient(90deg,rgba(251,191,36,.96),rgba(245,158,11,.96));color:#1c1917}
+    .float-banner .who{opacity:.9;font-size:12px;margin-right:8px;text-transform:uppercase;letter-spacing:.04em}
+    @keyframes bannerFlyUp{
+      0%{opacity:0;transform:translate(-50%, 30px) scale(.92)}
+      8%{opacity:1;transform:translate(-50%, 0) scale(1)}
+      92%{opacity:1;transform:translate(-50%, -220px) scale(1.02)}
+      100%{opacity:0;transform:translate(-50%, -260px) scale(1.04)}
+    }
+    .emoji-bubble{
+      position:fixed;z-index:9300;pointer-events:none;font-size:30px;
+      filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));
+      animation:emojiBubbleUp 4.2s linear forwards;
+    }
+    @keyframes emojiBubbleUp{
+      0%{opacity:0;transform:translateY(0) scale(.5)}
+      10%{opacity:1;transform:translateY(-20px) scale(1.15)}
+      85%{opacity:1;transform:translateY(-240px) scale(1)}
+      100%{opacity:0;transform:translateY(-280px) scale(1.1)}
+    }
+
+  
+    /* v13 float full scoreboard height */
+    .float-banner{
+      position:fixed!important;left:50%!important;z-index:9500!important;pointer-events:none!important;
+      transform:translateX(-50%);
+      background:linear-gradient(90deg,rgba(16,185,129,.96),rgba(59,130,246,.96))!important;
+      color:#fff!important;font-weight:900!important;font-size:17px!important;
+      padding:12px 20px!important;border-radius:999px!important;
+      white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
+      box-shadow:0 12px 32px rgba(0,0,0,.5)!important;
+      animation:none!important; /* JS-driven full path */
+      opacity:1!important;
+    }
+    .float-banner.gold{background:linear-gradient(90deg,rgba(251,191,36,.96),rgba(245,158,11,.96))!important;color:#1c1917!important}
+    .float-banner .who{opacity:.9;font-size:12px;margin-right:8px;text-transform:uppercase}
+    .emoji-bubble{
+      position:fixed!important;z-index:9400!important;pointer-events:none!important;
+      font-size:32px!important;animation:none!important;
+      filter:drop-shadow(0 4px 12px rgba(0,0,0,.45));
+    }
+    #cheer-more,#pred-more{display:none}
+    #cheer-more.open,#pred-more.open{display:block!important}
+    #anim-overlay{position:fixed;inset:0;z-index:9600;pointer-events:none;display:flex;align-items:center;justify-content:center}
+    #anim-overlay:not(.show){opacity:0;visibility:hidden}
+    #anim-overlay.show{opacity:1;visibility:visible}
+    #anim-text.burst{font-size:42px;font-weight:900;text-shadow:0 0 24px rgba(251,191,36,.8);animation:burstPop 1.1s ease-out}
+    #anim-text.burst.four{color:#38bdf8}
+    #anim-text.burst.six{color:#fbbf24}
+    #anim-text.burst.wicket{color:#f87171}
+    @keyframes burstPop{0%{transform:scale(.4);opacity:0}30%{transform:scale(1.25);opacity:1}100%{transform:scale(1);opacity:0}}
+
+  
+    #emoji-plus-btn, #emoji-picker, .emoji-pick-row {display:none!important}
+    #cheer-more .ttl{font-size:12px}
+  
+    .emoji-rail, #emoji-rail{
+      flex-wrap:nowrap!important;overflow-x:auto;justify-content:center;
+      -webkit-overflow-scrolling:touch;gap:4px!important;padding:4px 6px!important;
+    }
+    .emoji-rail .er{min-width:38px;padding:4px 6px}
+    .emoji-rail .er .e{font-size:16px}
+    .team-card .score{line-height:1.15}
+    .team-card .score .sc-main{display:block;font-size:22px;font-weight:900;letter-spacing:.02em}
+    .team-card .score .sc-ov{display:block;font-size:20px;font-weight:700;color:#94a3b8;margin-top:2px}
+  </style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <div id="anim-overlay"><div class="burst" id="anim-text"></div></div>
+  <div id="modal-ov" class="modal-ov hidden" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
+      <div class="mh"><h2 id="modal-title">Details</h2><button type="button" onclick="closeModal()">✕</button></div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="hdr" style="margin-bottom:8px">
+      <div class="live-dot" id="live-dot" style="font-size:12px"><i></i> <span id="live-dot-txt">LIVE</span></div>
+      <div class="live-right" style="gap:8px">
+        <span class="count" id="viewer-count" style="font-size:11px;color:#34d399;font-weight:800">👁 0</span>
+        </div>
+    </div>
+    <div id="no-data" class="wait-only">Waiting for score updates…</div>
+    <div id="live-root" class="hidden">
+      <div class="score-card">
+        <div class="match-head"><div class="type" id="v-match-type">MATCH</div><div class="line" id="v-match-line"></div></div>
+        <div class="crr-big">CRR: <span id="v-crr">0.00</span></div>
+        <div class="teams">
+          <div class="team-card" onclick="openTeamModal('A')"><div class="name" id="v-team-a">Team A</div><div class="score" id="v-score-a">0-0</div><div class="role" id="v-role-a">—</div></div>
+          <div class="team-card" onclick="openTeamModal('B')"><div class="name" id="v-team-b">Team B</div><div class="score" id="v-score-b">—</div><div class="role" id="v-role-b">—</div></div>
+        </div>
+        <div class="inns-row" style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(148,163,184,.12)">
+          <button type="button" class="cheer-toggle sm" id="btn-cheers" onclick="toggleCheerPad()" style="flex:0 0 auto;min-width:0;padding:6px 10px;font-size:10px">😊 Cheers</button>
+          <div class="inns" id="v-inns" style="margin:0;padding:0;border:0;flex:1;text-align:center;font-size:11px">Innings 1</div>
+          <button type="button" class="cheer-toggle pred-toggle sm" onclick="togglePredPad()" style="flex:0 0 auto;min-width:0;padding:6px 10px;font-size:10px">🎯 Predict</button>
+        </div>
+        <div class="players">
+          <div class="pbox"><div class="lbl">🏏 On strike</div><div class="nm" id="v-striker">—</div><div class="st" id="v-striker-st">0 (0)</div></div>
+          <div class="pbox bowl"><div class="lbl">⚾ Bowler</div><div class="nm" id="v-bowler">—</div><div class="st" id="v-bowler-st">0-0 (0.0)</div></div>
+        </div>
+        
+        <div id="emoji-rail" class="emoji-rail" aria-label="Reactions">
+          <div class="er" data-emoji="👍"><div class="e">👍</div><div class="n" id="er-thumbs">0</div></div>
+          <div class="er" data-emoji="🔥"><div class="e">🔥</div><div class="n" id="er-fire">0</div></div>
+          <div class="er" data-emoji="🎯"><div class="e">🎯</div><div class="n" id="er-target">0</div></div>
+          <div class="er" data-emoji="😲"><div class="e">😲</div><div class="n" id="er-wow">0</div></div>
+          <div class="er" data-emoji="🥳"><div class="e">🥳</div><div class="n" id="er-party">0</div></div>
+          <div class="er" data-emoji="🤩"><div class="e">🤩</div><div class="n" id="er-star">0</div></div>
+          <div class="er" data-emoji="❤️"><div class="e">❤️</div><div class="n" id="er-heart">0</div></div>
+          <div class="er" data-emoji="👏"><div class="e">👏</div><div class="n" id="er-clap">0</div></div>
+        </div>
+        <div class="over-box" style="margin-top:10px"><div class="lbl">This over</div><div class="over-balls" id="v-over-balls"></div><div class="over-msg" id="v-over-msg"></div></div>
+<div class="engage-slot" id="engage-slot" style="min-height:0"></div>
+        <div class="cheer-more" id="cheer-more">
+          <div class="ttl" style="margin-top:6px;margin-bottom:6px">Cheers · shout out</div>
+          <div class="admin-row" id="admin-row" style="display:none;margin-bottom:6px">
+            <span id="admin-status">Admin mode</span>
+            <span style="display:flex;gap:6px"><button type="button" onclick="adminClearChat()">Clear all</button><button type="button" onclick="exitAdmin()" style="border-color:rgba(148,163,184,.3);background:rgba(30,41,59,.9);color:#94a3b8">Exit</button></span>
+          </div>
+          <div id="chat-list" class="chat-list" style="max-height:160px;overflow:auto;margin-bottom:6px;border:1px solid rgba(148,163,184,.15);border-radius:10px"><div class="empty">No cheers yet — say hi 👋</div></div>
+          <div class="chat-compose" style="position:relative;border:0;padding:0;background:transparent">
+            <div id="name-box" class="name-prompt" style="display:none">
+              Your display name
+              <input id="chat-name" maxlength="24" placeholder="e.g. Rahul" />
+              <button type="button" class="send" onclick="saveChatName()" style="width:100%;margin-top:4px;background:#10b981;color:#042f2e;border:0;border-radius:10px;font-weight:800;padding:10px">Save name</button>
+              <div style="text-align:right;margin-top:8px"><a href="javascript:void(0)" onclick="promptAdmin()" style="color:#64748b;font-size:10px;text-decoration:underline">Admin</a></div>
+            </div>
+            <div id="compose-box">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:#94a3b8">
+                <span>As <b id="chat-name-label" style="color:#fbbf24">Guest</b></span>
+                <span style="display:flex;gap:8px;align-items:center">
+                  <button type="button" onclick="editChatName()" style="background:transparent;border:1px solid rgba(148,163,184,.35);color:#94a3b8;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer">Edit name</button>
+                  <a href="javascript:void(0)" onclick="promptAdmin()" style="color:#64748b;font-size:10px;text-decoration:underline">Admin</a>
+                </span>
+              </div>
+              <div id="emoji-picker" class="emoji-row" style="display:none;margin-bottom:8px">
+                <button type="button" onclick="pickEmoji('🔥')">🔥</button>
+                <button type="button" onclick="pickEmoji('👏')">👏</button>
+                <button type="button" onclick="pickEmoji('😱')">😱</button>
+                <button type="button" onclick="pickEmoji('🏏')">🏏</button>
+                <button type="button" onclick="pickEmoji('💯')">💯</button>
+                <button type="button" onclick="pickEmoji('😂')">😂</button>
+                <button type="button" onclick="pickEmoji('❤️')">❤️</button>
+                <button type="button" onclick="pickEmoji('🙌')">🙌</button>
+                <button type="button" onclick="pickEmoji('💪')">💪</button>
+                <button type="button" onclick="pickEmoji('⭐')">⭐</button>
+                <button type="button" onclick="pickEmoji('🥳')">🥳</button>
+                <button type="button" onclick="pickEmoji('🏆')">🏆</button>
+              </div>
+              <div class="chat-row">
+                <input id="chat-input" maxlength="200" placeholder="Cheer or comment…" onkeydown="if(event.key==='Enter')sendChat()" />
+                <button type="button" id="emoji-plus-btn" onclick="toggleEmojiPicker()" title="Add smiley" style="background:rgba(30,41,59,.9);border:1px solid rgba(148,163,184,.3);color:#e2e8f0;border-radius:10px;font-weight:800;padding:8px 10px;cursor:pointer;font-size:16px;line-height:1;min-width:42px"><span id="emoji-plus-icon">😊</span><span style="font-size:11px;margin-left:2px">+</span></button>
+                <button type="button" class="send" onclick="sendChat()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="pred-more" id="pred-more">
+          <div class="pred-row" id="pred-row" style="margin-top:8px">
+            <button type="button" class="pred-btn" data-p="0" onclick="setPrediction('0')">0</button>
+            <button type="button" class="pred-btn" data-p="1" onclick="setPrediction('1')">1</button>
+            <button type="button" class="pred-btn" data-p="2" onclick="setPrediction('2')">2</button>
+            <button type="button" class="pred-btn" data-p="3" onclick="setPrediction('3')">3</button>
+            <button type="button" class="pred-btn b4" data-p="4" onclick="setPrediction('4')">4</button>
+            <button type="button" class="pred-btn b6" data-p="6" onclick="setPrediction('6')">6</button>
+            <button type="button" class="pred-btn w" data-p="W" onclick="setPrediction('W')">W</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center;margin-top:8px">
+            <span style="font-size:11px;color:#fbbf24;font-weight:800">This over total</span>
+            <input id="pred-over-score" type="number" min="0" max="500" placeholder="e.g. 47" style="width:88px;padding:8px 10px;border-radius:8px;border:1px solid rgba(148,163,184,.35);background:#0f172a;color:#fff;font-weight:800" />
+            <button type="button" class="pred-btn" style="min-width:auto;padding:0 14px;height:34px;font-size:11px" id="btn-lock-over-score" onclick="lockOverScorePred()">Lock</button>
+          </div>
+          <div id="over-pred-status" style="text-align:center;font-size:11px;color:#7dd3fc;margin-top:6px"></div>
+          <div class="pts-bar" id="pts-bar">🪙 Coins <b id="my-coins">10</b> · Hits <span id="my-ok">0</span>
+            <div id="pending-pred" style="margin-top:4px;font-size:11px;color:#7dd3fc"></div>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:8px">
+            <button type="button" class="share-over-btn sm" style="margin:0" onclick="shareExpertView()">📲 WhatsApp</button>
+            <button type="button" class="share-over-btn sm" style="margin:0;background:rgba(251,191,36,.12);color:#fbbf24;border-color:rgba(251,191,36,.35)" onclick="openCoinRules()">📖 Coin rules</button>
+          </div>
+        </div>
+        <!-- Coin rules + guide popup -->
+        <div id="coin-rules-modal" style="display:none;position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeCoinRules()">
+          <div style="background:#0f172a;border:1px solid rgba(148,163,184,.3);border-radius:14px;padding:16px;max-width:340px;width:100%;max-height:80vh;overflow:auto;color:#e2e8f0;position:relative">
+            <button type="button" onclick="closeCoinRules()" style="position:absolute;top:10px;right:12px;background:transparent;border:0;color:#94a3b8;font-size:20px;cursor:pointer;line-height:1">×</button>
+            <h3 style="margin:0 0 10px;color:#fbbf24;font-size:15px">🪙 Coin rules &amp; guide</h3>
+            <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;font-weight:800;text-transform:uppercase;letter-spacing:.06em">How coins work</p>
+            <ul style="margin:0 0 12px;padding-left:18px;font-size:13px;line-height:1.5;color:#cbd5e1">
+              <li>Start with <b style="color:#fbbf24">10 coins</b></li>
+              <li>Prediction of next ball 0–3 correct → <b style="color:#34d399">+5</b></li>
+              <li>Prediction of next ball 4 / 6 / W correct → <b style="color:#34d399">+10</b></li>
+              <li>Wrong ball Prediction → <b style="color:#f87171">−2</b></li>
+              <li>Prediction of end-of-over total exact → <b style="color:#34d399">+50</b></li>
+              <li>Prediction of end-of-over total within ±2 → <b style="color:#34d399">+20</b></li>
+            </ul>
+            <p style="font-size:12px;color:#94a3b8;margin:0 0 8px;font-weight:800;text-transform:uppercase;letter-spacing:.06em">What you can do</p>
+            <ul style="margin:0 0 12px;padding-left:18px;font-size:13px;line-height:1.5;color:#cbd5e1">
+              <li><b>Cheers</b> — comments &amp; smileys (tap Cheers)</li>
+              <li><b>Prediction</b> — make Prediction of next ball 0,1,2,3,4,6,W & win gold coins &amp; over total (tap Prediction)</li>
+              <li><b>Commentary</b> — ball-by-ball feed + voice</li>
+              <li><b>Stats</b> — batting &amp; bowling tables</li>
+              <li><b>Summary</b> — teams, match summary, orange &amp; purple caps</li>
+              <li>Tap team name on scoreboard for wickets / overs detail</li>
+            </ul>
+            <button type="button" <p class="coin-disclaimer">Disclaimer: Gold coins are virtual only, created for viewer engagement with the match. They have no real-world value and are not related to any real currency, prize, or payment.</p>
+            <button type="button" onclick="closeCoinRules()" style="width:100%;padding:10px;border:0;border-radius:10px;background:#10b981;color:#042f2e;font-weight:900;cursor:pointer">Got it</button>
+          </div>
+        </div>
+        <div class="status" id="v-status" style="display:none"></div>
+      </div>
+      <div id="viewer-result" class="viewer-result hidden"></div>
+      <div class="viewer-bar" style="display:none">
+        <span class="names" id="viewer-names"></span>
+      </div>
+      <div class="tabs" style="grid-template-columns:1fr 1fr 1fr 1fr">
+        <button type="button" class="tab on" id="tab-comm" onclick="setViewerTab('comm')">Commentary</button>
+        <button type="button" class="tab" id="tab-stats" onclick="setViewerTab('stats')">Stats</button>
+        <button type="button" class="tab" id="tab-fan" onclick="setViewerTab('fan')">Viewers Coins</button>
+        <button type="button" class="tab" id="tab-sum" onclick="setViewerTab('sum')">Summary</button>
+      </div>
+      <div id="panel-comm" class="panel">
+        <div class="panel-hdr" style="flex-wrap:wrap;row-gap:6px">
+          <span class="ttl">Ball-by-ball</span>
+          <select id="comm-tools-dd" class="icon-btn" style="padding:6px 10px;max-width:58%" onchange="onCommToolsChange(this.value)">
+            <option value="">Audio · EN · Off</option>
+            <option value="lang">Toggle language EN/HI</option>
+            <option value="voice-auto">Voice: Auto</option>
+            <option value="voice-female">Voice: Female</option>
+            <option value="voice-male">Voice: Male</option>
+            <option value="sound">Toggle sound on/off</option>
+          </select>
+          <button type="button" class="icon-btn" id="lang-btn" onclick="toggleLang()" style="display:none">EN</button>
+          <select id="voice-gender" class="icon-btn" style="display:none" onchange="onGenderChange()">
+            <option value="auto">Voice: Auto</option>
+            <option value="female">Voice: Female</option>
+            <option value="male">Voice: Male</option>
+          </select>
+          <button type="button" class="icon-btn" id="tts-btn" onclick="toggleTts()" style="display:none">🔈 Sound off</button>
+        </div>
+        <div id="comm-list"><div class="empty">No commentary yet</div></div>
+      </div>
+      <div id="panel-stats" class="panel hidden"><div id="stats-body"><div class="empty">No stats yet</div></div></div>
+      <div id="panel-fan" class="panel hidden">
+        <div class="panel-hdr"><span class="ttl">Viewers Coins</span>
+          <button type="button" class="icon-btn" onclick="loadFansRank()">🔄</button>
+        </div>
+        <div id="admin-coins-bar" style="display:none;padding:8px 12px;gap:6px;flex-wrap:wrap;align-items:center;border-bottom:1px solid rgba(148,163,184,.15)">
+          <span style="font-size:11px;color:#fbbf24;font-weight:800">Admin</span>
+          <button type="button" class="icon-btn" onclick="adminResetCoinsAll()" style="font-size:11px">Reset all coins</button>
+          <button type="button" class="icon-btn" onclick="adminResetEmojis()" style="font-size:11px">Reset emoji counts</button>
+          <button type="button" class="icon-btn" onclick="adminShowBlocks()" style="font-size:11px">Blocked list</button>
+        </div>
+        <div id="coins-board"><div class="empty">No viewers yet</div></div>
+        <div style="padding:8px 12px 4px;font-size:12px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:.06em">All predictions</div>
+        <div id="all-preds-board"><div class="empty">No predictions yet</div></div>
+      </div>
+      <!-- name gate modal -->
+      <div id="name-gate" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px">
+        <div style="background:#0f172a;border:1px solid rgba(148,163,184,.3);border-radius:16px;padding:20px;max-width:320px;width:100%;text-align:center">
+          <div style="font-size:18px;font-weight:900;color:#fbbf24;margin-bottom:8px">Welcome viewer</div>
+          <p style="font-size:13px;color:#94a3b8;margin:0 0 12px">Enter your name to cheer &amp; earn coins</p>
+          <input id="gate-name" maxlength="24" placeholder="Your name" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(148,163,184,.35);background:#1e293b;color:#fff;font-weight:800;font-size:15px;margin-bottom:10px" />
+          <button type="button" onclick="saveGateName()" style="width:100%;padding:12px;border:0;border-radius:10px;background:#10b981;color:#042f2e;font-weight:900;font-size:14px;cursor:pointer">Continue · 10 coins</button>
+        </div>
+      </div>
+      <div id="panel-sum" class="panel hidden">
+        <div class="subtabs">
+          <button type="button" class="subtab on" id="st-teams" onclick="setSumSub('teams')">Teams</button>
+          <button type="button" class="subtab" id="st-sum" onclick="setSumSub('sum')">Match summary</button>
+          <button type="button" class="subtab" id="st-viewers" onclick="setSumSub('viewers')">Viewers</button>
+          <button type="button" class="subtab" id="st-orange" onclick="setSumSub('orange')">Orange cap</button>
+          <button type="button" class="subtab" id="st-purple" onclick="setSumSub('purple')">Purple cap</button>
+        </div>
+        <div id="sum-teams"></div>
+        <div id="sum-sum" class="hidden"></div>
+        <div id="sum-viewers" class="hidden"></div>
+        <div id="sum-orange" class="hidden"></div>
+        <div id="sum-purple" class="hidden"></div>
+        <div id="sum-owners" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    var LIVE_KEY='cricket_live_viewer_v1',lastTs=0,lastEventKey='',lastAnimAt=0,lastChatTs=0,pendingEmoji='',lastData=null,lastSpokenLine='';
+    var viewerSwipeIndex=0,viewerSwipeTimer=null,viewerSwipeTouchX=0,viewerSwipeTouchY=0,lastViewerMatchEnded=false,viewerManualSwipe=false;
+    var LIVE_MATCH='';
+    var LIVE_VIEW_KEY='';
+    function readLiveParams(){
+      try{
+        var q=new URLSearchParams(location.search||'');
+        LIVE_MATCH=(q.get('match')||'current').trim()||'current';
+        LIVE_VIEW_KEY=(q.get('key')||'').trim();
+      }catch(e){LIVE_MATCH='current';LIVE_VIEW_KEY=''}
+    }
+    function resolveApiBase(){
+      try{
+        // Prefer same origin when served from the Worker (avoids broken server= query)
+        if((location.protocol==='http:'||location.protocol==='https:') && /\.workers\.dev$|pages\.dev/i.test(location.hostname||'')){
+          return location.origin;
+        }
+      }catch(e0){}
+      try{
+        var q=new URLSearchParams(location.search||'');
+        var s=(q.get('server')||'').trim();
+        s=s.replace(/^\.+/,'').replace(/\s+/g,'');
+        if(/^https?:\/\//i.test(s)){ return s.replace(/\/+$/,''); }
+        if(/^https?:[^\/]/i.test(s)){ return s.replace(/^(https?):/i,'$1://').replace(/\/+$/,''); }
+        if(s && !/^https?:/i.test(s) && /\./.test(s)){ return ('https://'+s).replace(/\/+$/,''); }
+      }catch(e){}
+      try{if(location.protocol==='http:'||location.protocol==='https:')return location.origin}catch(e2){}
+      return'';
+    }
+    readLiveParams();
+    var API_BASE=resolveApiBase();
+    try{console.log('Live viewer match=',LIVE_MATCH,'api=',API_BASE,'float-bus=v21')}catch(e){}
+
+    /* ===== FLOAT BUS v22 — one copy, side lanes, no score cover ===== */
+    var __fbSeen = Object.create(null);
+    var __fbSeedUntil = Date.now() + 1200;
+    var __fbEmojiResetAt = 0;
+    function __fbEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+    function __fbBanner(name, text){
+      try{
+        var el=document.createElement('div');
+        el.setAttribute('data-float-bus','1');
+        // Keep banner in upper band, slightly off-center so score stays readable
+        var side = Math.random() < 0.5 ? 'left' : 'right';
+        el.style.cssText='position:fixed;z-index:99990;pointer-events:none;background:linear-gradient(90deg,rgba(16,185,129,.92),rgba(59,130,246,.92));color:#fff;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;white-space:nowrap;max-width:46vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 8px 24px rgba(0,0,0,.4)';
+        el.innerHTML='<span style="opacity:.9;font-size:10px;margin-right:6px;text-transform:uppercase">'+__fbEsc(name||'Fan')+'</span> '+__fbEsc(text||'');
+        var startY=window.innerHeight*0.52, endY=20;
+        try{
+          var over=document.querySelector('.over-box');
+          var head=document.querySelector('.match-head')||document.querySelector('.crr-big');
+          if(over) startY=over.getBoundingClientRect().top;
+          if(head) endY=Math.max(8, head.getBoundingClientRect().top-24);
+        }catch(e){}
+        if(side==='left'){ el.style.left='8px'; el.style.right='auto'; }
+        else { el.style.right='8px'; el.style.left='auto'; }
+        el.style.top=startY+'px';
+        document.body.appendChild(el);
+        var t0=null,dur=3000;
+        function step(ts){
+          if(!t0)t0=ts;
+          var p=Math.min(1,(ts-t0)/dur);
+          var e=1-Math.pow(1-p,2);
+          el.style.top=(startY+(endY-startY)*e)+'px';
+          el.style.opacity=String(p<0.82?1:1-((p-0.82)/0.18));
+          if(p<1) requestAnimationFrame(step);
+          else try{el.remove()}catch(e2){}
+        }
+        requestAnimationFrame(step);
+      }catch(e){}
+    }
+    function __fbBubbles(emoji){
+      try{
+        // Only 1–2 bubbles, left/right lanes only (never center score)
+        var n = 1 + (Math.random() < 0.35 ? 1 : 0);
+        var over=document.querySelector('.over-box');
+        var baseTop=window.innerHeight*0.55;
+        try{ if(over) baseTop=over.getBoundingClientRect().top; }catch(e){}
+        var endTop=16;
+        try{
+          var head=document.querySelector('.match-head')||document.querySelector('.crr-big');
+          if(head) endTop=Math.max(8, head.getBoundingClientRect().top-16);
+        }catch(e2){}
+        var W=window.innerWidth||360;
+        for(var i=0;i<n;i++){
+          (function(i){
+            setTimeout(function(){
+              var el=document.createElement('div');
+              el.textContent=emoji;
+              el.style.cssText='position:fixed;z-index:99988;pointer-events:none;font-size:26px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.35));opacity:.9';
+              var lane = (i%2===0) ? 'left' : 'right';
+              var x = lane==='left' ? (6 + Math.random()*28) : (W - 34 - Math.random()*28);
+              var y = baseTop + Math.random()*16;
+              el.style.left=x+'px'; el.style.top=y+'px';
+              document.body.appendChild(el);
+              var t0=null,dur=2600+Math.random()*600;
+              function step(ts){
+                if(!t0)t0=ts;
+                var p=Math.min(1,(ts-t0)/dur);
+                var e=1-Math.pow(1-p,1.4);
+                el.style.top=(y+(endTop-y)*e)+'px';
+                el.style.opacity=String(p<0.75?0.9:0.9*((1-p)/0.25));
+                if(p<1) requestAnimationFrame(step);
+                else try{el.remove()}catch(e3){}
+              }
+              requestAnimationFrame(step);
+            }, i*120);
+          })(i);
+        }
+      }catch(e){}
+    }
+    function __fbApply(list){
+      try{
+        list=list||[];
+        var now=Date.now();
+        var me='';
+        try{ me=localStorage.getItem('cricket_viewer_id')||''; }catch(e){}
+        list.forEach(function(m){
+          if(!m) return;
+          var mid=String(m.mid||'');
+          var t=String(m.text||'');
+          var em=String(m.emoji||'');
+          // Dedup by mid AND by content fingerprint (stops chat+floats double delivery)
+          var fp=String(m.id||'')+'|'+(em||t)+'|'+String(Math.floor((Number(m.ts)||0)/2500));
+          if(mid && __fbSeen[mid]) return;
+          if(__fbSeen[fp]) return;
+          var tsNum=Number(m.ts);
+          if(!isFinite(tsNum)) tsNum=0;
+          var age=tsNum?(now-tsNum):0;
+          if(age<0) age=0;
+          if(age>180000){ if(mid) __fbSeen[mid]=1; __fbSeen[fp]=1; return; }
+          if(now < __fbSeedUntil && age>5000){ if(mid) __fbSeen[mid]=1; __fbSeen[fp]=1; return; }
+          if(mid) __fbSeen[mid]=1;
+          __fbSeen[fp]=1;
+          if(m.id && me && m.id===me && age<6000) return; // already shown locally
+          var isF=t.indexOf('__FLOAT__')===0;
+          var payload=isF?(em||t.replace('__FLOAT__','')):((em?em+' ':'')+t);
+          payload=String(payload||'').trim();
+          if(!payload) return;
+          __fbBanner(m.name||'Fan', payload);
+          if(isF||em){ var em2=em||(isF?t.replace('__FLOAT__',''):''); if(em2) __fbBubbles(em2); }
+          try{ __recordActivity(m.id, m.name, t, em||(isF?t.replace('__FLOAT__',''):'')); }catch(eAct){}
+        });
+      }catch(e){ console.log('fbApply',e); }
+    }
+    function __fbPoll(){
+      if(!API_BASE) return;
+      if(window.__cfLimitUntil && Date.now()<window.__cfLimitUntil) return;
+      if(document.hidden) return;
+      fetch(API_BASE+'/floats?t='+Date.now(), {cache:'no-store'})
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(d){
+          if(!d) return;
+          if(d.emojiResetAt && Number(d.emojiResetAt) > (__fbEmojiResetAt||0)){
+            __fbEmojiResetAt = Number(d.emojiResetAt);
+            try{
+              if(typeof emojiRailCounts==='object'){
+                Object.keys(emojiRailCounts).forEach(function(k){ emojiRailCounts[k]=0; });
+              }
+              if(typeof paintEmojiCounts==='function') paintEmojiCounts();
+              else ['thumbs','fire','target','wow','party','star','heart','clap','tada'].forEach(function(k){
+                var el=document.getElementById('er-'+k); if(el) el.textContent='0';
+              });
+            }catch(e){}
+          }
+          try{ __ingestActivityList(d.floats||[]); }catch(eIn){}
+          __fbApply(d.floats||[]);
+        })
+        .catch(function(){});
+    }
+    // Hook score poll responses that already include floats
+    var __fbOrigFetch=window.fetch;
+    window.fetch=function(){
+      var args=arguments;
+      return __fbOrigFetch.apply(this, args).then(function(res){
+        try{
+          var url=String(args[0]&&args[0].url||args[0]||'');
+          if(/live-public|\/floats|\/chat|\/presence/i.test(url) && res && res.ok){
+            res.clone().json().then(function(d){
+              if(!d) return;
+              if(d.floats) __fbApply(d.floats);
+              if(d.messages) __fbApply(d.messages);
+              if(d.data && d.data.floats) __fbApply(d.data.floats);
+            }).catch(function(){});
+          }
+        }catch(e){}
+        return res;
+      });
+    };
+    setInterval(__fbPoll, 1000);
+    setTimeout(__fbPoll, 400);
+    /* ===== end FLOAT BUS v21 ===== */
+
+    function $(id){return document.getElementById(id)}
+    function uid(){try{var id=localStorage.getItem('cricket_viewer_id');if(id)return id;id='v'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);localStorage.setItem('cricket_viewer_id',id);return id}catch(e){return 'v'+Date.now()}}
+    function getChatName(){try{return localStorage.getItem('cricket_viewer_name')||''}catch(e){return ''}}
+    function saveChatName(){
+      var n=($('chat-name').value||'').trim().slice(0,24);
+      if(!n){alert('Enter a name');return}
+      try{localStorage.setItem('cricket_viewer_name',n)}catch(e){}
+      if($('name-box'))$('name-box').style.display='none';
+      if($('compose-box'))$('compose-box').style.display='block';
+      if($('chat-name-label'))$('chat-name-label').textContent=n+' · 🪙'+(typeof myCoins!=='undefined'?myCoins:10);
+      heartbeat();try{pushFanScore()}catch(e2){}
+    }
+    function saveGateName(){
+      var n=($('gate-name').value||'').trim().slice(0,24);
+      if(!n){alert('Enter your name');return}
+      try{localStorage.setItem('cricket_viewer_name',n)}catch(e){}
+      if($('name-gate'))$('name-gate').style.display='none';
+      if($('chat-name'))$('chat-name').value=n;
+      if($('chat-name-label'))$('chat-name-label').textContent=n+' · 🪙'+(typeof myCoins!=='undefined'?myCoins:10);
+      // ensure starter coins once
+      try{
+        if(localStorage.getItem('cricket_fan_coins')==null){
+          myCoins=10;
+          localStorage.setItem('cricket_fan_coins','10');
+          localStorage.setItem('cricket_fan_starter','1');
+        }
+      }catch(eS){}
+      refreshPtsUI();
+    try{bindViewerSwipe()}catch(eSwipe){}
+      heartbeat();
+      try{pushFanScore()}catch(e2){}
+    }
+    function editChatName(){
+      if($('name-box'))$('name-box').style.display='block';
+      if($('compose-box'))$('compose-box').style.display='none';
+      if($('chat-name')){$('chat-name').value=getChatName();$('chat-name').focus()}
+    }
+    function pickEmoji(e){
+      pendingEmoji=e;
+      try{
+        if($('emoji-plus-icon'))$('emoji-plus-icon').textContent=e;
+        if($('emoji-picker'))$('emoji-picker').style.display='none';
+      }catch(err){}
+      sendChat();
+    }
+    function toggleEmojiPicker(){
+      var el=$('emoji-picker');if(!el)return;
+      el.style.display=(el.style.display==='none'||!el.style.display)?'flex':'none';
+    }
+    function openCoinRules(){ try{localStorage.setItem('cricket_coin_rules_seen','1'); var b=document.querySelector('.coin-rules-btn'); if(b)b.classList.remove('blink')}catch(e){} openCoinRules_inner(); }
+    function openCoinRules_inner(){
+      var m=$('coin-rules-modal');if(!m)return;
+      m.style.display='flex';
+    }
+    function closeCoinRules(){
+      var m=$('coin-rules-modal');if(!m)return;
+      m.style.display='none';
+    }
+    var predDetailOpen=false;
+    function toggleMyPredictions(){
+      predDetailOpen=!predDetailOpen;
+      loadFansRank();
+    }
+    function predHistoryHtml(){
+      if(!correctList||!correctList.length){
+        return '<div class="empty" style="padding:12px">No predictions yet. Use Predict under the scoreboard.</div>';
+      }
+      var rows=correctList.slice().reverse();
+      var html='<div style="padding:8px 12px 4px;font-size:11px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:.06em">Your prediction log</div>';
+      html+='<div style="overflow:auto;max-height:240px"><table class="stats" style="font-size:12px"><thead><tr><th>When</th><th>Pred</th><th>Result</th><th class="num">Coins</th></tr></thead><tbody>';
+      rows.forEach(function(c){
+        var when=c.when||c.label||'—';
+        var pred=c.pred||'—';
+        var act=c.actual!=null?String(c.actual):'—';
+        var coins=c.coins!=null?c.coins:(c.pts!=null?c.pts:0);
+        var col=coins>0?'#34d399':(coins<0?'#f87171':'#94a3b8');
+        var sign=coins>0?'+':'';
+        html+='<tr><td style="font-size:11px">'+esc(when)+'</td><td>'+esc(pred)+'</td><td>'+esc(act)+'</td><td class="num" style="color:'+col+'">'+sign+coins+'</td></tr>';
+      });
+      html+='</tbody></table></div>';
+      html+='<div style="padding:8px 12px;text-align:center"><button type="button" class="share-over-btn sm" style="margin:0" onclick="sharePredHistory()">📲 Share log</button></div>';
+      return html;
+    }
+    function sharePredHistory(){
+      var name=getChatName()||'Fan';
+      var lines=['*'+name+'* · prediction log · 🪙 '+myCoins+' coins',''];
+      if(!correctList.length){lines.push('No predictions yet.')}
+      else{
+        lines.push('When | Pred | Result | Coins');
+        correctList.slice().reverse().forEach(function(c){
+          var coins=c.coins!=null?c.coins:0;
+          lines.push((c.when||'—')+' | '+(c.pred||'—')+' | '+(c.actual!=null?c.actual:'—')+' | '+(coins>0?'+':'')+coins);
+        });
+      }
+      try{lines.push('');lines.push(location.href)}catch(e){}
+      var text=lines.join('\n');
+      var wa='https://wa.me/?text='+encodeURIComponent(text);
+      try{window.open(wa,'_blank')}catch(e2){location.href=wa}
+    }
+    function ballWhenLabel(data,atBalls){
+      try{
+        var b=(atBalls!=null?atBalls:(data&&data.balls)|0)|0;
+        var ov=Math.floor(b/6)+1;
+        var ballInOver=(b%6)+1;
+        var inns=(data&&data.innings)|0||1;
+        return 'Inns '+inns+' · Over '+ov+' · Ball '+ballInOver;
+      }catch(e){return '—'}
+    }
+    function setViewerSwipe(i,auto){viewerSwipeIndex=0;var tr=$('v-swipe-track');if(tr)tr.style.transform='translateX(0)';}
+    function autoSwipeBack(){
+      if(viewerSwipeTimer)clearTimeout(viewerSwipeTimer);
+      viewerSwipeTimer=setTimeout(function(){viewerSwipeTimer=null;if(!viewerManualSwipe&&!lastViewerMatchEnded)setViewerSwipe(0,true)},6000);
+    }
+    function bindViewerSwipe(){
+      var sh=$('v-swipe-shell'); if(!sh||sh._bound)return; sh._bound=true;
+      sh.addEventListener('touchstart',function(e){var t=e.touches&&e.touches[0];if(!t)return;viewerSwipeTouchX=t.clientX;viewerSwipeTouchY=t.clientY;},{passive:true});
+      sh.addEventListener('touchend',function(e){var t=e.changedTouches&&e.changedTouches[0];if(!t)return;var dx=t.clientX-viewerSwipeTouchX,dy=t.clientY-viewerSwipeTouchY;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.15){setViewerSwipe(dx<0?1:0,false)}},{passive:true});
+    }
+    function triggerOverAutoSwipe(){
+      viewerManualSwipe=false;
+      setViewerSwipe(1,true);
+      autoSwipeBack();
+    }
+        function setViewerTab(t){ if(t==='sum'||t==='summary'){ try{setSumSub('sum')}catch(e){} } 
+      ['comm','stats','fan','sum'].forEach(function(x){
+        var tb=$('tab-'+x),pn=$('panel-'+x);
+        if(tb)tb.classList.toggle('on',t===x);
+        if(pn)pn.classList.toggle('hidden',t!==x);
+      });
+      if(t==='fan')loadFansRank();
+    }
+    function ensureNameGate(){
+      if(getChatName()){
+        if($('name-gate'))$('name-gate').style.display='none';
+        if($('chat-name-label'))$('chat-name-label').textContent=getChatName()+' · 🪙'+(typeof myCoins!=='undefined'?myCoins:10);
+        return;
+      }
+      if($('name-gate')){
+        $('name-gate').style.display='flex';
+        try{$('gate-name').focus()}catch(e){}
+      }
+    }
+
+    // ---- Be Teamowner (fantasy) ----
+    function playerPoolFromData(data){
+      var names=[],seen={};
+      function push(n){n=String(n||'').trim();if(n&&!seen[n]){seen[n]=1;names.push(n)}}
+      if(!data)return{pool:names,size:5};
+      ['squadA','teamAPlayers','squadB','teamBPlayers'].forEach(function(k){
+        (data[k]||[]).forEach(function(n){push(typeof n==='string'?n:(n&&n.name))});
+      });
+      ['batters','bowlers','innings1Batters','innings2Batters','innings1Bowlers','innings2Bowlers','orangeCap','purpleCap','players','cumulativeOrangeCap','cumulativePurpleCap'].forEach(function(k){
+        (data[k]||[]).forEach(function(p){push(p&&p.name?p.name:p)});
+      });
+      push(data.strikerName);push(data.bowlerName);
+      var sa=(data.squadA||data.teamAPlayers||[]).length|0;
+      var sb=(data.squadB||data.teamBPlayers||[]).length|0;
+      var size=5;
+      if(sa&&sb)size=Math.min(sa,sb);
+      else if(sa||sb)size=Math.max(sa,sb);
+      else size=Math.min(7,Math.max(3,Math.floor(names.length/2)||5));
+      size=Math.max(1,Math.min(size,names.length||1));
+      return{pool:names,size:size};
+    }
+    function statMapFromData(data){
+      var m={};
+      function add(n,r,w){
+        n=String(n||'').trim();if(!n)return;
+        var c=m[n]||{runs:0,wickets:0};
+        c.runs=Math.max(c.runs,r|0);c.wickets=Math.max(c.wickets,w|0);m[n]=c;
+      }
+      if(!data)return m;
+      ['batters','innings1Batters','innings2Batters'].forEach(function(k){(data[k]||[]).forEach(function(p){if(p)add(p.name,p.runs,p.wickets)})});
+      ['bowlers','innings1Bowlers','innings2Bowlers'].forEach(function(k){(data[k]||[]).forEach(function(p){if(p)add(p.name,p.runs,p.wickets||p.w)})});
+      (data.orangeCap||[]).forEach(function(p){if(p)add(p.name,p.runs,0)});
+      (data.purpleCap||[]).forEach(function(p){if(p)add(p.name,0,p.wickets||p.w)});
+      (data.players||[]).forEach(function(p){if(p)add(p.name,p.runs,p.wickets)});
+      return m;
+    }
+    function scoreTeamPlayers(players,data){
+      var sm=statMapFromData(data),runs=0,wk=0,detail=[];
+      (players||[]).forEach(function(nm){
+        var s=sm[nm]||{runs:0,wickets:0};
+        runs+=s.runs|0;wk+=s.wickets|0;
+        detail.push({name:nm,runs:s.runs|0,wickets:s.wickets|0});
+      });
+      return{runs:runs,wickets:wk,total:runs+wk,detail:detail};
+    }
+    function renderFantasyBoard(payload){
+      var teams=(payload&&payload.teams)||[];
+      var winner=payload&&payload.winner;
+      var matchEnded=!!(payload&&payload.matchEnded);
+      var myId=uid();
+      var mine=teams.find(function(t){return t.id===myId});
+      var myEl=$('fan-my-team'),board=$('fan-board'),winEl=$('fan-winner');
+      if(mine){
+        var tn=mine.teamName||mine.name||'My team';
+        var redrafts=mine.redrafts|0;
+        var canRedraft=redrafts<1;
+        try{
+          if($('btn-draft-team')){
+            $('btn-draft-team').textContent=canRedraft?'🎲 Re-draft':'🎲 Locked';
+            $('btn-draft-team').disabled=!canRedraft&&!!mine.players;
+            if(!canRedraft)$('btn-draft-team').style.opacity='0.55';
+            else $('btn-draft-team').style.opacity='1';
+          }
+          if($('fan-draft-hint'))$('fan-draft-hint').textContent=canRedraft?'One re-draft left.':'Team locked — no more re-drafts.';
+        }catch(eB){}
+        myEl.innerHTML='<div class="fan-team-card top"><div class="owner">'+esc(tn)+'</div>'+
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px">Owner: '+esc(mine.name||'')+'</div>'+
+          '<div class="score">'+mine.total+' pts <span style="font-size:12px;color:#94a3b8">('+mine.runs+' runs + '+mine.wickets+' wkts)</span></div>'+
+          '<div class="players">'+(mine.detail||mine.players||[]).map(function(p){
+            if(typeof p==='string')return '• '+esc(p);
+            return '• '+esc(p.name)+' <span style="color:#64748b">'+p.runs+'r / '+p.wickets+'w</span>';
+          }).join('<br>')+'</div></div>';
+        try{if($('fan-team-name')&&mine.teamName)$('fan-team-name').value=mine.teamName}catch(e){}
+      }else{
+        try{if($('btn-draft-team')){$('btn-draft-team').textContent='🎲 Draft';$('btn-draft-team').disabled=false;$('btn-draft-team').style.opacity='1'}
+          if($('fan-draft-hint'))$('fan-draft-hint').textContent='Name team, then draft. One re-draft allowed later.';
+        }catch(e0){}
+        myEl.innerHTML='<div class="empty" style="padding:12px">Name your team above, then Draft</div>';
+      }
+      if(matchEnded&&teams.length){
+        var top=winner||teams[0];
+        var topLabel=top.teamName||top.name;
+        winEl.innerHTML='<div class="winner-banner">🏆 Winner: '+esc(topLabel)+' · '+top.total+' pts<br><span style="font-weight:700;font-size:12px">Owner '+esc(top.name||'')+' · '+top.runs+' runs + '+top.wickets+' wickets</span></div>';
+      }else if(teams.length){
+        winEl.innerHTML='<div style="text-align:center;font-size:11px;color:#94a3b8;padding:4px 12px">Live standings — winner declared when match ends</div>';
+      }else winEl.innerHTML='';
+      if(!teams.length){board.innerHTML='<div class="empty">No fantasy teams yet</div>';return}
+      board.innerHTML='<div class="sec-title">All team owners</div>'+teams.map(function(t,i){
+        var me=t.id===myId?' · you':'';
+        var cls=i===0?'fan-team-card top':'fan-team-card';
+        var label=t.teamName||t.name||'Team';
+        return '<div class="'+cls+'"><div style="display:flex;justify-content:space-between"><span class="owner">#'+(i+1)+' '+esc(label)+me+'</span><span class="score">'+t.total+'</span></div>'+
+          '<div style="font-size:11px;color:#94a3b8">Owner: '+esc(t.name||'')+' · '+t.runs+' runs + '+t.wickets+' wickets</div>'+
+          '<div class="players">'+(t.players||[]).map(function(n){return esc(n)}).join(' · ')+'</div></div>';
+      }).join('');
+    }
+    function loadFantasyBoard(){
+      if(!API_BASE){
+        // local-only fallback using lastData
+        try{
+          var raw=localStorage.getItem('cricket_fantasy_local');
+          var mine=raw?JSON.parse(raw):null;
+          var teams=[];
+          if(mine&&mine.players){
+            var sc=scoreTeamPlayers(mine.players,lastData);
+            teams.push({id:uid(),name:getChatName()||'You',teamName:mine.teamName||'',players:mine.players,detail:sc.detail,runs:sc.runs,wickets:sc.wickets,total:sc.total});
+          }
+          renderFantasyBoard({teams:teams,matchEnded:!!(lastData&&lastData.matchEnded),winner:(lastData&&lastData.matchEnded&&teams[0])?teams[0]:null});
+        }catch(e){renderFantasyBoard({teams:[]})}
+        return;
+      }
+      try{
+        var x=new XMLHttpRequest();
+        x.open('GET',API_BASE.replace(/\/+$/,'')+'/fantasy?_='+Date.now(),true);
+        x.timeout=5000;
+        x.onload=function(){try{renderFantasyBoard(JSON.parse(x.responseText))}catch(e){}};
+        x.send();
+      }catch(e){}
+    }
+    function openOwnTeam(){
+      setViewerTab('fan');
+      try{
+        var tn=$('fan-team-name');
+        if(tn&&!tn.value){
+          var base=(getChatName()||'Fan').slice(0,16);
+          tn.value=base+' XI';
+        }
+      }catch(e){}
+      // Small delay so panel is visible, then auto-draft random team
+      setTimeout(function(){try{draftFantasyTeam(true)}catch(e){}},200);
+    }
+    function draftFantasyTeam(fromQuick){
+      var name=getChatName();
+      if(!name){setViewerTab('chat');alert('Enter your name in Shout out! first');return}
+      var teamName=(($('fan-team-name')&&$('fan-team-name').value)||'').trim().slice(0,28);
+      if(!teamName){
+        teamName=(name+' XI').slice(0,28);
+        try{if($('fan-team-name'))$('fan-team-name').value=teamName}catch(e){}
+      }
+      try{localStorage.setItem('cricket_fantasy_team_name',teamName)}catch(e){}
+      var info=playerPoolFromData(lastData);
+      // shuffle local pick when we have players; server also randomizes if list empty/invalid
+      var pool=info.pool.slice();
+      for(var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=pool[i];pool[i]=pool[j];pool[j]=t}
+      var picked=pool.length?pool.slice(0,Math.max(1,info.size||5)):[];
+      if(!API_BASE){
+        if(!picked.length){alert('Player list not available yet — wait for live score from scorer');return}
+        try{localStorage.setItem('cricket_fantasy_local',JSON.stringify({players:picked,name:name,teamName:teamName}))}catch(e){}
+        loadFantasyBoard();
+        if(fromQuick)setViewerTab('fan');
+        return;
+      }
+      function postDraft(playersArr){
+        try{
+          var x=new XMLHttpRequest();
+          x.open('POST',API_BASE.replace(/\/+$/,'')+'/fantasy',true);
+          x.setRequestHeader('Content-Type','application/json');
+          x.timeout=10000;
+          x.onload=function(){
+            try{
+              var d=JSON.parse(x.responseText||'{}');
+              if(d.error){alert(d.error);return}
+              renderFantasyBoard(d);
+              setViewerTab('fan');
+            }catch(e){loadFantasyBoard()}
+          };
+          x.onerror=function(){alert('Could not reach server — check Live server URL')};
+          // Send players if we have them; empty array → server picks random from live state
+          x.send(JSON.stringify({id:uid(),name:name,teamName:teamName,players:playersArr||[]}));
+        }catch(e){alert('Draft failed')}
+      }
+      // If no local pool, refresh live once then draft (server still has state)
+      if(!picked.length){
+        try{
+          var x2=new XMLHttpRequest();
+          x2.open('GET',API_BASE.replace(/\/+$/,'')+'/live?_='+Date.now(),true);
+          x2.timeout=8000;
+          x2.onload=function(){
+            try{
+              var live=JSON.parse(x2.responseText||'{}');
+              if(live&&live.ts)lastData=live;
+              var info2=playerPoolFromData(lastData);
+              var pool2=info2.pool.slice();
+              for(var i=pool2.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=pool2[i];pool2[i]=pool2[j];pool2[j]=t}
+              picked=pool2.length?pool2.slice(0,Math.max(1,info2.size||5)):[];
+            }catch(e){}
+            postDraft(picked);
+          };
+          x2.onerror=function(){postDraft([])};
+          x2.send();
+        }catch(e){postDraft([])}
+        return;
+      }
+      postDraft(picked);
+    }
+    function setSumSub(s){
+      ['teams','sum','viewers','orange','purple'].forEach(function(x){
+        var b=$('st-'+x),p=$('sum-'+x);
+        if(b)b.classList.toggle('on',s===x);
+        if(p)p.classList.toggle('hidden',s!==x);
+      });
+      if(s==='viewers'){ try{ paintViewersSummary(); }catch(e){} }
+    }
+    // Track viewers + activity for Summary → Viewers tab
+    var __viewerMap = Object.create(null); // id -> {id,name,firstSeen,lastSeen,online,emojis:{},messages:[]}
+    function __touchViewer(id, name, online){
+      if(!id) return;
+      id=String(id);
+      var now=Date.now();
+      var v=__viewerMap[id];
+      if(!v){
+        v={id:id,name:name||'Fan',firstSeen:now,lastSeen:now,online:!!online,emojis:Object.create(null),messages:[]};
+        __viewerMap[id]=v;
+      } else {
+        if(name) v.name=name;
+        v.lastSeen=now;
+        if(online!=null) v.online=!!online;
+      }
+      return v;
+    }
+    function __recordActivity(id, name, text, emoji, ts){
+      if(!id && !name) return;
+      var v=__touchViewer(id||('n:'+name), name||'Fan', true);
+      if(!v) return;
+      var em=String(emoji||'').trim();
+      var t=String(text||'').replace(/^__FLOAT__/,'').trim();
+      // pure emoji float: text may be __FLOAT__🔥 or just emoji
+      if(!em && t && t.length<=4){ em=t; }
+      if(em){ v.emojis[em]=(v.emojis[em]|0)+1; }
+      if(t && t!==em){
+        v.messages.push({text:t, emoji:em||'', ts:ts||Date.now()});
+        if(v.messages.length>40) v.messages=v.messages.slice(-40);
+      } else if(em && !t){
+        // still log emoji-only as lightweight message line for activity log
+        v.messages.push({text:em, emoji:em, ts:ts||Date.now()});
+        if(v.messages.length>40) v.messages=v.messages.slice(-40);
+      }
+    }
+    // Build activity from float/chat history without animating
+    function __ingestActivityList(list){
+      try{
+        (list||[]).forEach(function(m){
+          if(!m) return;
+          var mid=String(m.mid||((m.id||'')+'-'+(m.ts||'')+'-'+(m.text||'')+'-'+(m.emoji||'')));
+          if(!window.__actSeen) window.__actSeen=Object.create(null);
+          if(window.__actSeen[mid]) return;
+          window.__actSeen[mid]=1;
+          __recordActivity(m.id, m.name, m.text, m.emoji, m.ts);
+        });
+      }catch(e){}
+    }
+    function paintViewersSummary(){
+      var el=$('sum-viewers'); if(!el) return;
+      var rows=Object.keys(__viewerMap).map(function(k){return __viewerMap[k]});
+      rows.sort(function(a,b){ return (b.online?1:0)-(a.online?1:0) || (b.lastSeen|0)-(a.lastSeen|0); });
+      if(!rows.length){ el.innerHTML='<div class="empty">No viewers yet</div>'; return; }
+      function fmtT(ts){
+        try{ var d=new Date(ts); return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }catch(e){ return '—'; }
+      }
+      var html='<div style="padding:8px 4px;font-size:12px;color:#94a3b8">Online / offline · visit &amp; last seen · Activity</div>';
+      rows.forEach(function(v){
+        var emKeys=Object.keys(v.emojis||{});
+        var emTotal=0; emKeys.forEach(function(k){ emTotal+=v.emojis[k]|0; });
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:10px 8px;border-bottom:1px solid rgba(148,163,184,.12)">';
+        html+='<span style="width:8px;height:8px;border-radius:50%;background:'+(v.online?'#34d399':'#64748b')+';flex-shrink:0"></span>';
+        html+='<div style="flex:1;min-width:0"><div style="font-weight:800;color:#e2e8f0">'+esc(v.name||'Fan')+'</div>';
+        html+='<div style="font-size:11px;color:#94a3b8">'+(v.online?'Online':'Offline')+' · in '+fmtT(v.firstSeen)+' · last '+fmtT(v.lastSeen)+'</div></div>';
+        html+='<button type="button" class="icon-btn" style="font-size:11px" onclick="showViewerActivity(\''+esc(v.id).replace(/'/g,"\\'")+'\')">Activity</button>';
+        html+='</div>';
+      });
+      el.innerHTML=html;
+    }
+    function showViewerActivity(id){
+      var v=__viewerMap[id]; if(!v){ alert('No activity'); return; }
+      var emKeys=Object.keys(v.emojis||{});
+      var emHtml=emKeys.length?emKeys.map(function(k){ return k+' ×'+(v.emojis[k]|0); }).join(' · '):'No emojis';
+      var msgHtml=(v.messages||[]).length?(v.messages.slice().reverse().map(function(m){
+        return '<div style="padding:6px 0;border-bottom:1px solid rgba(148,163,184,.1)">'+(m.emoji?esc(m.emoji)+' ':'')+esc(m.text||'')+'</div>';
+      }).join('')):'<div class="empty">No messages</div>';
+      var box=document.createElement('div');
+      box.style.cssText='position:fixed;inset:0;z-index:10060;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px';
+      box.onclick=function(e){ if(e.target===box) box.remove(); };
+      box.innerHTML='<div style="background:#0f172a;border:1px solid rgba(148,163,184,.3);border-radius:14px;padding:16px;max-width:340px;width:100%;max-height:80vh;overflow:auto;color:#e2e8f0">'+
+        '<div style="font-weight:900;color:#fbbf24;margin-bottom:8px">'+esc(v.name||'Fan')+' · Activity</div>'+
+        '<div style="font-size:12px;color:#94a3b8;margin-bottom:10px">'+(v.online?'Online':'Offline')+'</div>'+
+        '<div style="font-size:12px;font-weight:800;color:#7dd3fc;margin-bottom:4px">Emojis</div>'+
+        '<div style="font-size:14px;margin-bottom:12px">'+emHtml+'</div>'+
+        '<div style="font-size:12px;font-weight:800;color:#7dd3fc;margin-bottom:4px">Messages</div>'+msgHtml+
+        '<button type="button" style="width:100%;margin-top:12px;padding:10px;border:0;border-radius:10px;background:#1e293b;color:#e2e8f0;font-weight:800;cursor:pointer" onclick="this.closest(\'div[style*=fixed]\').remove()">Close</button></div>';
+      document.body.appendChild(box);
+    }
+    var cheerTarget='striker';
+    function setCheerTarget(t){
+      cheerTarget=t==='bowler'?'bowler':'striker';
+      try{
+        var bs=$('cheer-tgt-striker'),bb=$('cheer-tgt-bowler');
+        if(bs)bs.classList.toggle('on',cheerTarget==='striker');
+        if(bb)bb.classList.toggle('on',cheerTarget==='bowler');
+        updateCheerTargetLabel();
+      }catch(e){}
+    }
+    function updateCheerTargetLabel(){
+      try{
+        var sn=(lastData&&lastData.strikerName)||'On strike';
+        var bn=(lastData&&lastData.bowlerName)||'Bowler';
+        var lab=cheerTarget==='bowler'?('⚾ '+bn):('🏏 '+sn);
+        if($('cheer-tgt-label'))$('cheer-tgt-label').textContent='Cheering: '+lab+' · pick an emoji';
+      }catch(e){}
+    }
+    function mountEngage(el){
+      var slot=$('engage-slot'); if(!slot||!el)return;
+      try{
+        // keep other panels in DOM; only show active in slot area visually
+        if(el.parentNode!==slot) slot.appendChild(el);
+      }catch(e){}
+    }
+    function flashTreasureOnce(){
+      var slot=$('engage-slot'); if(!slot)return;
+      // do NOT clear slot children (would destroy pred/cheer panels)
+      var t=document.createElement('div'); t.className='treasure-flash'; t.id='treasure-flash-tmp';
+      t.innerHTML='<div class="box">🪙🎁</div><div class="coins">Gold coins await!</div>';
+      slot.insertBefore(t, slot.firstChild);
+      setTimeout(function(){ try{var x=$('treasure-flash-tmp');if(x&&x.parentNode)x.parentNode.removeChild(x)}catch(e){} }, 1200);
+    }
+    function toggleCheerPad(){
+      var el=$('cheer-more'); if(!el)return;
+      var pred=$('pred-more');
+      var opening=!el.classList.contains('open');
+      if(pred){ pred.classList.remove('open'); pred.style.display='none'; }
+      if(opening){
+        try{mountEngage(el)}catch(e){}
+        el.classList.add('open');
+        el.style.display='block';
+        try{flashTreasureOnce()}catch(e){}
+      } else {
+        el.classList.remove('open');
+        el.style.display='none';
+      }
+      try{updateCheerTargetLabel()}catch(e){}
+    }
+    function togglePredPad(){
+      var el=$('pred-more'); if(!el)return;
+      var cheer=$('cheer-more');
+      var opening=!el.classList.contains('open');
+      if(cheer){ cheer.classList.remove('open'); cheer.style.display='none'; }
+      if(opening){
+        try{mountEngage(el)}catch(e){}
+        el.classList.add('open');
+        el.style.display='block';
+        try{flashTreasureOnce()}catch(e){}
+      } else {
+        el.classList.remove('open');
+        el.style.display='none';
+      }
+    }
+    function sendCheerEmoji(emoji){
+      if(!cheerTarget){alert('Select On strike or Bowler first');return}
+      sendReact(cheerTarget,emoji);
+    }
+    var skipEventAnimUntil=0; // suppress 4/6/W/1/2 burst while showing thumbs points
+    function flashPredResult(ok,delta,label){
+      try{
+        skipEventAnimUntil=Date.now()+2400;
+        try{
+          var ov=$('anim-overlay');
+          if(ov)ov.classList.remove('show');
+          var tx=$('anim-text');
+          if(tx)tx.textContent='';
+        }catch(eO){}
+        try{
+          if(lastData){
+            var ev0=lastData.lastEvent||'';
+            lastEventKey=(lastData.ts||Date.now())+':'+ev0+':'+(lastData.strikerRuns|0)+':pts';
+          }
+        }catch(eK){}
+        var f=document.createElement('div');
+        f.className='pts-burst '+(ok?'up':'down');
+        if(ok){
+          f.innerHTML='👍<span class="pts-num">+'+Math.abs(delta)+' 🪙</span><span style="display:block;font-size:13px;font-weight:700;opacity:.9">'+esc(label||'Correct!')+'</span>';
+        }else{
+          f.innerHTML='👎<span class="pts-num">−'+Math.abs(delta)+' 🪙</span><span style="display:block;font-size:13px;font-weight:700;opacity:.9">'+esc(label||'Wrong')+'</span>';
+        }
+        document.body.appendChild(f);
+        setTimeout(function(){try{f.remove()}catch(e){}},2000);
+      }catch(e){}
+    }
+    var playerCheers={};
+    function cheerSummaryHtml(playerName){
+      var arr=playerCheers[playerName]||[];
+      if(!arr.length)return'';
+      var counts={};
+      arr.forEach(function(c){counts[c.emoji]=(counts[c.emoji]|0)+1});
+      return Object.keys(counts).map(function(em){
+        return '<span class="emoji-chip" onclick="showCheerDetail(\''+esc(playerName).replace(/'/g,"\\'")+'\')">'+em+(counts[em]>1?('×'+counts[em]):'')+'</span>';
+      }).join('');
+    }
+    function showCheerDetail(playerName){
+      var arr=playerCheers[playerName]||[];
+      var html='<div class="cheer-detail" onclick="this.remove()"><div class="box" onclick="event.stopPropagation()"><h4>Cheers for '+esc(playerName)+'</h4>';
+      if(!arr.length)html+='<div class="empty">No cheers yet</div>';
+      else arr.slice().reverse().forEach(function(c){
+        html+='<div class="row">'+esc(c.emoji)+' · '+esc(c.from||'Fan')+'</div>';
+      });
+      html+='<button type="button" class="fan-btn sec" style="width:100%;margin-top:10px" onclick="this.closest(\'.cheer-detail\').remove()">Close</button></div></div>';
+      document.body.insertAdjacentHTML('beforeend',html);
+    }
+    function loadCheers(){
+      if(!API_BASE)return;
+      try{
+        var x=new XMLHttpRequest();
+        x.open('GET',API_BASE.replace(/\/+$/,'')+'/reactions?_='+Date.now(),true);
+        x.onload=function(){
+          try{
+            var d=JSON.parse(x.responseText);
+            playerCheers=d.byPlayer||{};
+            paintPlayerCheers();
+          }catch(e){}
+        };
+        x.send();
+      }catch(e){}
+    }
+    function paintPlayerCheers(){
+      try{
+        // Never show smileys on player names / cards
+        var sn=lastData&&lastData.strikerName;
+        var bn=lastData&&lastData.bowlerName;
+        if($('v-striker'))$('v-striker').textContent=sn||'—';
+        if($('v-bowler'))$('v-bowler').textContent=bn||'—';
+        if($('v-striker-cheers'))$('v-striker-cheers').innerHTML='';
+        if($('v-bowler-cheers'))$('v-bowler-cheers').innerHTML='';
+        if(lastData&&$('sum-teams')&&!$('sum-teams').classList.contains('hidden')){
+          try{paintTeamsWithCheers(lastData)}catch(e2){}
+        }
+      }catch(e){}
+    }
+    function paintTeamsWithCheers(data){
+      var squadA=data.squadA||data.teamAPlayers||[],squadB=data.squadB||data.teamBPlayers||[];
+      function squadHtml(teamName,squad){
+        return '<div class="sec-title" style="color:#fbbf24">'+esc(teamName||'Team')+'</div>'+
+          (squad.length?squad.map(function(n,i){
+            var nm=typeof n==='string'?n:(n&&n.name)||'';
+            // No smileys on player names
+            return '<div class="team-player-row"><div class="pn">'+(i+1)+'. '+esc(nm)+'</div></div>';
+          }).join(''):'<div class="empty">No players listed</div>');
+      }
+      if($('sum-teams'))$('sum-teams').innerHTML=squadHtml(data.teamA||'Team A',squadA)+squadHtml(data.teamB||'Team B',squadB);
+    }
+    function loadFantasyBoardForOwners(){
+      var el=$('sum-owners');if(!el)return;
+      function paint(teams){
+        if(!teams||!teams.length){el.innerHTML='<div class="empty">No team owners yet</div>';return}
+        el.innerHTML='<div class="sec-title">👑 Team owner rank</div>'+teams.map(function(t,i){
+          var label=t.teamName||t.name||'Team';
+          return '<div class="rank-row"><span class="rk">'+(i+1)+'</span><span class="nm">'+esc(label)+
+            '<span style="color:#64748b;font-size:11px"> · '+esc(t.name||'')+'</span></span>'+
+            '<span class="pt">'+(t.total|0)+'</span></div>';
+        }).join('');
+      }
+      if(!API_BASE){paint([]);return}
+      try{
+        var x=new XMLHttpRequest();
+        x.open('GET',API_BASE.replace(/\/+$/,'')+'/fantasy?_='+Date.now(),true);
+        x.onload=function(){try{var d=JSON.parse(x.responseText);paint(d.teams||[])}catch(e){paint([])}};
+        x.send();
+      }catch(e){paint([])}
+    }
+
+    // ---- Predictions / coins (single balance, start 10) ----
+    var myCoins=10,myOk=0,myBad=0,pendingPred=null,pendingOverPred=null,correctList=[];
+    var lastOverKeySettled='';
+    try{
+      if(localStorage.getItem('cricket_fan_coins')!=null){
+        myCoins=parseInt(localStorage.getItem('cricket_fan_coins'),10)||10;
+      }else if(localStorage.getItem('cricket_fan_gold')!=null||localStorage.getItem('cricket_fan_silver')!=null){
+        var g=parseInt(localStorage.getItem('cricket_fan_gold')||'0',10)||0;
+        var s=parseInt(localStorage.getItem('cricket_fan_silver')||'0',10)||0;
+        myCoins=Math.max(10,g+s);
+      }else{
+        myCoins=10;
+        localStorage.setItem('cricket_fan_coins','10');
+      }
+      myOk=parseInt(localStorage.getItem('cricket_fan_ok')||'0',10)||0;
+      myBad=parseInt(localStorage.getItem('cricket_fan_bad')||'0',10)||0;
+      correctList=JSON.parse(localStorage.getItem('cricket_fan_correct')||'[]')||[];
+      pendingOverPred=JSON.parse(localStorage.getItem('cricket_fan_over_pred')||'null');
+    }catch(e){myCoins=10}
+    function totalCoins(){return myCoins|0}
+    function refreshPtsUI(){
+      try{
+        if($('my-coins'))$('my-coins').textContent=myCoins;
+        if($('my-ok'))$('my-ok').textContent=myOk;
+        if($('my-bad'))$('my-bad').textContent=myBad;
+        var label=getChatName()?(getChatName()+' · 🪙'+myCoins):'';
+        if($('chat-name-label')&&getChatName())$('chat-name-label').textContent=label;
+        if(pendingOverPred&&pendingOverPred.locked&&!pendingOverPred.settled){
+          if($('over-pred-status'))$('over-pred-status').textContent='Locked end-of-over total: '+pendingOverPred.value;
+          if($('btn-lock-over-score')){$('btn-lock-over-score').textContent='Locked';$('btn-lock-over-score').disabled=true}
+          if($('pred-over-score')){$('pred-over-score').value=pendingOverPred.value;$('pred-over-score').disabled=true}
+        }else{
+          if($('btn-lock-over-score')){$('btn-lock-over-score').textContent='Lock';$('btn-lock-over-score').disabled=false}
+          if($('pred-over-score'))$('pred-over-score').disabled=false;
+        }
+      }catch(e){}
+    }
+    function saveFanLocal(){
+      try{
+        localStorage.setItem('cricket_fan_coins',String(myCoins));
+        localStorage.setItem('cricket_fan_pts',String(myCoins));
+        localStorage.setItem('cricket_fan_ok',String(myOk));
+        localStorage.setItem('cricket_fan_bad',String(myBad));
+        localStorage.setItem('cricket_fan_correct',JSON.stringify(correctList.slice(-40)));
+        if(pendingOverPred)localStorage.setItem('cricket_fan_over_pred',JSON.stringify(pendingOverPred));
+        else localStorage.removeItem('cricket_fan_over_pred');
+      }catch(e){}
+      refreshPtsUI();
+      pushFanScore();
+      try{if($('panel-fan')&&!$('panel-fan').classList.contains('hidden'))loadFansRank()}catch(eR){}
+    }
+    function pushFanScore(){
+      if(!API_BASE||!getChatName())return;
+      try{
+        var x=new XMLHttpRequest();
+        x.open('POST',API_BASE.replace(/\/+$/,'')+'/fan/update',true);
+        x.setRequestHeader('Content-Type','application/json');
+        x.onload=function(){try{if($('panel-fan')&&!$('panel-fan').classList.contains('hidden'))loadFansRank()}catch(e){}};
+        x.send(JSON.stringify({
+          id:uid(),name:getChatName()||'Fan',
+          points:myCoins|0,gold:0,silver:myCoins|0,
+          correct:myOk,wrong:myBad,correctList:correctList.slice(-20)
+        }));
+      }catch(e){}
+    }
+    function setPrediction(v){ try{publishPrediction(v,'')}catch(ePub){} 
+      if(!getChatName()){ensureNameGate();alert('Enter your name first');return}
+      pendingPred={value:String(v),atBalls:lastData?(lastData.balls|0):-1,ts:Date.now()};
+      document.querySelectorAll('.pred-btn').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-p')===String(v))});
+      try{$('pending-pred').textContent='Locked in: next ball = '+v}catch(e){}
+    }
+    function lockOverScorePred(){ try{var ot=($('pred-over-score')&&$('pred-over-score').value)||'';publishPrediction('over',ot)}catch(ePub2){} 
+      if(!getChatName()){ensureNameGate();alert('Enter your name first');return}
+      if(pendingOverPred&&pendingOverPred.locked&&!pendingOverPred.settled){alert('Already locked for this over');return}
+      var el=$('pred-over-score');
+      var val=el?parseInt(el.value,10):NaN;
+      if(isNaN(val)||val<0){alert('Enter the predicted total score at end of this over');return}
+      var balls=lastData?(lastData.balls|0):0;
+      var overKey=(lastData?(lastData.innings|0):1)+'-'+Math.floor(balls/6);
+      pendingOverPred={value:val,locked:true,settled:false,atBalls:balls,overKey:overKey,ts:Date.now()};
+      saveFanLocal();
+      try{$('over-pred-status').textContent='Locked end-of-over total: '+val}catch(e){}
+    }
+    function settleOverScorePred(data){
+      if(!pendingOverPred||!pendingOverPred.locked||pendingOverPred.settled||!data)return;
+      var balls=data.balls|0;
+      // Over complete: legal balls mod 6 == 0 and progressed past lock, or innings/match ended
+      var legalNow=balls;
+      var overDone=(legalNow>pendingOverPred.atBalls)&&((legalNow%6)===0);
+      if(data.matchEnded)overDone=true;
+      if((data.innings|0)!==(pendingOverPred.overKey?parseInt(String(pendingOverPred.overKey).split('-')[0],10):1)&&legalNow>=0){
+        // innings changed — settle on last known runs if we have firstInningsScore
+        if(data.firstInningsScore!=null&&(pendingOverPred.overKey||'').indexOf('1-')===0){
+          var act0=data.firstInningsScore|0;
+          var pred0=pendingOverPred.value|0;
+          var diff0=Math.abs(pred0-act0);
+          var ok0=diff0===0||diff0<=2;
+          var gold0=diff0===0?50:(diff0<=2?20:0);
+          if(gold0){myCoins+=gold0;myOk++}else myBad++;
+          pendingOverPred.settled=true;pendingOverPred.actual=act0;
+          flashPredResult(!!gold0,gold0||2,gold0?(diff0===0?'Exact over total! +'+gold0+' 🪙':'Within ±2 · +'+gold0+' 🪙'):('Over total '+pred0+' vs '+act0));
+          var ovLab0='Inns 1 · End of over';
+          try{var okp=(pendingOverPred.overKey||'').split('-');ovLab0='Inns '+(okp[0]||1)+' · Over '+((parseInt(okp[1],10)|0)+1)+' end'}catch(eL0){}
+          correctList.push({pred:'Over total '+pred0,actual:String(act0),coins:gold0||0,when:ovLab0,ts:Date.now()});
+          saveFanLocal();
+          try{if($('pred-over-score')){$('pred-over-score').value='';$('pred-over-score').disabled=false}}catch(e){}
+          pendingOverPred=null;saveFanLocal();
+          return;
+        }
+      }
+      if(!overDone)return;
+      var okKey=(data.innings|0)+'-'+Math.floor((legalNow-1)/6);
+      if(okKey===lastOverKeySettled&&!data.matchEnded)return;
+      lastOverKeySettled=okKey;
+      var actual=data.runs|0;
+      var pred=pendingOverPred.value|0;
+      var diff=Math.abs(pred-actual);
+      var gold=0;
+      if(diff===0)gold=50;
+      else if(diff<=2)gold=20;
+      if(gold){myCoins+=gold;myOk++}else myBad++;
+      pendingOverPred.settled=true;pendingOverPred.actual=actual;
+      var ovLab='Inns '+(data.innings|0)+' · Over '+(Math.floor((legalNow-1)/6)+1)+' end';
+      correctList.push({pred:'Over total '+pred,actual:String(actual),coins:gold||0,when:ovLab,ts:Date.now()});
+      flashPredResult(!!gold,gold||2,gold?(diff===0?'Exact! End of over '+actual+' · +'+gold+' 🪙':'Close ±'+diff+' · +'+gold+' 🪙'):('Predicted '+pred+' · was '+actual));
+      try{if($('over-pred-status'))$('over-pred-status').textContent=gold?('✓ +'+gold+' coins'):('Was '+actual);}catch(e){}
+      try{if($('pred-over-score')){$('pred-over-score').value='';$('pred-over-score').disabled=false}
+        if($('btn-lock-over-score')){$('btn-lock-over-score').textContent='Lock';$('btn-lock-over-score').disabled=false}
+      }catch(e2){}
+      pendingOverPred=null;
+      saveFanLocal();
+    }
+    function settlePrediction(data){
+      try{settleOverScorePred(data)}catch(eS){}
+      if(!pendingPred||!data)return;
+      var balls=data.balls|0;
+      if(balls<=pendingPred.atBalls)return;
+      var actual=null;
+      if(data.lastEvent==='wicket')actual='W';
+      else if(data.lastEvent==='six')actual='6';
+      else if(data.lastEvent==='four')actual='4';
+      else if(data.lastEvent==='two')actual='2';
+      else if(data.lastEvent==='one')actual='1';
+      else if(data.lastEvent==='three')actual='3';
+      else if(data.lastEvent==='dot'||data.lastEvent==='zero')actual='0';
+      else{
+        var ov=(data.thisOver&&data.thisOver.balls)||[];
+        if(ov.length)actual=String(ov[ov.length-1]);
+      }
+      if(actual==null)return;
+      actual=String(actual).toUpperCase();
+      var pred=String(pendingPred.value).toUpperCase();
+      if((actual==='WD'||actual==='NB'||actual==='WIDE'||actual.indexOf('WD')===0)){
+        return;
+      }
+      var isBoundary=pred==='4'||pred==='6'||pred==='W';
+      var ok=(pred===actual);
+      var whenLab=ballWhenLabel(data,pendingPred.atBalls);
+      if(ok){
+        var sil=isBoundary?10:5;
+        myOk++;myCoins+=sil;
+        correctList.push({pred:'Ball '+pred,actual:actual,coins:sil,when:whenLab,ts:Date.now()});
+        try{$('pending-pred').innerHTML='<span class="pts-flash">👍 '+pred+' · +'+sil+' 🪙</span>'}catch(e){}
+        flashPredResult(true,sil,pred+' · +'+sil+' coins');
+      }else{
+        myBad++;myCoins=Math.max(0,(myCoins|0)-2);
+        correctList.push({pred:'Ball '+pred,actual:actual,coins:-2,when:whenLab,ts:Date.now()});
+        try{$('pending-pred').innerHTML='<span class="pts-bad">👎 You '+pred+' · was '+actual+' · −2 🪙</span>'}catch(e){}
+        flashPredResult(false,2,'You '+pred+' · was '+actual);
+      }
+      pendingPred=null;
+      document.querySelectorAll('.pred-btn').forEach(function(b){b.classList.remove('on')});
+      saveFanLocal();
+    }
+    function sendReact(target,emoji){
+      if(!getChatName()){ensureNameGate();alert('Enter your name first');return}
+      if(target!=='striker'&&target!=='bowler'){
+        alert('Select On strike batsman or Bowler first');
+        return;
+      }
+      var name=getChatName()||'Fan';
+      var player='';
+      if(target==='striker'&&lastData)player=lastData.strikerName||'';
+      if(target==='bowler'&&lastData)player=lastData.bowlerName||'';
+      if(!player){alert('Player name not available yet');return}
+      try{
+        var f=document.createElement('div');f.className='react-float';
+        f.textContent=emoji+' '+player;
+        document.body.appendChild(f);
+        setTimeout(function(){try{f.remove()}catch(e){}},1200);
+      }catch(e){}
+      // Optimistic local show
+      try{
+        if(!playerCheers[player])playerCheers[player]=[];
+        playerCheers[player].push({emoji:emoji,from:name,ts:Date.now()});
+        paintPlayerCheers();
+      }catch(eO){}
+      if(!API_BASE)return;
+      try{
+        var x=new XMLHttpRequest();
+        x.open('POST',API_BASE.replace(/\/+$/,'')+'/react',true);
+        x.setRequestHeader('Content-Type','application/json');
+        x.onload=function(){
+          try{
+            var d=JSON.parse(x.responseText);
+            if(d.byPlayer){playerCheers=d.byPlayer;paintPlayerCheers()}
+          }catch(e){}
+        };
+        x.send(JSON.stringify({id:uid(),name:name,target:target,emoji:emoji,player:player}));
+      }catch(e2){}
+    }
+    function loadFansRank(){
+      try{loadAllPredictions()}catch(e0){}
+      var el=$('coins-board')||$('sum-rank'); if(!el)return;
+      function paint(rows){
+        rows=(rows||[]).slice().sort(function(a,b){return (b.points|0)-(a.points|0)||(b.correct|0)-(a.correct|0)});
+        if(!rows.length){ el.innerHTML='<div class="empty">No viewers yet</div>'; return; }
+        var html='<div style="overflow:auto;max-height:280px"><table class="stats" style="font-size:12px"><thead><tr><th>#</th><th>Viewer</th><th class="num">Coins</th>'+(__adminKey?'<th></th>':'')+'</tr></thead><tbody>';
+        rows.forEach(function(r,i){
+          html+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(r.name||'Fan')+'</td><td class="num">🪙 '+(r.points|0)+'</td>';
+          if(__adminKey){
+            html+='<td style="white-space:nowrap"><button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminResetCoinsOne(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Reset</button> ';
+            html+='<button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminBlockViewer(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Block</button></td>';
+          }
+          html+='</tr>';
+        });
+        html+='</tbody></table></div>';
+        el.innerHTML=html;
+      }
+      if(!API_BASE){ paint([]); return; }
+      fetch(API_BASE+'/fans').then(function(r){return r.json()}).then(function(d){
+        paint(d.fans||d.list||[]);
+      }).catch(function(){ paint([]); });
+    }
+    function shareExpertView(){
+      var d=lastData||{};
+      var name=getChatName()||'Fan';
+      var score=(d.runs|0)+'-'+(d.wickets|0)+' ('+oversFromBalls(d.balls)+')';
+      var lines=[
+        '*'+name+'* · 🪙 '+myCoins+' coins',
+        (d.teamA||'Team A')+' vs '+(d.teamB||'Team B'),
+        'Live: '+score+(d.battingTeamName?(' · '+d.battingTeamName+' batting'):''),
+        'Correct predictions: '+myOk+' · Wrong: '+myBad
+      ];
+      if(correctList.length){
+        lines.push('Recent correct: '+correctList.slice(-5).map(function(c){return c.pred}).join(', '));
+      }
+      var ov=(d.thisOver&&d.thisOver.balls)||[];
+      if(ov.length)lines.push('This over: '+ov.join(' '));
+      lines.push('');
+      lines.push('My take: watch the next few balls — key phase.');
+      try{lines.push(location.href)}catch(e){}
+      var text=lines.join('\n');
+      var wa='https://wa.me/?text='+encodeURIComponent(text);
+      try{window.open(wa,'_blank')}catch(e2){location.href=wa}
+    }
+    refreshPtsUI();
+    function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+    function oversFromBalls(b){b=b|0;return Math.floor(b/6)+'.'+(b%6)}
+    function sr(r,b){b=b|0;if(b<=0)return'—';return(Math.round((r/b)*1000)/10).toFixed(1)}
+    function econ(r,b){b=b|0;if(b<=0)return'—';return(Math.round((r/(b/6))*100)/100).toFixed(2)}
+    function highlightEventWords(text){
+      var out=esc(text).replace(/\b(FOUR|SIX|WICKET|OUT)\b!?/gi,function(m){var u=m.toUpperCase();var cls='hl';if(u.indexOf('FOUR')===0)cls+=' four';else if(u.indexOf('SIX')===0)cls+=' six';else cls+=' wicket';return'<span class="'+cls+'">'+m+'</span>'});
+      out=out.replace(/\bno run\b/gi,'<span class="hl run0">no run</span>');
+      out=out.replace(/\bकोई रन नहीं\b/g,'<span class="hl run0">कोई रन नहीं</span>');
+      out=out.replace(/\b([012])(\s*runs?)\b/gi,function(m,n,w){return'<span class="hl run'+n+'">'+n+w+'</span>'});
+      out=out.replace(/\b([012])\s*रन\b/g,function(m,n){return'<span class="hl run'+n+'">'+n+' रन</span>'});
+      return out;
+    }
+    function formatCommentaryLine(line){line=String(line||'').trim();if(!line)return{title:'',body:''};var dash=line.split(/\s+[—–]\s+/);if(dash.length>=2&&dash[0].length<100)return{title:dash[0].replace(/^\*+/,'').trim(),body:dash.slice(1).join(' — ').replace(/^\*+\s*/,'').trim()};var m=line.match(/^(.+?(?:\d+(?:st|nd|rd|th)\s+ball))[.\s*—–-]*(.*)$/i);if(m)return{title:m[1].replace(/^\*+/,'').trim(),body:(m[2]||'').replace(/^\*+\s*/,'').trim()};return{title:line.replace(/^\*+/,'').trim(),body:''}}
+    function batTable(rows,currentName){
+      if(!rows||!rows.length)return'<tr><td colspan="6" class="empty">No batting yet</td></tr>';
+      var cur=(currentName||'').toLowerCase();
+      var sorted=rows.slice().sort(function(a,b){
+        var an=(a.name||'').toLowerCase()===cur?0:1,bn=(b.name||'').toLowerCase()===cur?0:1;
+        return an-bn;
+      });
+      return sorted.map(function(p){
+        var isCur=cur && (p.name||'').toLowerCase()===cur && !p.isOut;
+        var name=esc(p.name)+(p.isOut?'':((p.balls|0)>0?'*':''));
+        var srVal=sr(p.runs,p.balls);
+        return '<tr class="'+(isCur?'neon':'dim')+'"><td>'+name+'</td><td class="num">'+(p.runs|0)+'</td><td class="num">'+(p.balls|0)+'</td><td class="num">'+(p.fours|0)+'/'+(p.sixes|0)+'</td><td class="num">'+srVal+'</td><td>'+esc(p.howOut||(p.isOut?'':'not out'))+'</td></tr>';
+      }).join('');
+    }
+    function bowlTable(rows,currentName){
+      if(!rows||!rows.length)return'<tr><td colspan="6" class="empty">No bowling yet</td></tr>';
+      var cur=(currentName||'').toLowerCase();
+      var sorted=rows.slice().sort(function(a,b){
+        var an=(a.name||'').toLowerCase()===cur?0:1,bn=(b.name||'').toLowerCase()===cur?0:1;
+        return an-bn;
+      });
+      return sorted.map(function(p){
+        var isCur=cur && (p.name||'').toLowerCase()===cur;
+        var ov=oversFromBalls(p.bowlBalls);
+        var runs=p.bowlRuns|0, wk=p.wickets|0, ec=econ(p.bowlRuns,p.bowlBalls);
+        return '<tr class="'+(isCur?'neon':'dim')+'"><td>'+esc(p.name)+'</td><td class="num">'+ov+'</td><td class="num">'+runs+'</td><td class="num">'+wk+'</td><td class="num">'+(p.dots|0)+'</td><td class="num">'+ec+'</td></tr>';
+      }).join('');
+    }
+    function statsBlock(title,batName,bowlName,batters,bowlers,cls){return'<div class="sec-title '+(cls||'')+'">'+esc(title)+' · Batting · '+esc(batName||'')+'</div><table class="stats"><thead><tr><th>Batter</th><th class="num">R</th><th class="num">B</th><th class="num">4/6</th><th class="num">SR</th><th>How out</th></tr></thead><tbody>'+batTable(batters,(lastData&&lastData.strikerName)||'')+'</tbody></table><div class="sec-title '+(cls||'')+'">'+esc(title)+' · Bowling · '+esc(bowlName||'')+'</div><table class="stats"><thead><tr><th>Bowler</th><th class="num">O</th><th class="num">R</th><th class="num">W</th><th class="num">Dots</th><th class="num">Econ</th></tr></thead><tbody>'+bowlTable(bowlers,(lastData&&lastData.bowlerName)||'')+'</tbody></table>'}
+    function playAnim(type,data){
+      if(!type)return;
+      if(Date.now()<skipEventAnimUntil)return;
+      var now=Date.now();
+      if(now-lastAnimAt<600)return;
+      lastAnimAt=now;
+      var el=$('anim-overlay'),tx=$('anim-text');
+      if(!el||!tx){
+        // create if missing
+        if(!el){ el=document.createElement('div'); el.id='anim-overlay'; document.body.appendChild(el); }
+        if(!tx){ tx=document.createElement('div'); tx.id='anim-text'; el.appendChild(tx); }
+      }
+      tx.className='burst '+type;
+      var name=(data&&data.milestone&&data.milestone.name)||(data&&data.strikerName)||'';
+      if(type==='four')tx.textContent='FOUR! 4️⃣';
+      else if(type==='six')tx.textContent='SIX! 6️⃣';
+      else if(type==='wicket')tx.textContent='WICKET! 🔴';
+      else if(type==='fifty')tx.textContent='FIFTY! 5️⃣0️⃣ '+(name||'');
+      else if(type==='hundred')tx.textContent='CENTURY! 💯 '+(name||'');
+      else tx.textContent=String(type).toUpperCase();
+      el.classList.add('show');
+      el.style.display='flex';
+      clearTimeout(playAnim._t);
+      playAnim._t=setTimeout(function(){
+        el.classList.remove('show');
+        el.style.display='none';
+      }, 1200);
+    }
+    function detectEventFromCommentary(lines){
+      if(!lines||!lines.length)return null;
+      var last=String(lines[lines.length-1]||'');
+      if(/\bwicket\b|\bout\b/i.test(last)&&!/\bnot out\b/i.test(last))return'wicket';
+      if(/\bsix\b/i.test(last))return'six';
+      if(/\bfour\b/i.test(last))return'four';
+      if(/\b2 runs?\b|\btwo\b/i.test(last))return'two';
+      if(/\b1 run\b|\bsingle\b/i.test(last))return'one';
+      if(/\bfifty\b|\b50\b/i.test(last))return'fifty';
+      if(/\bhundred\b|\bcentury\b|\b100\b/i.test(last))return'hundred';
+      return null;
+    }
+    function openTeamModal(side){
+      try{
+        var d=lastData;if(!d){return}
+        var name=side==='A'?(d.teamA||'Team A'):(d.teamB||'Team B');
+        var det=side==='A'?(d.teamADetail||{}):(d.teamBDetail||{});
+        var runs=det.runs!=null?det.runs:(d.battingSide===side?(d.runs|0):(d.firstInningsScore!=null?d.firstInningsScore:0));
+        var wkts=det.wickets!=null?det.wickets:(d.battingSide===side?(d.wickets|0):(d.firstInningsWickets|0));
+        var balls=det.balls!=null?det.balls:(d.battingSide===side?(d.balls|0):0);
+        var ov=det.overs||oversFromBalls(balls);
+        var fow=(d.fallOfWickets||[]).filter(function(w){return true}).slice(-12);
+        var fowHtml=fow.length?fow.map(function(w){
+          return '<div class="fow-row"><span class="a">'+esc(w.batsman||'')+' · '+esc(String(w.score!=null?w.score:''))+'</span><span class="b">'+esc(w.dismissal||'')+(w.overs?(' · '+esc(w.overs)):'')+'</span></div>';
+        }).join(''):'<div class="empty">No wickets yet</div>';
+        $('modal-title').textContent=name;
+        $('modal-body').innerHTML=
+          '<div class="info-card"><h3>Score</h3><p style="font-size:22px;font-weight:900;color:#34d399">'+runs+'-'+wkts+'</p>'+
+          '<p style="margin-top:6px">Overs: <b>'+esc(String(ov))+'</b> · Balls: <b>'+(balls|0)+'</b> · Wickets: <b>'+wkts+'</b></p></div>'+
+          '<div class="sec-title">Fall of wickets</div>'+fowHtml;
+        $('modal-ov').classList.remove('hidden');
+      }catch(e){console.log(e)}
+    }
+    function closeModal(){try{$('modal-ov').classList.add('hidden')}catch(e){}}
+
+    // ---------- Text-to-speech (Commentary): language + voice gender ----------
+    var ttsOn=(function(){try{return localStorage.getItem('cricket_tts_on')==='1'}catch(e){return false}})();
+    var ttsLang=(function(){try{return localStorage.getItem('cricket_tts_lang')||'en'}catch(e){return 'en'}})();
+    var ttsGender=(function(){try{return localStorage.getItem('cricket_tts_gender')||'auto'}catch(e){return 'auto'}})();
+    var ttsVoiceCache={};
+    var FEMALE_HINTS=/female|woman|zira|samantha|susan|karen|moira|tessa|veena|fiona|kate|salli|joanna|ivy|kendra|amy|emma|aditi|swara|priya|neerja|heera/i;
+    var MALE_HINTS=/male|man\b|david|alex\b|daniel|fred|george|james|mark|ryan|guy|ravi|arjun|hemant|rishi|matthew|justin|brian/i;
+    function voiceGender(v){var n=v.name||'';if(FEMALE_HINTS.test(n))return'female';if(MALE_HINTS.test(n))return'male';return'unknown'}
+    function pickBestVoice(lang,gender){
+      try{
+        var voices=speechSynthesis.getVoices()||[];
+        if(!voices.length)return null;
+        var langPrefix=(lang==='hi')?'hi':'en';
+        var pool=voices.filter(function(v){return v.lang&&v.lang.toLowerCase().indexOf(langPrefix)===0});
+        if(!pool.length)pool=voices;
+        var wantGender=gender&&gender!=='auto'?gender:null;
+        function rank(v){var score=0;if(/natural|neural|online|google/i.test(v.name))score+=3;if(langPrefix==='en'&&/en-in/i.test(v.lang))score+=2;if(wantGender&&voiceGender(v)===wantGender)score+=5;else if(wantGender&&voiceGender(v)!=='unknown'&&voiceGender(v)!==wantGender)score-=4;return score}
+        pool=pool.slice().sort(function(a,b){return rank(b)-rank(a)});
+        return pool[0]||voices[0];
+      }catch(e){return null}
+    }
+    function getVoiceFor(lang){
+      var key=lang+':'+ttsGender;
+      if(!ttsVoiceCache[key])ttsVoiceCache[key]=pickBestVoice(lang,ttsGender);
+      return ttsVoiceCache[key];
+    }
+    try{
+      if('speechSynthesis' in window){
+        speechSynthesis.onvoiceschanged=function(){ttsVoiceCache={}};
+      }
+    }catch(e){}
+    function updateTtsBtn(){var b=$('tts-btn');if(!b)return;b.textContent=ttsOn?'🔊 Sound on':'🔈 Sound off';b.classList.toggle('on',ttsOn)}
+    function updateLangBtn(){var b=$('lang-btn');if(b)b.textContent=(ttsLang==='hi')?'हिं':'EN';var sel=$('voice-gender');if(sel)sel.value=ttsGender}
+    function toggleLang(){ttsLang=(ttsLang==='hi')?'en':'hi';try{localStorage.setItem('cricket_tts_lang',ttsLang)}catch(e){}updateLangBtn();lastSpokenLine='';
+    var viewerSwipeIndex=0,viewerSwipeTimer=null,viewerSwipeTouchX=0,viewerSwipeTouchY=0,lastViewerMatchEnded=false,viewerManualSwipe=false;if(lastData)render(lastData)}
+    function onGenderChange(){var sel=$('voice-gender');if(!sel)return;ttsGender=sel.value;try{localStorage.setItem('cricket_tts_gender',ttsGender)}catch(e){}ttsVoiceCache={};if(ttsOn)try{speak(ttsLang==='hi'?'आवाज़ बदल दी गई':'Voice updated',false)}catch(e2){}}
+    function onCommToolsChange(v){
+      if(!v)return;
+      if(v==='lang') toggleLang();
+      else if(v==='sound') toggleTts();
+      else if(v.indexOf('voice-')===0){
+        var g=v.replace('voice-',''); var sel=$('voice-gender'); if(sel){sel.value=g; onGenderChange();}
+      }
+      try{ var dd=$('comm-tools-dd'); if(dd) dd.selectedIndex=0; }catch(e){}
+      try{
+        var lang=($('lang-btn')&&$('lang-btn').textContent)||'EN';
+        var sound=($('tts-btn')&&$('tts-btn').textContent)||'';
+        var dd2=$('comm-tools-dd'); if(dd2) dd2.options[0].text='Audio · '+lang+' · '+(/on/i.test(sound)?'On':'Off');
+      }catch(e2){}
+    }
+    function toggleTts(){ttsOn=!ttsOn;try{localStorage.setItem('cricket_tts_on',ttsOn?'1':'0')}catch(e){}updateTtsBtn();if(ttsOn){try{speak(ttsLang==='hi'?'कमेंट्री ध्वनि चालू':'Commentary sound on')}catch(e2){}}else{try{speechSynthesis.cancel()}catch(e3){}}}
+    function speak(text,excited){
+      if(!ttsOn||!text)return;
+      try{
+        if(!('speechSynthesis' in window))return;
+        var u=new SpeechSynthesisUtterance(String(text).replace(/\*/g,''));
+        var v=getVoiceFor(ttsLang);
+        if(v)u.voice=v;
+        u.lang=ttsLang==='hi'?'hi-IN':(v&&v.lang)||'en-IN';
+        // Slightly higher pitch/rate reads as more animated & human on FOUR/SIX/WICKET
+        u.rate=excited?1.08:0.98;
+        u.pitch=excited?1.18:1.03;
+        u.volume=1;
+        speechSynthesis.speak(u);
+      }catch(e){}
+    }
+    function speakNewCommentary(data){
+      try{
+        var arr=(ttsLang==='hi')?(data.commentaryHi||data.commentary):data.commentary;
+        var lines=(arr||[]).filter(Boolean);
+        if(!lines.length)return;
+        var last=String(lines[lines.length-1]);
+        if(last===lastSpokenLine)return;
+        lastSpokenLine=last;
+        var parts=formatCommentaryLine(last);
+        var toSay=(parts.title||'')+(parts.body?('. '+parts.body):'')||last;
+        var srcForExcited=String((data.commentary||[]).slice(-1)[0]||last);
+        var excited=/\b(four|six|wicket|out)\b/i.test(srcForExcited)||/चौका|छक्का|आउट|विकेट/.test(last);
+        speak(toSay,excited);
+      }catch(e){}
+    }
+
+    // ---------- Team modal (tap team name -> wickets/overs, like scoreboard) ----------
+    function closeModal(){$('modal-ov').classList.add('hidden')}
+    function openTeamModal(side){
+      if(!lastData){return}
+      var d=lastData;
+      var teamName=side==='A'?(d.teamA||'Team A'):(d.teamB||'Team B');
+      $('modal-title').textContent=esc(teamName);
+      var isCurrentBatting=(d.battingSide===side);
+      var scoreLine='';
+      if(isCurrentBatting){
+        scoreLine=(d.runs|0)+'-'+(d.wickets|0)+' ('+oversFromBalls(d.balls)+' ov)';
+      } else if(d.firstInningsScore!=null){
+        scoreLine=d.firstInningsScore+'-'+(d.firstInningsWickets|0)+' ('+(d.firstInningsOvers||'—')+' ov)';
+      } else {
+        scoreLine='Yet to bat';
+      }
+      var fow=(d.fow||[]).filter(function(w){return (w.team||'')===teamName});
+      var html='<div style="padding:2px 14px 10px;font-size:13px;color:#94a3b8">Score: <b style="color:#34d399">'+esc(scoreLine)+'</b></div>';
+      html+='<div class="sec-title" style="padding:6px 14px">Fall of wickets</div>';
+      if(!fow.length){
+        html+='<div class="empty">No wickets fallen yet</div>';
+      } else {
+        fow.forEach(function(w,i){
+          html+='<div class="fow-row"><span class="a">'+(i+1)+'. '+esc(w.batsman||'')+' ('+(w.personalRuns|0)+')</span><span class="b">'+esc(w.score||0)+' · '+esc(w.over||'')+' ov</span></div>';
+          html+='<div class="fow-row" style="padding-top:0;border-bottom:1px solid rgba(148,163,184,.08)"><span class="a" style="color:#64748b;font-size:12px">'+esc(w.dismissal||'out')+(w.bowler?(' b '+esc(w.bowler)):'')+'</span></div>';
+        });
+      }
+      $('modal-body').innerHTML=html;
+      $('modal-ov').classList.remove('hidden');
+    }
+
+    function launchViewerFireworks(winner){
+      var old=document.getElementById('viewer-fireworks');if(old)old.remove();
+      var c=document.createElement('canvas');c.id='viewer-fireworks';c.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9998';document.body.appendChild(c);
+      var ctx=c.getContext('2d'),dpr=window.devicePixelRatio||1,W=innerWidth,H=innerHeight;c.width=W*dpr;c.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+      var ps=[],rs=[],colors=['#ff3b3b','#ffd60a','#ff6b00','#00e5ff','#b388ff','#76ff03','#ff1744','#fff59d'];var end=Date.now()+4500,last=0;
+      function rocket(){rs.push({x:40+Math.random()*(W-80),y:H+10,vx:(Math.random()-.5)*1.2,vy:-(7+Math.random()*5),c:colors[(Math.random()*colors.length)|0],trail:[]})}
+      function boom(x,y,col){for(var i=0;i<55;i++){var a=Math.random()*Math.PI*2,sp=1.5+Math.random()*5.5;ps.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:40+Math.random()*50,max:90,c:Math.random()<.35?col:colors[(Math.random()*colors.length)|0],s:1.2+Math.random()*2.4})}}
+      function frame(){var now=Date.now();ctx.clearRect(0,0,W,H);if(now<end&&now-last>300){rocket();if(Math.random()<.5)rocket();last=now;}
+        for(var i=rs.length-1;i>=0;i--){var r=rs[i];r.x+=r.vx;r.y+=r.vy;r.vy+=.04;r.trail.push({x:r.x,y:r.y});if(r.trail.length>10)r.trail.shift();for(var t=0;t<r.trail.length;t++){ctx.globalAlpha=t/r.trail.length*.65;ctx.fillStyle=r.c;ctx.fillRect(r.trail[t].x-1,r.trail[t].y,2,5)}ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(r.x,r.y,2.5,0,Math.PI*2);ctx.fill();if(r.vy>=-1.2||r.y<H*(.12+Math.random()*.25)){boom(r.x,r.y,r.c);rs.splice(i,1)}}
+        for(var j=ps.length-1;j>=0;j--){var p=ps[j];p.x+=p.vx;p.y+=p.vy;p.vy+=.07;p.vx*=.99;p.life--;if(p.life<=0){ps.splice(j,1);continue}ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.s,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;if(now<end||rs.length||ps.length)requestAnimationFrame(frame);else{ctx.clearRect(0,0,W,H);c.remove()}}
+      for(var k=0;k<5;k++)setTimeout(rocket,k*120);requestAnimationFrame(frame);
+    }
+
+    function render(data){
+      var prevData=lastData;
+      var wasEnded=!!lastViewerMatchEnded;
+      lastData=data; try{maybeShowOverLeaders(data)}catch(eOL){}
+      if(!data||!(data.ts||data.runs!=null||data.balls!=null||data.teamA||data.teamB)){$('no-data').classList.remove('hidden');$('live-root').classList.add('hidden');var gb=$('glow-ball');if(gb)gb.classList.add('paused');return}
+      var legalNow=data.balls|0, legalPrev=prevData?(prevData.balls|0):-1;
+      var overJustEnded=!!(prevData&&prevData.ts&&!(prevData.matchEnded)&&!data.matchEnded&&(data.innings|0)===(prevData.innings|0)&&legalNow>legalPrev&&legalNow>0&&(legalNow%6)===0);
+      if(overJustEnded&&!viewerManualSwipe){ triggerOverAutoSwipe(); }
+      if(data.matchEnded&&!wasEnded){ setViewerSwipe(0,true); try{launchViewerFireworks(data.matchWinner||data.winner||data.result||'')}catch(eFw){} }
+      lastViewerMatchEnded=!!data.matchEnded;
+      try{settlePrediction(data)}catch(eSp){}
+      try{paintPlayerCheers()}catch(eCh){}
+      $('no-data').classList.add('hidden');$('live-root').classList.remove('hidden');var gb2=$('glow-ball');if(gb2)gb2.classList.toggle('paused',!!data.matchEnded);
+      var ev=data.lastEvent||detectEventFromCommentary(data.commentary);
+      if(data.milestone&&data.milestone.type){ev=data.milestone.type}
+      try{
+        var sr0=data.strikerRuns|0;
+        if(sr0===50)ev='fifty';
+        if(sr0===100)ev='hundred';
+      }catch(eM){}
+      // Key by balls+runs+event — NOT ts (ts updates every publish and was replaying the same FOUR/TWO forever)
+      var ek=(data.balls|0)+':'+(data.runs|0)+':'+(data.wickets|0)+':'+(ev||'')+':'+(data.strikerRuns|0);
+      if(ev && ek!==lastEventKey){
+        lastEventKey=ek;
+        // Never replay event bursts after match ends, or while points overlay is showing
+        if(!data.matchEnded && Date.now()>=skipEventAnimUntil){
+          try{ playAnim(ev,data); }catch(eA){}
+        }
+      }
+      try{refreshPtsUI()}catch(eUp){}
+      $('v-match-type').textContent=(data.matchType||'MATCH').toUpperCase();
+      var line=data.innings===1?('1st innings · '+(data.battingTeamName||'')+' '+(data.runs|0)+' runs in '+(data.balls|0)+' balls'+((data.wickets|0)>0?(' for '+data.wickets+' wicket'+((data.wickets>1)?'s':'')):'')+(data.crr?(' · CRR '+data.crr):'')):('Innings '+data.innings+(data.targetScore!=null?(' · Target '+data.targetScore):''));
+      $('v-match-line').textContent=line;$('v-crr').textContent=(data.crr!=null?Number(data.crr).toFixed(2):'0.00');
+      $('v-team-a').textContent=data.teamA||'Team A';$('v-team-b').textContent=data.teamB||'Team B';
+      function scoreHtml(runs, wkts, overs){
+        return '<span class="sc-main">'+(runs|0)+' / '+(wkts|0)+'</span><span class="sc-ov">('+esc(String(overs!=null?overs:'—'))+')</span>';
+      }
+      if(data.battingSide==='A'){
+        $('v-score-a').innerHTML=scoreHtml(data.runs, data.wickets, oversFromBalls(data.balls));
+        $('v-role-a').textContent='Batting';
+        if(data.innings>=2&&data.firstInningsScore!=null){
+          $('v-score-b').innerHTML=scoreHtml(data.firstInningsScore, data.firstInningsWickets, data.firstInningsOvers||'—');
+          $('v-role-b').textContent='Bowling';
+        } else {
+          $('v-score-b').textContent='Yet to bat';
+          $('v-role-b').textContent='Bowling';
+        }
+      } else {
+        $('v-score-b').innerHTML=scoreHtml(data.runs, data.wickets, oversFromBalls(data.balls));
+        $('v-role-b').textContent='Batting';
+        if(data.firstInningsScore!=null){
+          $('v-score-a').innerHTML=scoreHtml(data.firstInningsScore, data.firstInningsWickets, data.firstInningsOvers||'—');
+          $('v-role-a').textContent='Bowling';
+        } else {
+          $('v-score-a').textContent='Yet to bat';
+          $('v-role-a').textContent='Bowling';
+        }
+      }
+      $('v-inns').innerHTML='Innings <b>'+(data.innings||1)+'</b> · '+esc(data.inningsLabel||'');
+      (function(){var r=data.strikerRuns|0,b=data.strikerBalls|0,s=b>0?((r*100)/b).toFixed(1):'0.0';var el=$('v-striker-st');if(el)el.innerHTML=r+' ('+b+')<div class="substat-board">SR '+s+'</div>';})();
+      (function(){
+        var runs=data.bowlerRuns|0, balls=data.bowlerBalls|0, wk=data.bowlerWickets|0;
+        var ov=typeof oversFromBalls==='function'?oversFromBalls(balls):((balls/6|0)+'.'+(balls%6));
+        var econ=balls>0?((runs*6)/balls).toFixed(2):'0.00';
+        var el=$('v-bowler-st');
+        if(el) el.innerHTML=runs+' ('+ov+') / '+wk+'<div class="substat-board">Econ '+econ+'</div>';
+      })();
+      // names + cheer emojis set in paintPlayerCheers()
+      try{paintPlayerCheers()}catch(ePc){
+        try{$('v-striker').textContent=data.strikerName||'—';$('v-bowler').textContent=data.bowlerName||'—'}catch(e2){}
+      }
+      $('v-status').textContent='';$('v-status').style.display='none';
+      var ov=data.thisOver||{balls:[],runs:0,legal:0};var balls=(ov.balls||[]).slice();
+      // Keep only current over (max 6 legal from the end) — fresh each over
+      (function(){var leg=0,kept=[];for(var i=balls.length-1;i>=0;i--){var s=String(balls[i]).toLowerCase();var isLeg=!(s==='wd'||s==='nb'||s==='wide');if(isLeg){if(leg>=6)break;leg++}else{if(leg>=6)break}kept.unshift(balls[i])}balls=kept})();
+      var overRuns=0,overLegal=0;
+      balls.forEach(function(b){var s=String(b).toLowerCase();if(s==='w'){overLegal++}else if(s==='wd'||s==='nb'||s==='wide'){overRuns+=1}else{var n=parseInt(s,10);if(!isNaN(n)){overRuns+=n;overLegal++}}});
+      ov.runs=overRuns;ov.legal=overLegal;
+      $('v-over-balls').innerHTML=balls.length?balls.map(function(b){var cls='ob';var s=String(b);if(s==='W'||s==='w')cls+=' w';else if(s==='4')cls+=' b4';else if(s==='6')cls+=' b6';return'<span class="'+cls+'">'+esc(s)+'</span>'}).join(''):'<span class="over-msg">No balls yet this over</span>';
+      (function(){
+        var msg='';
+        if(balls.length){
+          msg='This over: '+overRuns+' run'+(overRuns===1?'':'s')+' off '+overLegal+' legal';
+          var ballsLeft=Math.max(0, 6-overLegal);
+          msg+=' · '+ballsLeft+' ball'+(ballsLeft===1?'':'s')+' left';
+        }
+        // Chase: runs to win + balls left in match (approx)
+        try{
+          if((data.innings|0)>=2 && data.targetScore!=null){
+            var need=Math.max(0, (data.targetScore|0) - (data.runs|0));
+            var maxBalls=(data.maxOvers|0)*6;
+            var ballsGone=data.balls|0;
+            var matchBallsLeft=maxBalls>0?Math.max(0, maxBalls-ballsGone):null;
+            if(need>0){
+              msg+=(msg?' · ':'')+need+' to win';
+              if(matchBallsLeft!=null) msg+=' · '+matchBallsLeft+' balls left';
+            } else if(data.matchEnded){
+              msg+=(msg?' · ':'')+(data.resultText||'Match over');
+            } else {
+              msg+=(msg?' · ':'')+'Target reached';
+            }
+          }
+        }catch(eT){}
+        $('v-over-msg').textContent=msg;
+      })();
+      var lines=((ttsLang==='hi')?(data.commentaryHi||data.commentary):data.commentary||[]).slice().filter(Boolean).reverse();
+      $('comm-list').innerHTML=lines.length?lines.map(function(line,i){var parts=formatCommentaryLine(line);var html='';if(i===0)html+='<div class="t">LATEST</div>';if(parts.title)html+='<div class="title">'+highlightEventWords(parts.title)+'</div>';if(parts.body)html+='<div class="body">'+highlightEventWords(parts.body)+'</div>';if(!parts.title&&!parts.body)html+=highlightEventWords(line);return'<div class="feed-item">'+html+'</div>'}).join(''):'<div class="empty">No commentary yet</div>';
+      speakNewCommentary(data);
+      var i1Bat=data.innings1Batters||(data.innings===1?data.batters:[]);var i1Bowl=data.innings1Bowlers||(data.innings===1?data.bowlers:[]);
+      var i2Bat=data.innings2Batters||(data.innings>=2?data.batters:[]);var i2Bowl=data.innings2Bowlers||(data.innings>=2?data.bowlers:[]);
+      // Latest innings on top
+      var html='';
+      if((data.innings|0)>=2){
+        html+=statsBlock('Innings 2',data.battingTeamName,data.bowlingTeamName,i2Bat,i2Bowl,'inn2');
+        html+=statsBlock('Innings 1',data.innings1BatName||data.firstBattingName||'',data.innings1BowlName||data.firstBowlingName||'',i1Bat,i1Bowl,'');
+      } else {
+        html+=statsBlock('Innings 1',data.innings1BatName||data.firstBattingName||data.battingTeamName,data.innings1BowlName||data.firstBowlingName||data.bowlingTeamName,i1Bat,i1Bowl,'');
+      }
+      $('stats-body').innerHTML=html;
+      var swipeStats=null; if(false && $('v-swipe-stats-body')){ swipeStats.innerHTML=((data.innings|0)>=2?statsBlock('Innings '+(data.innings|0),data.battingTeamName,data.bowlingTeamName,i2Bat,i2Bowl,'inn2'):statsBlock('Innings 1',data.innings1BatName||data.firstBattingName||data.battingTeamName,data.innings1BowlName||data.firstBowlingName||data.bowlingTeamName,i1Bat,i1Bowl,''))+'<div class="v-swipe-hint">Swipe right for scoreboard · swipe left for stats</div>'; }
+      var totRuns=(data.runs|0)+(data.firstInningsScore|0);
+      var totWkts=(data.wickets|0)+(data.firstInningsWickets|0);
+      var totBalls=(data.balls|0);
+      try{if(data.firstInningsOvers){var fo=String(data.firstInningsOvers).split('.');totBalls+=(parseInt(fo[0],10)||0)*6+(parseInt(fo[1],10)||0)}}catch(eT){}
+      var tA=data.teamA||'Team A',tB=data.teamB||'Team B';
+      var detA=data.teamADetail||{},detB=data.teamBDetail||{};
+      var scoreLineA=(detA.runs!=null?detA.runs:(data.battingSide==='A'?data.runs:data.firstInningsScore))+'/'+(detA.wickets!=null?detA.wickets:(data.battingSide==='A'?data.wickets:data.firstInningsWickets|0))+' ('+(detA.overs||oversFromBalls(detA.balls!=null?detA.balls:data.balls))+')';
+      var scoreLineB=(detB.runs!=null?detB.runs:(data.battingSide==='B'?data.runs:data.firstInningsScore))+'/'+(detB.wickets!=null?detB.wickets:(data.battingSide==='B'?data.wickets:data.firstInningsWickets|0))+' ('+(detB.overs||'—')+')';
+      var mom=data.manOfTheMatch||'';
+      var result=data.matchResult||data.resultText||data.statusText||'';
+      var histSum=data.matchHistorySummary||[];
+      var histHtml='';
+      if(histSum.length){
+        histHtml='<div class="sec-title">📚 All Matches</div>'+histSum.map(function(m){
+          var win=m.resultText||m.matchResult||m.winner||'';
+          var scores=m.scoreLine||((m.score!=null?m.score:'—')+'/'+(m.wickets!=null?m.wickets:'—')+' in '+(m.overs||'—')+'/'+(m.maxOvers||'—')+' ov · Target '+(m.targetScore!=null?m.targetScore:'—'));
+          var mReason=m.manOfTheMatchReason||m.manOfTheMatchDetail||m.momReason||'';
+          return '<div class="info-card" style="margin-bottom:8px">'+
+            '<p style="font-size:11px;color:#94a3b8;font-weight:800">Match #'+esc(m.matchNo)+' · '+esc(m.date)+' '+esc(m.time)+'</p>'+
+            (m.stage?('<p style="font-size:10px;color:#fbbf24;font-weight:800;text-transform:uppercase">'+esc(m.stage)+'</p>'):'')+
+            '<p style="font-size:15px;font-weight:900;color:#fbbf24;margin-top:4px">'+esc(m.teamA)+' vs '+esc(m.teamB)+'</p>'+
+            '<p style="font-size:13px;margin-top:4px;color:#cbd5e1">'+esc(scores)+'</p>'+
+            '<p style="font-size:13px;font-weight:800;color:#34d399;margin-top:4px">'+esc(win)+'</p>'+
+            (m.manOfTheMatch?('<p style="font-size:12px;margin-top:4px">⭐ Man of the Match: <b style="color:#34d399">'+esc(m.manOfTheMatch)+'</b></p>'):'')+
+            (mReason?('<p style="font-size:12px;margin-top:2px;color:#cbd5e1">MOM reason: '+esc(mReason)+'</p>'):'')+
+            '</div>';
+        }).join('');
+      } else {
+        histHtml='<div class="sec-title">📚 All Matches</div><div class="empty" style="padding:12px">No previous matches yet.</div>';
+      }
+      var momReason=data.manOfTheMatchReason||data.manOfTheMatchDetail||'';
+      var summaryNow='';
+      if(data.matchEnded){
+        summaryNow=
+          '<div class="sec-title" style="margin-top:12px">📋 Match Summary</div>'+
+          '<div class="info-card"><h3>🏆 Match Result</h3><p style="font-size:18px;font-weight:900;color:#fbbf24">'+esc(result||'Match completed')+'</p></div>'+
+          '<div class="info-card"><h3>Final Scores</h3><p><b style="color:#fbbf24">'+esc(tA)+'</b> · '+esc(String(scoreLineA))+'<br><b style="color:#fbbf24">'+esc(tB)+'</b> · '+esc(String(scoreLineB))+'</p></div>'+
+          (mom?('<div class="info-card"><h3>⭐ Man of the Match</h3><p style="color:#34d399;font-weight:900;font-size:16px">'+esc(mom)+'</p>'+(momReason?('<p style="margin-top:5px;color:#cbd5e1"><b>Reason:</b> '+esc(momReason)+'</p>'):'<p style="margin-top:5px;color:#94a3b8">Reason not provided</p>')+'</div>'):'')+
+          '<div class="info-card"><h3>Match Totals</h3><p>Total runs: <b style="color:#34d399">'+totRuns+'</b><br>Total wickets: <b style="color:#34d399">'+totWkts+'</b><br>Total legal balls: <b style="color:#34d399">'+totBalls+'</b> ('+oversFromBalls(totBalls)+' ov)</p></div>';
+      }
+      // All Matches first, then current Match Summary (no empty instruction block while live)
+      $('sum-sum').innerHTML=histHtml+summaryNow;
+      var vr=$('viewer-result');
+      if(vr){
+        if(data.matchEnded){
+          vr.classList.remove('hidden');
+          vr.innerHTML='<div class="vr-title">🏆 Match completed</div><div class="vr-result">'+esc(result||'Match completed')+'</div><div class="vr-score">'+esc(tA)+' · '+esc(scoreLineA)+'<br>'+esc(tB)+' · '+esc(scoreLineB)+'</div>'+(mom?'<div class="vr-mom">⭐ '+esc(mom)+'</div>':'')+(momReason?'<div class="vr-reason">'+esc(momReason)+'</div>':'');
+        }else{ vr.classList.add('hidden'); vr.innerHTML=''; }
+      }
+      // Cumulative orange/purple like Info tab (fallback to this-match if not pushed yet)
+      var orange=data.cumulativeOrangeCap&&data.cumulativeOrangeCap.length?data.cumulativeOrangeCap:(data.orangeCap||[]);
+      $('sum-orange').innerHTML='<div class="sec-title">🟠 Orange cap · all matches</div><table class="stats"><thead><tr><th>#</th><th>Batter</th><th class="num">R</th><th class="num">B</th><th class="num">4s</th><th class="num">6s</th><th class="num">SR</th></tr></thead><tbody>'+
+        (orange.length?orange.map(function(p,i){return'<tr><td class="num">'+(i+1)+'</td><td>'+esc(p.name)+'</td><td class="num">'+(p.runs|0)+'</td><td class="num">'+(p.balls|0)+'</td><td class="num">'+(p.fours|0)+'</td><td class="num">'+(p.sixes|0)+'</td><td class="num">'+(p.SR!=null?p.SR:sr(p.runs,p.balls))+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">No batting data</td></tr>')+'</tbody></table>';
+      var purple=data.cumulativePurpleCap&&data.cumulativePurpleCap.length?data.cumulativePurpleCap:(data.purpleCap||[]);
+      $('sum-purple').innerHTML='<div class="sec-title">🟣 Purple cap · all matches</div><table class="stats"><thead><tr><th>#</th><th>Bowler</th><th class="num">W</th><th class="num">R</th><th class="num">O</th><th class="num">Dots</th><th class="num">Econ</th></tr></thead><tbody>'+
+        (purple.length?purple.map(function(p,i){return'<tr><td class="num">'+(i+1)+'</td><td>'+esc(p.name)+'</td><td class="num">'+(p.wickets|0)+'</td><td class="num">'+(p.bowlRuns|0)+'</td><td class="num">'+oversFromBalls(p.bowlBalls)+'</td><td class="num">'+(p.dots|0)+'</td><td class="num">'+(p.Econ!=null?p.Econ:econ(p.bowlRuns,p.bowlBalls))+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">No bowling data</td></tr>')+'</tbody></table>';
+      try{paintTeamsWithCheers(data)}catch(eT){
+        var squadA=data.squadA||data.teamAPlayers||[],squadB=data.squadB||data.teamBPlayers||[];
+        function squadHtml(teamName,squad){
+          return '<div class="sec-title" style="color:#fbbf24">'+esc(teamName||'Team')+'</div>'+
+            (squad.length?squad.map(function(n,i){return '<div class="cap-row"><span class="n">'+(i+1)+'. '+esc(n)+'</span></div>'}).join(''):'<div class="empty">No players listed</div>');
+        }
+        $('sum-teams').innerHTML=squadHtml(data.teamA||'Team A',squadA)+squadHtml(data.teamB||'Team B',squadB);
+      }
+    }
+
+    
+    var lastFloatTs=0;
+    function floatCheerBanner(name,text,kind){
+      try{
+        var el=document.createElement('div');
+        el.className='float-banner'+(kind==='gold'?' gold':'');
+        var show=String(text||'').replace(/^__FLOAT__/,'');
+        el.innerHTML='<span class="who">'+esc(name||'Fan')+'</span> '+esc(show);
+        document.body.appendChild(el);
+        // Start at This Over, end above CRR / top of scoreboard
+        var startY, endY;
+        try{
+          var over=document.querySelector('.over-box');
+          var crr=document.querySelector('.crr-big')||document.querySelector('.match-head')||$('live-root');
+          if(over) startY=over.getBoundingClientRect().top;
+          else startY=window.innerHeight*0.55;
+          if(crr) endY=Math.max(8, crr.getBoundingClientRect().top - 36);
+          else endY=24;
+        }catch(e){ startY=window.innerHeight*0.55; endY=24; }
+        el.style.top=startY+'px';
+        el.style.bottom='auto';
+        el.style.opacity='1';
+        // Animate independently of CSS keyframes duration
+        var t0=null, dur=3200;
+        function step(ts){
+          if(!t0)t0=ts;
+          var p=Math.min(1,(ts-t0)/dur);
+          // ease-out
+          var e=1-Math.pow(1-p,2);
+          var y=startY+(endY-startY)*e;
+          el.style.top=y+'px';
+          el.style.opacity=String(p<0.85?1:1-((p-0.85)/0.15));
+          if(p<1) requestAnimationFrame(step);
+          else { try{el.parentNode&&el.parentNode.removeChild(el)}catch(e){} }
+        }
+        requestAnimationFrame(step);
+      }catch(e){}
+    }
+    
+    var emojiRailCounts=(function(){
+      try{
+        var r=localStorage.getItem('emoji_rail_v2_'+(typeof LIVE_MATCH!=='undefined'?LIVE_MATCH:'current'));
+        if(r) return JSON.parse(r);
+      }catch(e){}
+      return {thumbs:0,fire:0,target:0,wow:0,party:0,star:0,heart:0,clap:0};
+    })();
+    function emojiKey(emoji){
+      if(!emoji) return 'thumbs';
+      if(emoji.indexOf('👍')>=0) return 'thumbs';
+      if(emoji.indexOf('🔥')>=0) return 'fire';
+      if(emoji.indexOf('🎯')>=0) return 'target';
+      if(emoji.indexOf('😲')>=0||emoji.indexOf('😮')>=0) return 'wow';
+      if(emoji.indexOf('🥳')>=0) return 'party';
+      if(emoji.indexOf('🤩')>=0) return 'star';
+      if(emoji.indexOf('❤')>=0||emoji.indexOf('♥')>=0) return 'heart';
+      if(emoji.indexOf('👏')>=0) return 'clap';
+      if(emoji.indexOf('😲')>=0) return 'wow';
+      return 'thumbs';
+    }
+    function ensureEmojiRail(){
+      var r=$('emoji-rail');
+      if(!r){
+        r=document.createElement('div'); r.id='emoji-rail'; r.className='emoji-rail';
+        r.innerHTML=
+          '<div class="er" data-emoji="👍"><div class="e">👍</div><div class="n" id="er-thumbs">0</div></div>'+
+          '<div class="er" data-emoji="🔥"><div class="e">🔥</div><div class="n" id="er-fire">0</div></div>'+
+          '<div class="er" data-emoji="🎯"><div class="e">🎯</div><div class="n" id="er-target">0</div></div>'+
+          '<div class="er" data-emoji="😲"><div class="e">😲</div><div class="n" id="er-wow">0</div></div>'+
+          '<div class="er" data-emoji="🥳"><div class="e">🥳</div><div class="n" id="er-party">0</div></div>'+
+          '<div class="er" data-emoji="🤩"><div class="e">🤩</div><div class="n" id="er-star">0</div></div>'+
+          '<div class="er" data-emoji="❤️"><div class="e">❤️</div><div class="n" id="er-heart">0</div></div>'+
+          '<div class="er" data-emoji="👏"><div class="e">👏</div><div class="n" id="er-clap">0</div></div>'+
+          '<div class="er" data-emoji="👏"><div class="e">🎉</div><div class="n" id="er-tada">0</div></div>';
+        var over=$('v-over-balls');
+        if(over && over.parentNode) over.parentNode.parentNode.insertBefore(r, over.parentNode);
+        else document.body.appendChild(r);
+      }
+      // Move any leftover fixed rail into flow above this over
+      try{
+        r.style.position='static'; r.style.right='auto'; r.style.top='auto';
+        var overBox=document.querySelector('.over-box');
+        if(overBox && r.parentNode!==overBox.parentNode){
+          overBox.parentNode.insertBefore(r, overBox);
+        }
+      }catch(eM){}
+      if(!r._bound){
+        r._bound=true;
+        r.addEventListener('click', function(ev){
+          var t=ev.target.closest('.er'); if(!t)return;
+          ev.preventDefault();
+          sendMatchEmoji(t.getAttribute('data-emoji')||'👍');
+        });
+      }
+      paintEmojiCounts();
+      return r;
+    }
+    function paintEmojiCounts(){
+      ['thumbs','fire','target','wow','party','star','heart','clap'].forEach(function(k){
+        var el=$('er-'+k); if(el) el.textContent=String(emojiRailCounts[k]|0);
+      });
+    }
+    function saveEmojiRail(){
+      try{localStorage.setItem('emoji_rail_v2_'+(LIVE_MATCH||'current'), JSON.stringify(emojiRailCounts))}catch(e){}
+    }
+    async function sendMatchEmoji(emoji){
+      var name=getChatName()||'Fan';
+      try{bumpEmojiRail(emoji,1)}catch(e0){}
+      try{ __recordActivity(uid(), name, '__FLOAT__'+emoji, emoji, Date.now()); }catch(eAct){}
+      // Local: one side-lane bubble only (score stays clear)
+      try{ if(typeof __fbBubbles==='function') __fbBubbles(emoji); else spawnEmojiBubbles(emoji,1); }catch(e1){}
+      try{ if(typeof __fbBanner==='function') __fbBanner(name, emoji); else floatCheerBanner(name, emoji); }catch(e2){}
+      try{ if(!window.__myFloatMids) window.__myFloatMids={}; window.__myFloatMids['recent']=1; setTimeout(function(){try{delete window.__myFloatMids['recent']}catch(e){}},6000); }catch(e){}
+      var body={id:uid(),name:name,text:'__FLOAT__'+emoji,emoji:emoji,match:LIVE_MATCH||'current'};
+      try{ __fbSeen['fp|'+uid()+'|'+emoji+'|'+Math.floor(Date.now()/2500)]=1; }catch(e){}
+      if(!API_BASE)return;
+      // ONE server write only — avoids duplicate copies on other viewers
+      try{
+        var r=await fetch(API_BASE+'/floats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
+        var d=await r.json().catch(function(){return null});
+        if(d && d.mid){
+          if(!window.__seenFloatMids) window.__seenFloatMids={};
+          if(!window.__myFloatMids) window.__myFloatMids={};
+          window.__seenFloatMids[d.mid]=1;
+          window.__myFloatMids[d.mid]=1;
+          try{ __fbSeen[d.mid]=1; }catch(eS){}
+        }
+      }catch(e){ console.log('emoji floats post', e); }
+    }
+    function spawnEmojiBubbles(emoji, count){
+      // side lanes only, max 2
+      try{ if(typeof __fbBubbles==='function'){ __fbBubbles(emoji); return; } }catch(e){}
+      count=Math.max(1, Math.min((count|0)||1, 2));
+      var baseTop=window.innerHeight*0.55, endTop=18, W=window.innerWidth||360;
+      try{ var over=document.querySelector('.over-box'); if(over) baseTop=over.getBoundingClientRect().top; }catch(e){}
+      for(var i=0;i<count;i++){
+        (function(i){
+          setTimeout(function(){
+            var el=document.createElement('div');
+            el.className='emoji-bubble';
+            el.textContent=emoji;
+            var x=(i%2===0)?(8+Math.random()*24):(W-36-Math.random()*24);
+            var y0=baseTop+Math.random()*12;
+            el.style.cssText='position:fixed;z-index:99988;pointer-events:none;font-size:26px;left:'+x+'px;top:'+y0+'px';
+            document.body.appendChild(el);
+            var t0=null, dur=2600;
+            function step(ts){
+              if(!t0)t0=ts;
+              var p=Math.min(1,(ts-t0)/dur);
+              var e=1-Math.pow(1-p,1.5);
+              el.style.top=(y0+(endTop-y0)*e)+'px';
+              el.style.opacity=String(p<0.75?0.9:0.9*(1-p)/0.25);
+              if(p<1) requestAnimationFrame(step);
+              else try{el.remove()}catch(e2){}
+            }
+            requestAnimationFrame(step);
+          }, i*100);
+        })(i);
+      }
+    }
+    function bumpEmojiRail(emoji, by){
+      ensureEmojiRail();
+      by=(by==null)?1:(by|0); if(by<1)by=1;
+      var k=emojiKey(emoji);
+      emojiRailCounts[k]=(emojiRailCounts[k]|0)+by;
+      paintEmojiCounts();
+      saveEmojiRail();
+    }
+    function paintEmojiRailFromChat(messages){
+      ensureEmojiRail();
+      var c={thumbs:0,fire:0,target:0,wow:0,party:0,star:0,heart:0,clap:0};
+      (messages||[]).forEach(function(m){
+        var t=(m.emoji||'')+(m.text||'').replace('__FLOAT__','');
+        var k=emojiKey(t);
+        c[k]=(c[k]|0)+1;
+      });
+      Object.keys(c).forEach(function(k){
+        if((c[k]|0)>(emojiRailCounts[k]|0)) emojiRailCounts[k]=c[k]|0;
+      });
+      paintEmojiCounts();
+    }
+    
+
+    
+    async function sendChat(){
+      if(!API_BASE){alert('Server not connected');return}
+      var name=getChatName();
+      if(!name){try{ensureNameGate()}catch(e){alert('Enter your name first');}return}
+      var text=(($('chat-input')&&$('chat-input').value)||'').trim();
+      var emoji=(typeof pendingEmoji!=='undefined'&&pendingEmoji)||'';
+      try{pendingEmoji=''}catch(e){}
+      if(!text&&!emoji)return;
+      try{ if(!window.__myFloatMids) window.__myFloatMids={}; window.__myFloatMids['recent']=1; setTimeout(function(){try{delete window.__myFloatMids['recent']}catch(e){}},6000);}catch(eR){}
+      try{ floatCheerBanner(name, (emoji?emoji+' ':'')+text); }catch(eF){}
+      try{ __recordActivity(uid(), name, text, emoji, Date.now()); }catch(eAct){}
+      var body={id:uid(),name:name,text:text,emoji:emoji,match:LIVE_MATCH||'current'};
+      try{ sendFloatOverWs(Object.assign({type:'float'}, body)); }catch(eW){}
+      try{
+        var r=await fetch(API_BASE+'/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
+        var d=await r.json().catch(function(){return {}});
+        if($('chat-input'))$('chat-input').value='';
+        if(d && d.mid){
+          if(!window.__seenFloatMids) window.__seenFloatMids={};
+          window.__seenFloatMids[d.mid]=1;
+          window.__myFloatMids[d.mid]=1;
+        }
+        try{renderChat(d.messages||[], d.floats||[])}catch(eRC){}
+      }catch(e){ console.log('sendChat', e); alert('Could not send'); }
+      try{
+        await fetch(API_BASE+'/floats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
+      }catch(e2){}
+    }
+
+    
+    var lastOverBannerBalls=-1;
+    async function maybeShowOverLeaders(data){
+      // Gold-coin floating banners removed — coins stay in Viewers Coins list only
+      return;
+    }
+
+    
+    
+    
+    
+    // ===== Real-time float bus via Durable Object WebSocket =====
+    var __floatWs = null;
+    var __floatWsRetry = 0;
+    function floatWsUrl(){
+      try{
+        var base = API_BASE || location.origin;
+        return base.replace(/^http/,'ws') + '/ws';
+      }catch(e){ return (location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws'; }
+    }
+    function connectFloatWs(){
+      if(!API_BASE && !(location.protocol==='http:'||location.protocol==='https:')) return;
+      try{
+        if(__floatWs && (__floatWs.readyState===0 || __floatWs.readyState===1)) return;
+        var ws = new WebSocket(floatWsUrl());
+        __floatWs = ws;
+        ws.onopen = function(){
+          __floatWsRetry = 0;
+          try{ ws.send(JSON.stringify({type:'ping'})); }catch(e){}
+        };
+        ws.onmessage = function(ev){
+          try{
+            var msg = JSON.parse(ev.data);
+            if(!msg) return;
+            if(msg.type==='pong' || msg.type==='hello') return;
+            if(msg.type==='float' || msg.text || msg.emoji){
+              applyFloats([msg]);
+            }
+          }catch(e){ console.log('ws msg', e); }
+        };
+        ws.onclose = function(){
+          __floatWs = null;
+          var delay = Math.min(15000, 800 + (__floatWsRetry++ * 700));
+          setTimeout(connectFloatWs, delay);
+        };
+        ws.onerror = function(){ try{ ws.close(); }catch(e){} };
+      }catch(e){ console.log('ws connect', e); }
+    }
+    function sendFloatOverWs(payload){
+      try{
+        if(__floatWs && __floatWs.readyState===1){
+          __floatWs.send(JSON.stringify(Object.assign({type:'float'}, payload)));
+          return true;
+        }
+      }catch(e){}
+      return false;
+    }
+    setInterval(function(){
+      try{
+        if(__floatWs && __floatWs.readyState===1){
+          __floatWs.send(JSON.stringify({type:'ping'}));
+        } else {
+          connectFloatWs();
+        }
+      }catch(e){}
+    }, 25000);
+
+    function applyFloats(floats){
+      try{
+        if(!window.__seenFloatMids) window.__seenFloatMids={};
+        if(!window.__myFloatMids) window.__myFloatMids={};
+        var list=floats||[];
+        var me=uid();
+        var now=Date.now();
+        list.forEach(function(m){
+          if(!m) return;
+          var mid=String(m.mid||((m.id||'')+'-'+(m.ts||'')+'-'+(m.text||'')+'-'+(m.emoji||'')));
+          if(window.__seenFloatMids[mid]) return;
+          var ts=Number(m.ts)||0;
+          var age=ts?(now-ts):0; if(age<0) age=0;
+          if(age>90000){ window.__seenFloatMids[mid]=1; return; }
+          if(window.__seedFloatSkip && age>8000){ window.__seenFloatMids[mid]=1; return; }
+          window.__seenFloatMids[mid]=1;
+          if(window.__myFloatMids[mid]) return;
+          if(m.id && m.id===me && age<5000 && window.__myFloatMids['recent']) return;
+          var t=String(m.text||'');
+          var em=String(m.emoji||'');
+          var isFloat=t.indexOf('__FLOAT__')===0;
+          var payload=isFloat?(em||t.replace('__FLOAT__','')):((em?em+' ':'')+t);
+          payload=String(payload||'').trim();
+          if(!payload) return;
+          try{ floatCheerBanner(m.name||'Fan', payload); }catch(e1){}
+          if(isFloat || em){
+            var em2=em||(isFloat?t.replace('__FLOAT__',''):'');
+            if(em2){
+              try{ bumpEmojiRail(em2,1); }catch(e2){}
+              try{ spawnEmojiBubbles(em2, 5+Math.floor(Math.random()*2)); }catch(e3){}
+            }
+          }
+        });
+      }catch(e){ console.log('applyFloats', e); }
+    }
+    async function pollFloats(){
+      if(!API_BASE) return;
+      try{
+        var r=await fetch(API_BASE+'/floats?t='+Date.now(), {cache:'no-store'});
+        if(!r.ok) return;
+        var d=await r.json();
+        applyFloats(d.floats||[]);
+      }catch(e){ console.log('pollFloats', e); }
+    }
+
+    function renderChat(messages, floats){
+      try{paintEmojiRailFromChat(messages)}catch(e){}
+      try{ applyFloats(floats || messages || []); }catch(e){}
+    }
+
+    async function pollChat(){
+      if(!API_BASE)return;
+      try{
+        var r=await fetch(API_BASE+'/chat?t='+Date.now(), {cache:'no-store'});
+        if(!r.ok) return;
+        var d=await r.json();
+        try{renderChat(d.messages||[], d.floats||d.messages||[])}catch(e){}
+      }catch(e){ console.log('pollChat err', e); }
+    }
+
+    
+    var __knownViewers = {};
+    var __adminKey = '';
+    try{ __adminKey = localStorage.getItem('cricket_admin_key') || ''; }catch(e){}
+
+    function renderViewers(list, count){
+      try{
+        list = list || [];
+        var n = (count!=null ? count : list.length) | 0;
+        var el = $('viewer-count');
+        if(el) el.textContent = '👁 ' + n;
+        var nowMap = {};
+        var onlineIds = Object.create(null);
+        list.forEach(function(v){
+          var id = v.id || v.name || '';
+          nowMap[id] = v;
+          onlineIds[id]=1;
+          try{ __touchViewer(id, v.name||'Fan', true); }catch(eT){}
+          if(id && !__knownViewers[id] && Object.keys(__knownViewers).length>0){
+            try{ floatCheerBanner(v.name||'Viewer', 'joined the match 👋'); }catch(e){}
+          }
+        });
+        // mark others offline
+        try{
+          Object.keys(__viewerMap).forEach(function(id){
+            if(!onlineIds[id]) __viewerMap[id].online=false;
+          });
+        }catch(eOff){}
+        if(Object.keys(__knownViewers).length===0 && list.length){
+          list.forEach(function(v){ __knownViewers[v.id||v.name||''] = 1; });
+        } else {
+          __knownViewers = nowMap;
+        }
+        var names = $('viewer-names');
+        if(names) names.textContent = list.map(function(v){return v.name||'Fan'}).slice(0,8).join(', ');
+        try{ if($('sum-viewers') && !$('sum-viewers').classList.contains('hidden')) paintViewersSummary(); }catch(ePV){}
+      }catch(e){ console.log('renderViewers', e); }
+    }
+
+    function promptAdmin(){
+      var k = prompt('Admin password');
+      if(k==null) return;
+      k = String(k).trim();
+      if(!k) return;
+      if(!API_BASE){ alert('Server not connected'); return; }
+      fetch(API_BASE+'/admin/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k})})
+        .then(function(r){ return r.json().then(function(d){ return {ok:r.ok,d:d}; }); })
+        .then(function(x){
+          if(x.ok && x.d && x.d.ok){
+            __adminKey = k;
+            try{ localStorage.setItem('cricket_admin_key', k); }catch(e){}
+            try{ var ar=$('admin-row'); if(ar) ar.style.display='flex'; }catch(e){}
+            try{ var ab=$('admin-coins-bar'); if(ab) ab.style.display='flex'; }catch(e){}
+            alert('Admin mode on');
+            try{ loadFansRank(); }catch(e){}
+          } else {
+            alert('Wrong admin password');
+          }
+        })
+        .catch(function(){ alert('Admin login failed'); });
+    }
+    function exitAdmin(){
+      __adminKey='';
+      try{ localStorage.removeItem('cricket_admin_key'); }catch(e){}
+      try{ var ar=$('admin-row'); if(ar) ar.style.display='none'; }catch(e){}
+      try{ var ab=$('admin-coins-bar'); if(ab) ab.style.display='none'; }catch(e){}
+    }
+    function adminClearChat(){
+      if(!__adminKey||!API_BASE) return;
+      fetch(API_BASE+'/admin/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:__adminKey})})
+        .then(function(r){ return r.json(); })
+        .then(function(){ try{renderChat([])}catch(e){} alert('Chat cleared'); })
+        .catch(function(){ alert('Clear failed'); });
+    }
+    function adminBlockViewer(id, name){
+      if(!__adminKey||!API_BASE||!id) return;
+      if(!confirm('Block '+ (name||id) +'?')) return;
+      fetch(API_BASE+'/admin/block',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:__adminKey,id:id,name:name||'Fan'})})
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if(d&&d.ok){ alert('Blocked'); loadFansRank(); } else alert('Block failed'); })
+        .catch(function(){ alert('Block failed'); });
+    }
+    function adminUnblockViewer(id){
+      if(!__adminKey||!API_BASE||!id) return;
+      fetch(API_BASE+'/admin/unblock',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:__adminKey,id:id})})
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if(d&&d.ok){ alert('Unblocked'); } else alert('Unblock failed'); })
+        .catch(function(){ alert('Unblock failed'); });
+    }
+    function adminResetCoinsAll(){
+      if(!__adminKey||!API_BASE) return;
+      if(!confirm('Reset coins for ALL viewers to 10?')) return;
+      fetch(API_BASE+'/admin/reset-coins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:__adminKey})})
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if(d&&d.ok){ alert('All coins reset'); loadFansRank(); } else alert('Reset failed'); })
+        .catch(function(){ alert('Reset failed'); });
+    }
+    function adminResetEmojis(){
+      if(!__adminKey||!API_BASE) return;
+      if(!confirm('Reset emoji reaction counts for everyone?')) return;
+      fetch(API_BASE+'/admin/reset-emojis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:__adminKey})})
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if(d&&d.ok){
+            try{
+              if(typeof emojiRailCounts==='object'){ Object.keys(emojiRailCounts).forEach(function(k){ emojiRailCounts[k]=0; }); }
+              if(typeof paintEmojiCounts==='function') paintEmojiCounts();
+              else ['thumbs','fire','target','wow','party','star','heart','clap'].forEach(function(k){ var el=document.getElementById('er-'+k); if(el) el.textContent='0'; });
+              try{ localStorage.removeItem('emoji_rail_v2_'+(LIVE_MATCH||'current')); }catch(e){}
+            }catch(e){}
+            alert('Emoji counts reset');
+          } else alert('Reset failed');
+        })
+        .catch(function(){ alert('Reset failed'); });
+    }
+    function adminResetCoinsOne(id, name){
+      if(!__adminKey||!API_BASE||!id) return;
+      if(!confirm('Reset coins for '+(name||id)+'?')) return;
+      fetch(API_BASE+'/admin/reset-coins',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:__adminKey,id:id})})
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if(d&&d.ok){ loadFansRank(); } else alert('Reset failed'); })
+        .catch(function(){ alert('Reset failed'); });
+    }
+    function adminShowBlocks(){
+      if(!__adminKey||!API_BASE) return;
+      fetch(API_BASE+'/admin/blocks?key='+encodeURIComponent(__adminKey))
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var rows=d.blocks||[];
+          if(!rows.length){ alert('No blocked viewers'); return; }
+          var msg = rows.map(function(b){ return (b.name||b.id); }).join('\n');
+          var id = prompt('Blocked:\n'+msg+'\n\nType id to unblock (or cancel)');
+          if(id) adminUnblockViewer(id.trim());
+        })
+        .catch(function(){ alert('Could not load blocks'); });
+    }
+
+    function publishPrediction(pred, overTotal){
+      if(!API_BASE) return;
+      try{
+        fetch(API_BASE+'/predictions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:uid(),name:getChatName()||'Fan',pred:String(pred||''),over_total:String(overTotal||'')})})
+          .then(function(r){ return r.json(); })
+          .then(function(d){ try{ paintAllPredictions(d.predictions||[]); }catch(e){} })
+          .catch(function(){});
+      }catch(e){}
+    }
+    function paintAllPredictions(rows){
+      var el=$('all-preds-board'); if(!el) return;
+      rows = rows || [];
+      if(!rows.length){ el.innerHTML='<div class="empty">No predictions yet</div>'; return; }
+      var html='<div style="overflow:auto;max-height:220px"><table class="stats" style="font-size:12px"><thead><tr><th>Viewer</th><th>Ball</th><th>Over</th></tr></thead><tbody>';
+      rows.slice(0,40).forEach(function(p){
+        html+='<tr><td>'+esc(p.name||'Fan')+'</td><td class="num">'+esc(p.pred||'—')+'</td><td class="num">'+esc(p.over_total||'—')+'</td></tr>';
+      });
+      html+='</tbody></table></div>';
+      el.innerHTML=html;
+    }
+    function loadAllPredictions(){
+      if(!API_BASE) return;
+      fetch(API_BASE+'/predictions').then(function(r){ return r.json(); }).then(function(d){
+        paintAllPredictions(d.predictions||[]);
+      }).catch(function(){});
+    }
+
+
+    async function heartbeat(){
+      if(!API_BASE)return;
+      try{
+        var r=await fetch(API_BASE+'/presence',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:uid(),name:getChatName()||'Fan',match:LIVE_MATCH||'current'}),cache:'no-store'});
+        if(r.ok){
+          var d=await r.json();
+          try{renderViewers(d.viewers||d.list||[], d.count||d.watching||0)}catch(eV){}
+          try{applyFloats(d.floats||d.messages||[])}catch(eM){}
+        }
+      }catch(e){ console.log('heartbeat err', e); }
+    }
+
+    // ---------- Self-healing poll (fix for freeze after ~2 overs) ----------
+    // Root causes addressed:
+    // 1) pollBusy stuck after render/TTS error
+    // 2) fetch hanging on flaky tunnel → use XHR + timeout
+    // 3) Cloudflare quick tunnel 429 when too many concurrent polls
+    // 4) Stale signature skipping mid-over updates
+    var pollBusy=false,failCount=0,lastPollStart=0;
+    function setLiveDot(fails){
+      var dot=$('live-dot'),txt=$('live-dot-txt');
+      if(!dot)return;
+      if(fails>=3){dot.classList.add('lost');txt.textContent='Reconnecting…'}
+      else{dot.classList.remove('lost');txt.textContent='LIVE'}
+    }
+    function applyData(data){
+      try{ if(data && data.floats) applyFloats(data.floats); }catch(eFl){}
+      try{ if(data && data.data && data.data.floats) applyFloats(data.data.floats); }catch(eFl2){}
+
+      // Worker may return {ok:true, data:<payload>, updatedAt} OR the payload flat.
+      // Also accept {ok:true, ...score fields} if publisher stored with ok flag.
+      if(data && data.data && typeof data.data === 'object' && (data.data.ts || data.data.runs!=null || data.data.balls!=null)){
+        data = data.data;
+      }
+      if(data&&(data.ts || data.runs!=null || data.balls!=null || data.teamA)){
+        var sig=[data.ts||0,data.runs|0,data.wickets|0,data.balls|0,
+          data.strikerRuns|0,data.strikerBalls|0,data.bowlerRuns|0,data.bowlerBalls|0,
+          data.strikerName||'',data.bowlerName||'',
+          (data.commentary&&data.commentary.length)|0,
+          (data.thisOver&&data.thisOver.balls&&data.thisOver.balls.join(','))||'',
+          data.matchEnded?1:0, data.statusText||''].join('|');
+        if(sig!==lastTs){
+          lastTs=sig;
+          try{render(data)}catch(eR){console.log('render',eR)}
+        }
+      } else if(!lastTs){
+        try{render(null)}catch(eR2){}
+      }
+    }
+    function poll(){
+      // Respect Cloudflare free-tier backoff
+      if(window.__cfLimitUntil && Date.now()<window.__cfLimitUntil){ setLiveDot(Math.max(failCount,5)); return; }
+      if(document.hidden){ return; } // don't burn quota in background
+      if(pollBusy){
+        if(lastPollStart && (Date.now()-lastPollStart>4000)) pollBusy=false;
+        else return;
+      }
+      pollBusy=true;
+      lastPollStart=Date.now();
+      var done=function(){pollBusy=false};
+      if(!API_BASE){
+        try{var raw=localStorage.getItem(LIVE_KEY);if(raw)applyData(JSON.parse(raw))}catch(e0){}
+        setLiveDot(0);done();return;
+      }
+      try{
+        var x=new XMLHttpRequest();
+        var liveQuery='?match='+encodeURIComponent(LIVE_MATCH)+'&_='+Date.now();
+        x.open('GET',API_BASE.replace(/\/+$/,'')+'/api/live-public'+liveQuery,true);
+        x.timeout=5000;
+        x.onload=function(){
+          try{
+            if(x.status>=200&&x.status<300){
+              var parsed=JSON.parse(x.responseText);
+              var errStr=String((parsed&&parsed.error)||'');
+              if(/Exceeded allowed volume|free tier|limit/i.test(errStr)){
+                failCount=Math.max(failCount+3, 6);
+                window.__cfLimitUntil=Date.now()+30000; // back off 30s
+              } else {
+                applyData(parsed);failCount=0; window.__cfLimitUntil=0;
+              }
+            } else if(x.status===429||x.status===503){failCount+=3; window.__cfLimitUntil=Date.now()+30000;}
+            else failCount++;
+          }catch(e1){failCount++}
+          setLiveDot(failCount);done();
+        };
+        x.onerror=function(){
+          failCount++;setLiveDot(failCount);
+          try{var r2=localStorage.getItem(LIVE_KEY);if(r2)applyData(JSON.parse(r2))}catch(e2){}
+          done();
+        };
+        x.ontimeout=function(){failCount++;setLiveDot(failCount);done()};
+        x.send();
+      }catch(e3){failCount++;setLiveDot(failCount);done()}
+    }
+    window.addEventListener('storage',function(e){if(e.key===LIVE_KEY){lastTs='';poll()}});
+    document.addEventListener('visibilitychange',function(){if(!document.hidden){lastTs='';pollBusy=false;poll();}});
+    window.addEventListener('focus',function(){lastTs='';pollBusy=false;poll()});
+    try{refreshPtsUI()}catch(e){}
+    try{ensureNameGate()}catch(eG){}
+    if(getChatName()){
+      if($('name-box'))$('name-box').style.display='none';
+      if($('compose-box'))$('compose-box').style.display='block';
+      if($('chat-name'))$('chat-name').value=getChatName();
+      try{pushFanScore()}catch(eP){}
+    }
+    setInterval(function(){try{refreshPtsUI();if($('panel-fan')&&!$('panel-fan').classList.contains('hidden'))loadFansRank()}catch(e){}},4000);
+    updateTtsBtn();
+    updateLangBtn();
+    try{ensureEmojiRail()}catch(e){}
+    try{ if(__adminKey){ var ab=$('admin-coins-bar'); if(ab) ab.style.display='flex'; var ar=$('admin-row'); if(ar) ar.style.display='flex'; } }catch(eAd){}
+    try{
+      var seen=localStorage.getItem('cricket_coin_rules_seen');
+      var br=document.querySelector('[onclick*="openCoinRules"], .coin-rules-btn, #btn-coin-rules');
+      if(br){ br.classList.add('coin-rules-btn'); if(!seen) br.classList.add('blink'); }
+    }catch(eBoot){}
+    try{window.__seedFloatSkip=true;setTimeout(function(){window.__seedFloatSkip=false},800)}catch(e){}
+    // FREE-TIER SAFE intervals (was 1s and burned Durable Object daily quota)
+    // Score ~3s, floats ~5s (also on score poll), chat ~8s, presence ~20s
+    poll();
+    setInterval(function(){ try{ if(!document.hidden) poll(); }catch(e){} }, 3000);
+    try{connectFloatWs()}catch(eWSboot){}
+    setInterval(function(){ pollBusy=false; if(failCount>2 && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)){ lastTs=''; failCount=Math.max(0,failCount-1);} }, 8000);
+    try{ heartbeat(); }catch(eH){}
+    setInterval(function(){ try{ if(!document.hidden && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)) heartbeat(); }catch(e){} }, 20000);
+    try{ pollChat(); }catch(eC){}
+    setInterval(function(){ try{ if(!document.hidden && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)) pollChat(); }catch(e){} }, 8000);
+    // floats come with live-public; light backup poll only
+    try{ pollFloats(); }catch(eF){}
+    setInterval(function(){ try{ if(!document.hidden && !(window.__cfLimitUntil&&Date.now()<window.__cfLimitUntil)) pollFloats(); }catch(e){} }, 5000);
+    setInterval(function(){try{if($('panel-fan')&&!$('panel-fan').classList.contains('hidden'))loadFansRank()}catch(e){}},15000);
+  </script>
+</body>
+</html>

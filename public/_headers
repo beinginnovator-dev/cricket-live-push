@@ -1,0 +1,27 @@
+/manifest.json
+  Content-Type: application/manifest+json
+
+/manifest-live.json
+  Content-Type: application/manifest+json
+
+/sw.js
+  Content-Type: application/javascript
+  Service-Worker-Allowed: /
+  Cache-Control: no-cache
+
+/sw-live.js
+  Content-Type: application/javascript
+  Service-Worker-Allowed: /
+  Cache-Control: no-cache
+
+/icon-192.png
+  Content-Type: image/png
+
+/icon-512.png
+  Content-Type: image/png
+
+/icon-live-192.png
+  Content-Type: image/png
+
+/icon-live-512.png
+  Content-Type: image/png

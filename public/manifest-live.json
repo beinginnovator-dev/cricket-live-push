@@ -1,0 +1,33 @@
+{
+  "name": "Live Cricket Viewer",
+  "short_name": "LiveScore",
+  "description": "Watch live cricket scores and commentary",
+  "id": "/live.html",
+  "start_url": "/live.html",
+  "scope": "/live.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1412",
+  "theme_color": "#0369a1",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icon-live-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-live-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-live-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
