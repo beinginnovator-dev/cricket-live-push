@@ -802,8 +802,8 @@
     function readLiveParams(){
       try{
         var q=new URLSearchParams(location.search||'');
-        LIVE_MATCH=(q.get('match')||'current').trim()||'current';
-        LIVE_VIEW_KEY=(q.get('key')||'').trim();
+        LIVE_MATCH=(q.get('m')||q.get('match')||'current').trim()||'current';
+        LIVE_VIEW_KEY=(q.get('k')||q.get('key')||'').trim();
       }catch(e){LIVE_MATCH='current';LIVE_VIEW_KEY=''}
     }
     function resolveApiBase(){
@@ -815,7 +815,7 @@
       }catch(e0){}
       try{
         var q=new URLSearchParams(location.search||'');
-        var s=(q.get('server')||'').trim();
+        var s=((q.get('s')||q.get('server'))||'').trim();
         s=s.replace(/^\.+/,'').replace(/\s+/g,'');
         if(/^https?:\/\//i.test(s)){ return s.replace(/\/+$/,''); }
         if(/^https?:[^\/]/i.test(s)){ return s.replace(/^(https?):/i,'$1://').replace(/\/+$/,''); }
