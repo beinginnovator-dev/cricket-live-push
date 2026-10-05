@@ -5565,9 +5565,15 @@ function placeBoundaryAnimationOnStriker(toast){
     function getLiveMatchId() {
         try {
             var id=(localStorage.getItem(LIVE_MATCH_KEY)||'').trim();
-            if(!id){ id='match-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8); localStorage.setItem(LIVE_MATCH_KEY,id); }
+            // Prefer short codes (6–8 chars) so WhatsApp shows the link on one line
+            if(!id || id.indexOf('match-')===0 && id.length>12){
+              id = Math.random().toString(36).slice(2,8) + Date.now().toString(36).slice(-2);
+              id = id.replace(/[^a-z0-9]/gi,'').slice(0,8);
+              if(id.length < 6) id = ('m'+Date.now().toString(36)).slice(0,8);
+              localStorage.setItem(LIVE_MATCH_KEY, id);
+            }
             return id;
-        } catch(e) { return 'match-current'; }
+        } catch(e) { return 'live1'; }
     }
 
     function buildLivePayload() {
@@ -6029,12 +6035,31 @@ function placeBoundaryAnimationOnStriker(toast){
             if(/index\.html$/i.test(path)) path=path.replace(/index\.html$/i,'live.html');
             else if(path.endsWith('/')) path=path+'live.html';
             else path=path.replace(/\/?$/,'/')+'live.html';
-            var server=getLiveServerUrl() || base;
-            var q='?match='+encodeURIComponent(getLiveMatchId())+'&key='+encodeURIComponent(LIVE_VIEW_KEY);
-            // Always pass server so phones not on same origin still hit the Worker API
-            if(server) q+='&server='+encodeURIComponent(String(server).replace(/\/+$/,''));
-            return (base||'')+path+q;
-        } catch(e) { return 'live.html?match='+encodeURIComponent(getLiveMatchId())+'&key='+encodeURIComponent(LIVE_VIEW_KEY); }
+            // Prefer short path segment
+            if(path.indexOf('live.html')>=0) path = path.replace(/index\.html$/i,'').replace(/\/?$/,'/') ;
+            // keep live.html for asset routing reliability
+            if(!/live\.html$/i.test(path)) {
+              if(path.endsWith('/')) path=path+'live.html';
+              else path=path.replace(/\/?$/,'/')+'live.html';
+            }
+            var mid = getLiveMatchId();
+            // Short query: only m= (live.html accepts m + match)
+            var q = '?m=' + encodeURIComponent(mid);
+            var server = (getLiveServerUrl() || '').replace(/\/+$/,'');
+            var sameOrigin = server && base && server.replace(/\/+$/,'') === String(base).replace(/\/+$/,'');
+            var onWorker = /\.workers\.dev$|pages\.dev$/i.test(location.hostname||'');
+            // Only append server when viewer origin differs from API host
+            if(server && !sameOrigin && !onWorker) {
+              q += '&s=' + encodeURIComponent(server);
+            }
+            // key only if non-default
+            if(LIVE_VIEW_KEY && LIVE_VIEW_KEY !== 'VIEWER_2026') {
+              q += '&k=' + encodeURIComponent(LIVE_VIEW_KEY);
+            }
+            return (base||'') + path + q;
+        } catch(e) {
+            return 'live.html?m=' + encodeURIComponent(getLiveMatchId());
+        }
     }
 
     function promptLiveServerUrl(thenShare) {
