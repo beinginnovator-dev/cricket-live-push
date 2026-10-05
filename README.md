@@ -1,18 +1,15 @@
-# Live (push) + Scorer tutorial
+# Short live viewer link
 
-## Files to upload to GitHub `public/`
+## Before
+https://your.workers.dev/live.html?match=match-xxxx-yyyy&key=VIEWER_2026&server=https%3A%2F%2F...
 
-| File | Action |
-|------|--------|
-| `live.html` | Replace existing |
-| `tutorial.html` | New file (animated scorer guide) |
+## After
+https://your.workers.dev/live.html?m=a3f9k2x1
 
-## Live changes
-- WebSocket score push (`connectScoreWs` → `/ws?match=...`)
-- Polling only as 8s backup when tab visible
-- Floats / chat intervals slightly slowed (free-tier safe)
+## Files
+- public/index.html (scorer – short match id + short URL)
+- public/live.html (accepts m / k / s as well as match / key / server)
 
-## Tutorial
-- Open `/tutorial.html`
-- 8 animated steps: Settings → Teams → Match → Toss → Scoring → Live link → Stats/History
-- Link from scorer using SCORER_TUTORIAL_LINK.txt
+## Note
+New matches get an 8-char id automatically.
+Old long ids starting with `match-` are regenerated once when the scorer opens.
