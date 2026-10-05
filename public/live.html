@@ -76,8 +76,58 @@
     .match-head{text-align:center;margin-bottom:10px}
     .match-head .type{font-size:11px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#fbbf24}
     .match-head .line{font-size:11px;color:#94a3b8;margin-top:4px;line-height:1.35}
-    .crr-big{text-align:center;font-size:20px;font-weight:900;color:#fff;margin:8px 0 12px}
-    .crr-big span{color:#34d399}
+    .crr-big{display:none}
+    .team-logo{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;margin-right:4px;vertical-align:middle;background:#1e293b;border:1px solid rgba(148,163,184,.3);color:#fbbf24}
+    .team-logo.img{padding:0;overflow:hidden}
+    .team-logo.img img{width:100%;height:100%;object-fit:cover}
+    .sb-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;margin:0}
+    .sb-table th{font-size:10px;color:#7da89d;text-transform:uppercase;letter-spacing:.05em;padding:5px 2px;text-align:left;border-bottom:1px solid rgba(148,163,184,.15)}
+    .sb-table th.n,.sb-table td.n{text-align:center}
+    .sb-table td{padding:7px 2px;border-bottom:1px solid rgba(148,163,184,.08);vertical-align:middle}
+    .sb-table td.nm{font-weight:900;font-size:14px;color:#f0fdf4;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      text-shadow:0 0 10px rgba(52,211,153,.55),0 0 18px rgba(52,211,153,.25)}
+    .sb-table.bowl td.nm{color:#e0f2fe;text-shadow:0 0 10px rgba(125,211,252,.5),0 0 18px rgba(56,189,248,.22)}
+    .sb-table td.n{font-weight:700;color:#34d399;font-size:13px}
+    .sb-ico{margin-right:4px;font-size:13px}
+    .sb-wrap{background:rgba(15,23,42,.65);border:1px solid rgba(148,163,184,.15);border-radius:.75rem;padding:6px 8px 2px;margin-bottom:6px}
+    .sb-table col.c-name{width:32%}
+    .sb-table col.c-r{width:14%}
+    .sb-table col.c-b{width:14%}
+    .sb-table col.c-x{width:18%}
+    .sb-table col.c-y{width:22%}
+    
+    .match-meta-line{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 2px;font-size:11px;font-weight:900}
+    .match-meta-line .live-inline{color:#34d399}
+    .match-meta-line .live-inline.lost{color:#f87171}
+    .match-meta-line .view-inline{color:#34d399}
+    .crr-line{margin:2px 0 8px}
+
+    .crr-line{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:4px 0 10px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8}
+    .crr-line .crr-v{color:#34d399;font-size:11px;font-weight:900}
+    .crr-line .live-inline{color:#34d399;font-weight:900}
+    .crr-line .live-inline.lost{color:#f87171}
+    .crr-line .view-inline{color:#34d399;font-weight:900}
+    .chase-flash{display:none;margin:8px 0;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(251,191,36,.4);color:#fef3c7;font-weight:900;font-size:14px;text-align:center;animation:chasePulse 1.4s ease-in-out infinite}
+    .chase-flash.show{display:block}
+    @keyframes chasePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.82;transform:scale(1.02)}}
+    .comm-popup{display:none;margin:8px 0 0;z-index:5;position:relative}
+    .comm-popup.show{display:block;animation:commPopIn .28s ease}
+    @keyframes commPopIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .comm-popup-inner{
+      background:linear-gradient(165deg,rgba(15,23,42,.72),rgba(30,41,59,.55) 55%,rgba(15,23,42,.72));
+      border:1px solid rgba(148,163,184,.28);
+      border-radius:1rem;
+      padding:12px 14px;
+      box-shadow:0 12px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    }
+    .comm-popup-tag{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#34d399;margin-bottom:6px}
+    .comm-popup-body{font-size:14px;font-weight:700;color:#f1f5f9;line-height:1.45}
+    .comm-popup-body .title{font-weight:900;color:#fff;margin-bottom:4px}
+    .comm-popup-body .body{font-weight:600;color:#cbd5e1;font-size:13px}
+    #btn-comm-popup.on{background:#10b981;color:#042f2e;border-color:#34d399}
+
+    #players-or-result .viewer-result{margin:0}
     .teams{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
     .team-card{background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.15);border-radius:.9rem;padding:12px 10px;text-align:center;min-height:88px;cursor:pointer}
     .team-card:active{border-color:#34d399}
@@ -399,6 +449,72 @@
     .team-card .score{line-height:1.15}
     .team-card .score .sc-main{display:block;font-size:22px;font-weight:900;letter-spacing:.02em}
     .team-card .score .sc-ov{display:block;font-size:20px;font-weight:700;color:#94a3b8;margin-top:2px}
+  
+    
+    .hdr-sound-btn{
+      flex:0 0 42px!important;
+      max-width:42px;
+      min-width:42px;
+      padding:8px 4px!important;
+      font-size:16px!important;
+    }
+    .hdr-sound-btn.on{
+      background:#10b981!important;
+      color:#042f2e!important;
+      border-color:#34d399!important;
+      box-shadow:inset 0 2px 6px rgba(0,0,0,.2),0 0 10px rgba(16,185,129,.3);
+    }
+
+    .inns-row.action-row{
+      display:flex !important;
+      flex-wrap:nowrap !important;
+      align-items:center;
+      justify-content:space-between;
+      gap:6px;
+      margin:0 0 10px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(148,163,184,.12);
+      width:100%;
+      box-sizing:border-box;
+    }
+    .hdr-action-btn{
+      flex:1 1 0;
+      min-width:0;
+      max-width:none;
+      padding:7px 2px;
+      font-size:9.5px;
+      font-weight:800;
+      white-space:nowrap !important;
+      overflow:hidden;
+      text-overflow:clip;
+      line-height:1.2;
+      display:inline-flex !important;
+      align-items:center;
+      justify-content:center;
+      gap:2px;
+      box-sizing:border-box;
+    }
+    .hdr-action-btn span{white-space:nowrap}
+    #btn-comm-popup{flex:1.25 1 0;font-size:9px;padding:7px 2px}
+    .hdr-sound-btn{
+      flex:0 0 36px !important;
+      max-width:36px !important;
+      min-width:36px !important;
+      width:36px !important;
+      padding:7px 0 !important;
+      font-size:15px !important;
+    }
+    .hdr-action-btn.on,
+    .hdr-action-btn.punched,
+    #btn-comm-popup.on,#btn-comm-popup.punched,
+    #btn-cheers.on,#btn-predict.on,
+    .hdr-sound-btn.on{
+      background:#10b981!important;
+      color:#042f2e!important;
+      border-color:#34d399!important;
+      box-shadow:inset 0 2px 6px rgba(0,0,0,.25),0 0 10px rgba(16,185,129,.3);
+      transform:scale(0.98);
+    }
   </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
@@ -414,28 +530,89 @@
     <div class="hdr" style="margin-bottom:8px">
       <div class="live-dot" id="live-dot" style="font-size:12px"><i></i> <span id="live-dot-txt">LIVE</span></div>
       <div class="live-right" style="gap:8px">
-        <span class="count" id="viewer-count" style="font-size:11px;color:#34d399;font-weight:800">👁 0</span>
+        <span class="count" id="viewer-count" style="font-size:11px;color:#34d399;font-weight:800">🟢 0</span>
         </div>
     </div>
     <div id="no-data" class="wait-only">Waiting for score updates…</div>
     <div id="live-root" class="hidden">
       <div class="score-card">
-        <div class="match-head"><div class="type" id="v-match-type">MATCH</div><div class="line" id="v-match-line"></div></div>
-        <div class="crr-big">CRR: <span id="v-crr">0.00</span></div>
+        <div class="match-head">
+          <div class="type" id="v-match-type">MATCH</div>
+          <div class="match-meta-line">
+            <span class="live-inline" id="crr-live">● LIVE</span>
+            <span class="view-inline" id="crr-viewers">🟢 0</span>
+          </div>
+          <div class="line" id="v-match-line"></div>
+        </div>
+        <div class="crr-line">
+          <span>CRR: <span class="crr-v" id="v-crr">0.00</span></span>
+        </div>
         <div class="teams">
           <div class="team-card" onclick="openTeamModal('A')"><div class="name" id="v-team-a">Team A</div><div class="score" id="v-score-a">0-0</div><div class="role" id="v-role-a">—</div></div>
           <div class="team-card" onclick="openTeamModal('B')"><div class="name" id="v-team-b">Team B</div><div class="score" id="v-score-b">—</div><div class="role" id="v-role-b">—</div></div>
         </div>
-        <div class="inns-row" style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 0 10px;padding-bottom:8px;border-bottom:1px solid rgba(148,163,184,.12)">
-          <button type="button" class="cheer-toggle sm" id="btn-cheers" onclick="toggleCheerPad()" style="flex:0 0 auto;min-width:0;padding:6px 10px;font-size:10px">😊 Cheers</button>
-          <div class="inns" id="v-inns" style="margin:0;padding:0;border:0;flex:1;text-align:center;font-size:11px">Innings 1</div>
-          <button type="button" class="cheer-toggle pred-toggle sm" onclick="togglePredPad()" style="flex:0 0 auto;min-width:0;padding:6px 10px;font-size:10px">🎯 Predict</button>
+        <div class="inns-row action-row" style="display:flex;flex-wrap:nowrap;align-items:center;gap:6px;width:100%">
+          <button type="button" class="cheer-toggle sm hdr-action-btn" id="btn-cheers" onclick="toggleCheerPad()"><span>😊</span><span>Cheers</span></button>
+          <button type="button" class="cheer-toggle sm hdr-action-btn" id="btn-comm-popup" onclick="toggleCommentaryMode()"><span>🎤</span><span>Commentary</span></button>
+          <button type="button" class="cheer-toggle sm hdr-action-btn hdr-sound-btn" id="btn-sound-tts" onclick="toggleTts()" title="Commentary sound" aria-label="Sound on off">🔈</button>
+          <button type="button" class="cheer-toggle pred-toggle sm hdr-action-btn" id="btn-predict" onclick="togglePredPad()"><span>🎯</span><span>Predict</span></button>
         </div>
-        <div class="players">
-          <div class="pbox"><div class="lbl">🏏 On strike</div><div class="nm" id="v-striker">—</div><div class="st" id="v-striker-st">0 (0)</div></div>
-          <div class="pbox bowl"><div class="lbl">⚾ Bowler</div><div class="nm" id="v-bowler">—</div><div class="st" id="v-bowler-st">0-0 (0.0)</div></div>
+        <!-- keep v-inns hidden for any JS that still writes to it -->
+        <div class="inns" id="v-inns" style="display:none"></div>
+        <div id="players-or-result">
+          <div id="live-players">
+            <div class="sb-wrap">
+              <table class="sb-table">
+                <colgroup><col class="c-name"/><col class="c-r"/><col class="c-b"/><col class="c-x"/><col class="c-y"/></colgroup>
+                <thead><tr>
+                  <th><span class="sb-ico">🏏</span>Batsman</th>
+                  <th class="n">R</th><th class="n">B</th><th class="n">4/6</th><th class="n">SR</th>
+                </tr></thead>
+                <tbody>
+                  <tr>
+                    <td class="nm" id="v-striker">—</td>
+                    <td class="n" id="v-str-r">0</td>
+                    <td class="n" id="v-str-b">0</td>
+                    <td class="n" id="v-str-46">0/0</td>
+                    <td class="n" id="v-str-sr">0.0</td>
+                  </tr>
+                  <tr id="v-nonstrike-row" style="opacity:.8">
+                    <td class="nm" id="v-nonstriker">—</td>
+                    <td class="n" id="v-ns-r">0</td>
+                    <td class="n" id="v-ns-b">0</td>
+                    <td class="n" id="v-ns-46">0/0</td>
+                    <td class="n" id="v-ns-sr">0.0</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="sb-wrap">
+              <table class="sb-table bowl">
+                <colgroup><col class="c-name"/><col class="c-r"/><col class="c-b"/><col class="c-x"/><col class="c-y"/></colgroup>
+                <thead><tr>
+                  <th><span class="sb-ico">⚾</span>Bowler</th>
+                  <th class="n">R</th><th class="n">B</th><th class="n">W</th><th class="n">Econ</th>
+                </tr></thead>
+                <tbody><tr>
+                  <td class="nm" id="v-bowler">—</td>
+                  <td class="n" id="v-bowl-r">0</td>
+                  <td class="n" id="v-bowl-o">0.0</td>
+                  <td class="n" id="v-bowl-w">0</td>
+                  <td class="n" id="v-bowl-econ">0.00</td>
+                </tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div id="match-result-slot" class="viewer-result" style="display:none"></div>
         </div>
-        
+        <div id="chase-flash" class="chase-flash"></div>
+        <div id="comm-popup" class="comm-popup" aria-live="polite">
+          <div class="comm-popup-inner">
+            <div class="comm-popup-tag">LATEST</div>
+            <div class="comm-popup-body" id="comm-popup-body">No commentary yet</div>
+          </div>
+        </div>
+        <div class="over-box" style="margin-top:8px"><div class="lbl" id="v-over-lbl">This over</div><div class="over-balls" id="v-over-balls"></div><div class="over-msg" id="v-over-msg"></div></div>
         <div id="emoji-rail" class="emoji-rail" aria-label="Reactions">
           <div class="er" data-emoji="👍"><div class="e">👍</div><div class="n" id="er-thumbs">0</div></div>
           <div class="er" data-emoji="🔥"><div class="e">🔥</div><div class="n" id="er-fire">0</div></div>
@@ -446,7 +623,7 @@
           <div class="er" data-emoji="❤️"><div class="e">❤️</div><div class="n" id="er-heart">0</div></div>
           <div class="er" data-emoji="👏"><div class="e">👏</div><div class="n" id="er-clap">0</div></div>
         </div>
-        <div class="over-box" style="margin-top:10px"><div class="lbl">This over</div><div class="over-balls" id="v-over-balls"></div><div class="over-msg" id="v-over-msg"></div></div>
+        
 <div class="engage-slot" id="engage-slot" style="min-height:0"></div>
         <div class="cheer-more" id="cheer-more">
           <div class="ttl" style="margin-top:6px;margin-bottom:6px">Cheers · shout out</div>
@@ -1280,32 +1457,40 @@
     function toggleCheerPad(){
       var el=$('cheer-more'); if(!el)return;
       var pred=$('pred-more');
+      var btnC=$('btn-cheers'), btnP=$('btn-predict');
       var opening=!el.classList.contains('open');
       if(pred){ pred.classList.remove('open'); pred.style.display='none'; }
+      if(btnP) btnP.classList.remove('on');
       if(opening){
         try{mountEngage(el)}catch(e){}
         el.classList.add('open');
         el.style.display='block';
+        if(btnC) btnC.classList.add('on');
         try{flashTreasureOnce()}catch(e){}
       } else {
         el.classList.remove('open');
         el.style.display='none';
+        if(btnC) btnC.classList.remove('on');
       }
       try{updateCheerTargetLabel()}catch(e){}
     }
     function togglePredPad(){
       var el=$('pred-more'); if(!el)return;
       var cheer=$('cheer-more');
+      var btnC=$('btn-cheers'), btnP=$('btn-predict');
       var opening=!el.classList.contains('open');
       if(cheer){ cheer.classList.remove('open'); cheer.style.display='none'; }
+      if(btnC) btnC.classList.remove('on');
       if(opening){
         try{mountEngage(el)}catch(e){}
         el.classList.add('open');
         el.style.display='block';
+        if(btnP) btnP.classList.add('on');
         try{flashTreasureOnce()}catch(e){}
       } else {
         el.classList.remove('open');
         el.style.display='none';
+        if(btnP) btnP.classList.remove('on');
       }
     }
     function sendCheerEmoji(emoji){
@@ -1374,6 +1559,74 @@
         x.send();
       }catch(e){}
     }
+    
+    var __commPopupTimer=null;
+    var __commModeOn=false;
+    var __commLastSig='';
+    function getLatestCommentaryText(){
+      try{
+        var d=lastData||{};
+        var lines=((typeof ttsLang!=='undefined'&&ttsLang==='hi')?(d.commentaryHi||d.commentary):d.commentary||[]).slice().filter(Boolean);
+        if(!lines.length) return {html:'<div class="body">No commentary yet</div>', raw:'', sig:''};
+        var line=lines[lines.length-1];
+        var parts=typeof formatCommentaryLine==='function'?formatCommentaryLine(line):{title:'',body:String(line)};
+        var html='';
+        if(parts.title) html+='<div class="title">'+(typeof highlightEventWords==='function'?highlightEventWords(parts.title):parts.title)+'</div>';
+        if(parts.body) html+='<div class="body">'+(typeof highlightEventWords==='function'?highlightEventWords(parts.body):parts.body)+'</div>';
+        if(!parts.title&&!parts.body) html+='<div class="body">'+(typeof highlightEventWords==='function'?highlightEventWords(String(line)):String(line))+'</div>';
+        var sig=String(line)+'|'+(d.balls|0)+'|'+(d.runs|0);
+        return {html:html, raw:String(line), sig:sig};
+      }catch(e){ return {html:'<div class="body">No commentary yet</div>', raw:'', sig:''}; }
+    }
+    function hideCommentaryPopup(){
+      try{
+        var pop=$('comm-popup');
+        if(pop) pop.classList.remove('show');
+        if(__commPopupTimer){ clearTimeout(__commPopupTimer); __commPopupTimer=null; }
+      }catch(e){}
+    }
+    function displayCommentaryPopup(forMs){
+      try{
+        var pop=$('comm-popup'), body=$('comm-popup-body');
+        if(!pop||!body) return;
+        var info=getLatestCommentaryText();
+        body.innerHTML=info.html;
+        __commLastSig=info.sig||'';
+        pop.classList.add('show');
+        if(__commPopupTimer) clearTimeout(__commPopupTimer);
+        var ms=(forMs!=null?forMs:6000);
+        __commPopupTimer=setTimeout(function(){
+          try{ if($('comm-popup')) $('comm-popup').classList.remove('show'); }catch(e){}
+        }, ms);
+      }catch(e){ console.log('comm popup', e); }
+    }
+    function toggleCommentaryMode(){
+      try{
+        var btn=$('btn-comm-popup');
+        __commModeOn=!__commModeOn;
+        if(btn){
+          if(__commModeOn){ btn.classList.add('on'); btn.classList.add('punched'); }
+          else { btn.classList.remove('on'); btn.classList.remove('punched'); }
+        }
+        if(__commModeOn){
+          displayCommentaryPopup(6000);
+        } else {
+          hideCommentaryPopup();
+        }
+      }catch(e){ console.log('toggle comm', e); }
+    }
+    function showLatestCommentaryPopup(){ toggleCommentaryMode(); }
+    function refreshCommentaryIfModeOn(){
+      if(!__commModeOn) return;
+      try{
+        var info=getLatestCommentaryText();
+        if(info.sig && info.sig!==__commLastSig){
+          displayCommentaryPopup(6000);
+        }
+      }catch(e){}
+    }
+
+
     function paintPlayerCheers(){
       try{
         // Never show smileys on player names / cards
@@ -1813,7 +2066,12 @@
         speechSynthesis.onvoiceschanged=function(){ttsVoiceCache={}};
       }
     }catch(e){}
-    function updateTtsBtn(){var b=$('tts-btn');if(!b)return;b.textContent=ttsOn?'🔊 Sound on':'🔈 Sound off';b.classList.toggle('on',ttsOn)}
+    function updateTtsBtn(){
+      var b=$('tts-btn');
+      if(b){ b.textContent=ttsOn?'🔊 Sound on':'🔈 Sound off'; b.classList.toggle('on',ttsOn); }
+      var s=$('btn-sound-tts');
+      if(s){ s.textContent=ttsOn?'🔊':'🔈'; s.classList.toggle('on',!!ttsOn); s.title=ttsOn?'Sound on':'Sound off'; }
+    }
     function updateLangBtn(){var b=$('lang-btn');if(b)b.textContent=(ttsLang==='hi')?'हिं':'EN';var sel=$('voice-gender');if(sel)sel.value=ttsGender}
     function toggleLang(){ttsLang=(ttsLang==='hi')?'en':'hi';try{localStorage.setItem('cricket_tts_lang',ttsLang)}catch(e){}updateLangBtn();lastSpokenLine='';
     var viewerSwipeIndex=0,viewerSwipeTimer=null,viewerSwipeTouchX=0,viewerSwipeTouchY=0,lastViewerMatchEnded=false,viewerManualSwipe=false;if(lastData)render(lastData)}
@@ -1941,7 +2199,7 @@
       $('v-match-type').textContent=(data.matchType||'MATCH').toUpperCase();
       var line=data.innings===1?('1st innings · '+(data.battingTeamName||'')+' '+(data.runs|0)+' runs in '+(data.balls|0)+' balls'+((data.wickets|0)>0?(' for '+data.wickets+' wicket'+((data.wickets>1)?'s':'')):'')+(data.crr?(' · CRR '+data.crr):'')):('Innings '+data.innings+(data.targetScore!=null?(' · Target '+data.targetScore):''));
       $('v-match-line').textContent=line;$('v-crr').textContent=(data.crr!=null?Number(data.crr).toFixed(2):'0.00');
-      $('v-team-a').textContent=data.teamA||'Team A';$('v-team-b').textContent=data.teamB||'Team B';
+      /* team names+logos set below */
       function scoreHtml(runs, wkts, overs){
         return '<span class="sc-main">'+(runs|0)+' / '+(wkts|0)+'</span><span class="sc-ov">('+esc(String(overs!=null?overs:'—'))+')</span>';
       }
@@ -1967,18 +2225,103 @@
         }
       }
       $('v-inns').innerHTML='Innings <b>'+(data.innings||1)+'</b> · '+esc(data.inningsLabel||'');
-      (function(){var r=data.strikerRuns|0,b=data.strikerBalls|0,s=b>0?((r*100)/b).toFixed(1):'0.0';var el=$('v-striker-st');if(el)el.innerHTML=r+' ('+b+')<div class="substat-board">SR '+s+'</div>';})();
+      (function(){
+        var r=data.strikerRuns|0,b=data.strikerBalls|0;
+        var s=b>0?((r*100)/b).toFixed(1):'0.0';
+        var f4=data.strikerFours|0, s6=data.strikerSixes|0;
+        if($('v-striker'))$('v-striker').textContent=(data.strikerName||'—')+(data.strikerName?'*':'');
+        if($('v-str-r'))$('v-str-r').textContent=r;
+        if($('v-str-b'))$('v-str-b').textContent=b;
+        if($('v-str-46'))$('v-str-46').textContent=f4+'/'+s6;
+        if($('v-str-sr'))$('v-str-sr').textContent=s;
+        // non-striker if present
+        var nr=data.nonStrikerRuns|0, nb=data.nonStrikerBalls|0;
+        var ns=nb>0?((nr*100)/nb).toFixed(1):'0.0';
+        if($('v-nonstriker'))$('v-nonstriker').textContent=data.nonStrikerName||'—';
+        if($('v-ns-r'))$('v-ns-r').textContent=nr;
+        if($('v-ns-b'))$('v-ns-b').textContent=nb;
+        if($('v-ns-46'))$('v-ns-46').textContent=(data.nonStrikerFours|0)+'/'+(data.nonStrikerSixes|0);
+        if($('v-ns-sr'))$('v-ns-sr').textContent=ns;
+        var nsr=$('v-nonstrike-row');
+        if(nsr) nsr.style.display = data.nonStrikerName ? '' : 'none';
+      })();
       (function(){
         var runs=data.bowlerRuns|0, balls=data.bowlerBalls|0, wk=data.bowlerWickets|0;
         var ov=typeof oversFromBalls==='function'?oversFromBalls(balls):((balls/6|0)+'.'+(balls%6));
         var econ=balls>0?((runs*6)/balls).toFixed(2):'0.00';
-        var el=$('v-bowler-st');
-        if(el) el.innerHTML=runs+' ('+ov+') / '+wk+'<div class="substat-board">Econ '+econ+'</div>';
+        if($('v-bowler'))$('v-bowler').textContent=data.bowlerName||'—';
+        if($('v-bowl-r'))$('v-bowl-r').textContent=runs;
+        if($('v-bowl-o'))$('v-bowl-o').textContent=ov;
+        if($('v-bowl-w'))$('v-bowl-w').textContent=wk;
+        if($('v-bowl-econ'))$('v-bowl-econ').textContent=econ;
       })();
-      // names + cheer emojis set in paintPlayerCheers()
-      try{paintPlayerCheers()}catch(ePc){
-        try{$('v-striker').textContent=data.strikerName||'—';$('v-bowler').textContent=data.bowlerName||'—'}catch(e2){}
-      }
+      try{paintPlayerCheers()}catch(ePc){}
+      // Chase flash (like scorer)
+      (function(){
+        var el=$('chase-flash');
+        if(!el) return;
+        if(data.matchEnded){ el.classList.remove('show'); el.textContent=''; return; }
+        if((data.innings|0)>=2 && data.targetScore!=null){
+          var need=Math.max(0,(data.targetScore|0)-(data.runs|0));
+          var maxBalls=(data.maxOvers|0)*6;
+          var ballsLeft=maxBalls>0?Math.max(0,maxBalls-(data.balls|0)):null;
+          var ovLeft=ballsLeft!=null?((ballsLeft/6)|0)+'.'+(ballsLeft%6):'';
+          if(need>0 && ballsLeft!=null && ballsLeft<=18){
+            el.textContent='⚡ Need '+need+' runs in '+ballsLeft+' balls ('+ovLeft+' ov left)';
+            el.classList.add('show');
+          } else if(need>0 && ballsLeft!=null){
+            el.textContent='Need '+need+' off '+ballsLeft+' balls';
+            el.classList.add('show');
+          } else { el.classList.remove('show'); }
+        } else { el.classList.remove('show'); }
+      })();
+      // Team logos (letter badges or image URL)
+      (function(){
+        function setLogo(side, name, url){
+          var el=$('v-team-'+side);
+          if(!el) return;
+          var letter=(name||'T').trim().charAt(0).toUpperCase()||'T';
+          var logo='';
+          if(url){
+            logo='<span class="team-logo img"><img src="'+esc(url)+'" alt=""/></span>';
+          } else {
+            logo='<span class="team-logo">'+esc(letter)+'</span>';
+          }
+          el.innerHTML=logo+esc(name||('Team '+side.toUpperCase()));
+        }
+        setLogo('a', data.teamA, data.teamALogo||data.logoA);
+        setLogo('b', data.teamB, data.teamBLogo||data.logoB);
+      })();
+      // Result banner in place of striker/bowler
+      (function(){
+        var slot=$('match-result-slot'), players=$('live-players');
+        if(!slot) return;
+        if(data.matchEnded){
+          if(players) players.style.display='none';
+          slot.style.display='block';
+          var res=data.resultText||data.result||data.matchWinner||'Match over';
+          var scA=(data.teamA||'A')+' '+(data.scoreAText||'');
+          var scB=(data.teamB||'B')+' '+(data.scoreBText||'');
+          if(!data.scoreAText && data.firstInningsScore!=null){
+            /* best effort */
+          }
+          slot.innerHTML='<div class="vr-title">Match result</div><div class="vr-result">'+esc(String(res))+'</div>'
+            +'<div class="vr-score">'+esc(data.teamA||'Team A')+': '+(data.battingSide==='A'?(data.runs|0)+'/'+(data.wickets|0):((data.firstInningsScore!=null?data.firstInningsScore:'—')+'/'+(data.firstInningsWickets!=null?data.firstInningsWickets:'—')))
+            +' · '+esc(data.teamB||'Team B')+': '+(data.battingSide==='B'?(data.runs|0)+'/'+(data.wickets|0):((data.firstInningsScore!=null && data.battingSide==='A')?data.firstInningsScore:'—'))+'</div>'
+            +(data.mom?('<div class="vr-mom">Player of the match: '+esc(data.mom)+'</div>'):'');
+        } else {
+          if(players) players.style.display='';
+          slot.style.display='none';
+          slot.innerHTML='';
+        }
+      })();
+      // This over label with match overs
+      (function(){
+        var lbl=$('v-over-lbl');
+        if(!lbl) return;
+        var mo=data.maxOvers|0;
+        lbl.textContent = mo ? ('This over ('+mo+' overs match)') : 'This over';
+      })();
       $('v-status').textContent='';$('v-status').style.display='none';
       var ov=data.thisOver||{balls:[],runs:0,legal:0};var balls=(ov.balls||[]).slice();
       // Keep only current over (max 6 legal from the end) — fresh each over
@@ -2013,6 +2356,7 @@
         }catch(eT){}
         $('v-over-msg').textContent=msg;
       })();
+      try{ refreshCommentaryIfModeOn(); }catch(eCommMode){}
       var lines=((ttsLang==='hi')?(data.commentaryHi||data.commentary):data.commentary||[]).slice().filter(Boolean).reverse();
       $('comm-list').innerHTML=lines.length?lines.map(function(line,i){var parts=formatCommentaryLine(line);var html='';if(i===0)html+='<div class="t">LATEST</div>';if(parts.title)html+='<div class="title">'+highlightEventWords(parts.title)+'</div>';if(parts.body)html+='<div class="body">'+highlightEventWords(parts.body)+'</div>';if(!parts.title&&!parts.body)html+=highlightEventWords(line);return'<div class="feed-item">'+html+'</div>'}).join(''):'<div class="empty">No commentary yet</div>';
       speakNewCommentary(data);
@@ -2438,12 +2782,48 @@
     var __adminKey = '';
     try{ __adminKey = localStorage.getItem('cricket_admin_key') || ''; }catch(e){}
 
+    
+    function buildJoinWelcome(name){
+      var d = lastData || {};
+      var parts = ['Welcome '+(name||'Viewer')+'!'];
+      try{
+        var toss = d.tossWinner || d.tossTeam || '';
+        var dec = d.tossDecision || d.tossChoose || '';
+        if(toss){
+          var decTxt = /bowl/i.test(String(dec)) ? 'bowl first' : (/bat/i.test(String(dec)) ? 'bat first' : String(dec||''));
+          parts.push(toss+' won the toss'+(decTxt?(' & decided to '+decTxt):''));
+        }
+        var mo = d.maxOvers|0;
+        if(mo) parts.push('It is a '+mo+' overs match');
+        if(d.matchEnded){
+          parts.push(d.resultText||d.result||'Match finished');
+        } else if(d.ts || d.runs!=null || d.balls>0){
+          var st = d.matchStartTime || d.startedAt || d.startTime;
+          if(st){
+            try{
+              var dt = new Date(st);
+              if(!isNaN(dt.getTime())){
+                parts.push('Match started at '+dt.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}));
+              }
+            }catch(e){}
+          } else {
+            parts.push('Match in progress');
+          }
+        } else {
+          parts.push('Match yet to start');
+        }
+        parts.push('Check Summary tab for team details');
+      }catch(e){}
+      return parts.join(' · ');
+    }
+
     function renderViewers(list, count){
       try{
         list = list || [];
         var n = (count!=null ? count : list.length) | 0;
         var el = $('viewer-count');
-        if(el) el.textContent = '👁 ' + n;
+        if(el) el.textContent = '🟢 ' + n;
+        var cv=$('crr-viewers'); if(cv) cv.textContent = '🟢 ' + n;
         var nowMap = {};
         var onlineIds = Object.create(null);
         list.forEach(function(v){
@@ -2452,7 +2832,10 @@
           onlineIds[id]=1;
           try{ __touchViewer(id, v.name||'Fan', true); }catch(eT){}
           if(id && !__knownViewers[id] && Object.keys(__knownViewers).length>0){
-            try{ floatCheerBanner(v.name||'Viewer', 'joined the match 👋'); }catch(e){}
+            try{
+              var welcome = buildJoinWelcome(v.name||'Viewer');
+              floatCheerBanner(v.name||'Viewer', welcome);
+            }catch(e){ try{ floatCheerBanner(v.name||'Viewer', 'joined the match 👋'); }catch(e2){} }
           }
         });
         // mark others offline
@@ -2619,9 +3002,16 @@
     var pollBusy=false,failCount=0,lastPollStart=0;
     function setLiveDot(fails){
       var dot=$('live-dot'),txt=$('live-dot-txt');
-      if(!dot)return;
-      if(fails>=3){dot.classList.add('lost');txt.textContent='Reconnecting…'}
-      else{dot.classList.remove('lost');txt.textContent='LIVE'}
+      var inline=$('crr-live');
+      if(fails>=3){
+        if(dot){dot.classList.add('lost');}
+        if(txt)txt.textContent='Reconnecting…';
+        if(inline){inline.classList.add('lost');inline.textContent='● Reconnecting';}
+      } else {
+        if(dot){dot.classList.remove('lost');}
+        if(txt)txt.textContent='LIVE';
+        if(inline){inline.classList.remove('lost');inline.textContent='● LIVE';}
+      }
     }
     function applyData(data){
       try{ if(data && data.floats) applyFloats(data.floats); }catch(eFl){}
