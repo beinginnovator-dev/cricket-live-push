@@ -664,7 +664,7 @@
     /* Remove inert activity placeholders */
     .live-match-activity, #live-match-activity, .match-activity-box, #match-activity,
     [data-activity-placeholder]{display:none!important}
-    .match-status-line{
+    .match-status-line{display:none!important;
       margin:8px 0 4px;padding:10px 12px;border-radius:12px;
       background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.18);
       font-size:12px;line-height:1.5;color:#cbd5e1;font-weight:600;
@@ -762,7 +762,7 @@
 
     /* Status narrative */
     body.theme-amazon .match-status-line,
-    body.theme-sports .match-status-line{
+    body.theme-sports .match-status-line{display:none!important;
       color:#334155!important;font-size:13px!important;line-height:1.5!important;
       border:1px solid #e2e8f0!important;background:#f8fafc!important;padding:10px 12px!important
     }
@@ -1060,6 +1060,29 @@
       font-size:11px;white-space:nowrap;overflow:visible
     }
   
+
+    .join-status-toast{
+      position:fixed;left:12px;right:12px;top:56px;z-index:120;
+      display:flex;align-items:flex-start;gap:10px;
+      padding:12px 14px;border-radius:14px;
+      background:rgba(15,23,42,.96);border:1px solid rgba(52,211,153,.35);
+      box-shadow:0 12px 40px rgba(0,0,0,.45);color:#e2e8f0;
+      font-size:13px;line-height:1.45;font-weight:600
+    }
+    .join-status-toast.hidden{display:none!important}
+    .join-status-toast .jst-body{flex:1;min-width:0}
+    .join-status-toast .jst-close{
+      border:0;background:rgba(148,163,184,.2);color:#e2e8f0;
+      width:28px;height:28px;border-radius:999px;font-size:18px;line-height:1;
+      cursor:pointer;flex-shrink:0
+    }
+    body.theme-amazon .join-status-toast,
+    body.theme-sports .join-status-toast{
+      background:#fff;color:#0f172a;border-color:#cbd5e1;box-shadow:0 8px 24px rgba(15,23,42,.12)
+    }
+    body.theme-amazon .join-status-toast .jst-close,
+    body.theme-sports .join-status-toast .jst-close{background:#f1f5f9;color:#0f172a}
+  
   </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
@@ -1100,6 +1123,10 @@
           <div class="line" id="v-match-line" style="display:none"></div>
         </div>
         <div class="match-status-line" id="match-status-line" style="display:none"></div>
+        <div id="join-status-toast" class="join-status-toast hidden" role="status">
+          <div class="jst-body" id="join-status-text"></div>
+          <button type="button" class="jst-close" onclick="dismissJoinStatus()" aria-label="Close">×</button>
+        </div>
         <div class="teams">
           <div class="team-card" onclick="openTeamModal('A')"><div class="name" id="v-team-a">Team A</div><div class="score" id="v-score-a">0-0</div><div class="role" id="v-role-a">—</div></div>
           <div class="team-card" onclick="openTeamModal('B')"><div class="name" id="v-team-b">Team B</div><div class="score" id="v-score-b">—</div><div class="role" id="v-role-b">—</div></div>
@@ -1555,6 +1582,7 @@
       var n=($('chat-name').value||'').trim().slice(0,24);
       if(!n){alert('Enter a name');return}
       try{localStorage.setItem('cricket_viewer_name',n)}catch(e){}
+      try{ showJoinStatusFlash(lastData, true); }catch(eJ){}
       if($('name-box'))$('name-box').style.display='none';
       if($('compose-box'))$('compose-box').style.display='block';
       if($('chat-name-label'))$('chat-name-label').textContent=n+' · 🪙'+(typeof myCoins!=='undefined'?myCoins:10);
@@ -1564,6 +1592,7 @@
       var n=($('gate-name').value||'').trim().slice(0,24);
       if(!n){alert('Enter your name');return}
       try{localStorage.setItem('cricket_viewer_name',n)}catch(e){}
+      try{ showJoinStatusFlash(lastData, true); }catch(eJ){}
       if($('name-gate'))$('name-gate').style.display='none';
       if($('chat-name'))$('chat-name').value=n;
       if($('chat-name-label'))$('chat-name-label').textContent=n+' · 🪙'+(typeof myCoins!=='undefined'?myCoins:10);
@@ -1717,6 +1746,7 @@
         if($('name-gate'))$('name-gate').style.display='none';
         if($('chat-name-label'))$('chat-name-label').textContent=getChatName()+' · 🪙'+(typeof myCoins!=='undefined'?myCoins:10);
         try{paintMatchStatus(lastData)}catch(e){}
+        try{showJoinStatusFlash(lastData,false)}catch(e2){}
         return;
       }
       if($('name-gate')){
@@ -2968,14 +2998,11 @@
         var decTxt = /bowl/i.test(String(tossDec)) ? 'bowl' : (/bat/i.test(String(tossDec)) ? 'bat' : '');
         var maxO = data.maxOvers || data.overs || data.totalOvers || '';
         var inns = data.innings|0;
+        if(inns < 1) inns = 1;
 
-        // First innings closed score
-        var fRuns = data.firstInningsScore;
-        var fWkts = data.firstInningsWickets;
-        var fOv = data.firstInningsOvers;
-        if(fRuns==null && inns>=2){
-          // batting side is 2nd; first score might be on non-batting team
-          fRuns = data.firstInningsScore;
+        function teamScoreLine(name, runs, wkts, balls, oversStr){
+          var ov = oversStr || oversFromBallsSafe(balls|0);
+          return name + ' are ' + (runs|0) + '/' + (wkts|0) + ' in ' + ov + ' overs';
         }
 
         var parts = [];
@@ -2985,32 +3012,57 @@
         if(maxO) parts.push('It is a ' + maxO + '-over match.');
 
         if(data.matchEnded){
-          var res = data.resultText || data.statusText || 'Match completed.';
-          parts.push(res);
+          var res = data.resultText || data.statusText || data.result || 'Match completed.';
+          parts.push(String(res));
           return parts.join(' ');
         }
 
+        // Resolve batting team from score side flags
+        var batName = data.battingTeamName || '';
+        var bowlName = data.bowlingTeamName || '';
+        if(!batName){
+          if(data.battingSide==='A' || data.battingTeam==='A') batName = a;
+          else if(data.battingSide==='B' || data.battingTeam==='B') batName = b;
+        }
+        if(!bowlName){
+          if(batName === a) bowlName = b;
+          else if(batName === b) bowlName = a;
+        }
+
+        var runs = data.runs|0, wkts = data.wickets|0, balls = data.balls|0;
+        var ov = data.overs || oversFromBallsSafe(balls);
+
+        // Prefer live card: if team A has score and B yet to bat style
+        var aRuns = data.teamARuns, aWk = data.teamAWickets, aBalls = data.teamABalls;
+        var bRuns = data.teamBRuns, bWk = data.teamBWickets, bBalls = data.teamBBalls;
+
         if(inns <= 1){
-          var bat = data.battingTeamName || (data.battingSide==='A'?a:b);
-          var runs = data.runs|0, wkts = data.wickets|0;
-          var ov = data.overs || oversFromBallsSafe(data.balls|0);
-          if((data.balls|0)>0 || runs>0){
-            parts.push(bat + ' are ' + runs + '/' + wkts + ' after ' + ov + ' overs.');
+          if(!batName) batName = a;
+          if(balls > 0 || runs > 0){
+            parts.push(teamScoreLine(batName, runs, wkts, balls, ov) + '.');
+          } else if(tossWin){
+            parts.push('Match is about to start.');
           } else {
-            parts.push(bat + ' are about to begin their innings.');
+            parts.push('Waiting for the first ball.');
           }
         } else {
-          // Chase
-          var bat2 = data.battingTeamName || (data.battingSide==='A'?a:b);
-          var bowl2 = data.bowlingTeamName || (data.battingSide==='A'?b:a);
-          var fiRuns = fRuns!=null ? fRuns : data.firstInningsScore;
-          var fiWkts = fWkts!=null ? fWkts : data.firstInningsWickets;
-          var fiOv = fOv || data.firstInningsOvers || '';
-          if(fiRuns!=null){
-            parts.push(bowl2 + ' posted ' + fiRuns + '/' + (fiWkts!=null?fiWkts:'?') + (fiOv?(' in '+fiOv+' overs'):'') + '.');
+          // 2nd innings / chase
+          var fiRuns = data.firstInningsScore;
+          var fiWkts = data.firstInningsWickets;
+          var fiOv = data.firstInningsOvers || '';
+          var posted = bowlName || (batName === a ? b : a);
+          if(fiRuns != null){
+            parts.push((posted || 'The first team') + ' posted ' + fiRuns + '/' + (fiWkts != null ? fiWkts : '?') + (fiOv ? (' in ' + fiOv + ' overs') : '') + '.');
           }
-          var need = data.targetScore!=null ? Math.max(0, (data.targetScore|0) - (data.runs|0)) : null;
-          parts.push(bat2 + ' are chasing' + (data.targetScore!=null?(' a target of '+(data.targetScore|0)):'') + ' and are currently ' + (data.runs|0) + '/' + (data.wickets|0) + ' in ' + (data.overs||oversFromBallsSafe(data.balls|0)) + ' overs' + (need!=null && need>0 ? (', needing ' + need + ' more runs') : '') + '.');
+          if(!batName) batName = b;
+          if(balls > 0 || runs > 0){
+            var need = data.runsNeeded != null ? data.runsNeeded : (data.target != null ? (data.target - runs) : null);
+            var line = teamScoreLine(batName, runs, wkts, balls, ov);
+            if(need != null && need > 0) line += ', needing ' + need + ' more runs to win';
+            parts.push(line + '.');
+          } else {
+            parts.push(batName + ' are about to begin the chase.');
+          }
         }
         return parts.join(' ');
       }catch(e){ return ''; }
@@ -3018,13 +3070,34 @@
     function paintMatchStatus(data){
       try{
         var el = $('match-status-line');
-        if(!el) return;
-        // only after viewer has logged name
-        if(!getChatName()){ el.style.display='none'; el.textContent=''; return; }
-        var txt = buildMatchStatusText(data||lastData||{});
-        if(!txt){ el.style.display='none'; return; }
-        el.textContent = txt;
-        el.style.display = 'block';
+        if(el){ el.style.display='none'; el.textContent=''; }
+      }catch(e){}
+    }
+    var __joinStatusTimer = null;
+    var __joinStatusShownKey = '';
+    function dismissJoinStatus(){
+      try{
+        var t=$('join-status-toast');
+        if(t) t.classList.add('hidden');
+        if(__joinStatusTimer){ clearTimeout(__joinStatusTimer); __joinStatusTimer=null; }
+      }catch(e){}
+    }
+    function showJoinStatusFlash(data, force){
+      try{
+        if(!getChatName()) return;
+        data = data || lastData || {};
+        var txt = buildMatchStatusText(data);
+        if(!txt) return;
+        var key = String(data.liveMatchId || data.matchId || (typeof LIVE_MATCH!=='undefined'?LIVE_MATCH:'') || 'm') + '|' + getChatName();
+        if(!force && __joinStatusShownKey === key) return;
+        __joinStatusShownKey = key;
+        var box = $('join-status-toast');
+        var body = $('join-status-text');
+        if(!box || !body) return;
+        body.textContent = txt;
+        box.classList.remove('hidden');
+        if(__joinStatusTimer) clearTimeout(__joinStatusTimer);
+        __joinStatusTimer = setTimeout(function(){ dismissJoinStatus(); }, 10000);
       }catch(e){}
     }
     function updateMatchClock(data){
@@ -3080,7 +3153,8 @@
       lastViewerMatchEnded=!!data.matchEnded;
       try{settlePrediction(data)}catch(eSp){}
       try{paintPlayerCheers()}catch(eCh){}
-      $('no-data').classList.add('hidden');$('live-root').classList.remove('hidden');var gb2=$('glow-ball');if(gb2)gb2.classList.toggle('paused',!!data.matchEnded);
+      $('no-data').classList.add('hidden');$('live-root').classList.remove('hidden');
+      try{showJoinStatusFlash(data,false)}catch(eJS){}var gb2=$('glow-ball');if(gb2)gb2.classList.toggle('paused',!!data.matchEnded);
       var ev=data.lastEvent||detectEventFromCommentary(data.commentary);
       if(data.milestone&&data.milestone.type){ev=data.milestone.type}
       try{
@@ -4132,6 +4206,21 @@ try{mountDashboards()}catch(e){}
         if(!m || m.classList.contains('hidden')) return;
         if(m.contains(ev.target) || (g && g.contains(ev.target))) return;
         m.classList.add('hidden');
+      }catch(e){}
+    });
+
+
+    document.addEventListener('visibilitychange', function(){
+      try{
+        if(!document.hidden && getChatName()){
+          // soft rejoin reminder only if was away > 30s
+          if(window.__awaySince && Date.now()-window.__awaySince > 30000){
+            showJoinStatusFlash(lastData, true);
+          }
+          window.__awaySince = 0;
+        } else if(document.hidden){
+          window.__awaySince = Date.now();
+        }
       }catch(e){}
     });
 
