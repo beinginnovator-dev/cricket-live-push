@@ -50,7 +50,8 @@
     .v-innings-stats{background:linear-gradient(165deg,#0f172a,#1e293b 55%,#0f172a);border:1px solid rgba(148,163,184,.2);padding:10px 8px;overflow:auto;max-height:540px}
     .v-swipe-title{text-align:center;color:#fbbf24;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:3px 0 9px}
     .v-innings-stats .sec-title{padding:10px 8px 6px;font-size:11px}
-    .v-innings-stats table.stats{font-size:12px}
+    .v-innings-stats table.stats{font-size:12px;line-height:1.4}
+    table.stats th,table.stats td{vertical-align:middle;line-height:1.35;padding:8px 6px}
     .v-innings-stats table.stats th{font-size:9px;padding:7px 4px}
     .v-innings-stats table.stats td{font-size:11px;padding:7px 4px}
     .v-swipe-hint{text-align:center;font-size:9px;color:#64748b;margin:5px 0 8px;letter-spacing:.04em}
@@ -84,8 +85,8 @@
     .sb-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;margin:0}
     .sb-table th{font-size:10px;color:#7da89d;text-transform:uppercase;letter-spacing:.05em;padding:5px 2px;text-align:left;border-bottom:1px solid rgba(148,163,184,.15)}
     .sb-table th.n,.sb-table td.n{text-align:center}
-    .sb-table td{padding:7px 2px;border-bottom:1px solid rgba(148,163,184,.08);vertical-align:middle}
-    .sb-table td.nm{font-weight:900;font-size:14px;color:#f0fdf4;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    .sb-table td{padding:8px 3px;border-bottom:1px solid rgba(148,163,184,.08);vertical-align:middle;line-height:1.35}
+    .sb-table td.nm{font-weight:900;font-size:14px;color:#f0fdf4;max-width:100%;overflow:visible;text-overflow:clip;white-space:nowrap;
       text-shadow:0 0 10px rgba(52,211,153,.55),0 0 18px rgba(52,211,153,.25)}
     .sb-table.bowl td.nm{color:#e0f2fe;text-shadow:0 0 10px rgba(125,211,252,.5),0 0 18px rgba(56,189,248,.22)}
     .sb-table td.n{font-weight:700;color:#34d399;font-size:13px}
@@ -141,7 +142,7 @@
     .players{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:stretch}
     .pbox{background:rgba(15,23,42,.65);border:1px solid rgba(148,163,184,.15);border-radius:.75rem;padding:12px 10px;min-height:84px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center}
     .pbox .lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#fbbf24}
-    .pbox .nm{font-size:14px;font-weight:800;margin-top:6px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pbox .nm{font-size:14px;font-weight:800;margin-top:6px;max-width:100%;white-space:nowrap;overflow:visible;text-overflow:clip}
     .pbox .st{font-size:18px;font-weight:900;color:#fff;margin-top:4px}
     .pbox.bowl .lbl{color:#7dd3fc}
     .status{margin-top:12px;text-align:center;font-size:12px;color:#cbd5e1}
@@ -155,7 +156,7 @@
     .over-msg{font-size:12px;color:#94a3b8;font-style:italic;text-align:center}
     .viewer-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:8px 10px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.15);border-radius:.75rem;font-size:12px}
     .viewer-bar .count{font-weight:800;color:#34d399}
-    .viewer-bar .names{color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
+    .viewer-bar .names{color:#94a3b8;overflow:visible;text-overflow:clip;white-space:nowrap;max-width:55%}
     .tabs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:3px;margin:10px 0 8px}
     .tab{border:1px solid rgba(148,163,184,.2);background:rgba(30,41,59,.75);color:#94a3b8;font-weight:700;font-size:8px;text-transform:uppercase;letter-spacing:.03em;border-radius:999px;padding:6px 2px;cursor:pointer;line-height:1.2}
     .fan-team-card{margin:10px 12px;padding:12px;border-radius:.75rem;background:rgba(30,41,59,.65);border:1px solid rgba(148,163,184,.18)}
@@ -306,7 +307,7 @@
     @keyframes coinBlink{0%,100%{outline:2px solid transparent}50%{outline:2px solid #fbbf24}}
     .float-banner{position:fixed;left:50%;top:72px;transform:translateX(-50%);z-index:9200;pointer-events:none;
       background:linear-gradient(90deg,rgba(16,185,129,.95),rgba(59,130,246,.95));color:#fff;font-weight:800;font-size:13px;
-      padding:8px 16px;border-radius:999px;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+      padding:8px 16px;border-radius:999px;white-space:nowrap;max-width:90vw;overflow:visible;text-overflow:clip;
       box-shadow:0 8px 24px rgba(0,0,0,.4);animation:bannerFly 2.1s ease-out forwards}
     .float-banner.gold{background:linear-gradient(90deg,rgba(251,191,36,.95),rgba(245,158,11,.95));color:#1c1917}
     .float-banner .who{opacity:.9;font-size:10px;margin-right:6px;text-transform:uppercase;letter-spacing:.04em}
@@ -340,7 +341,7 @@
       top:auto;bottom:42%;
       background:linear-gradient(90deg,rgba(16,185,129,.95),rgba(59,130,246,.95));
       color:#fff;font-weight:800;font-size:13px;padding:8px 16px;border-radius:999px;
-      white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;
+      white-space:nowrap;max-width:90vw;overflow:visible;text-overflow:clip;
       box-shadow:0 8px 24px rgba(0,0,0,.4);
       animation:bannerFlyUp 2s ease-out forwards;
     }
@@ -388,7 +389,7 @@
       top:auto;bottom:38%;
       background:linear-gradient(90deg,rgba(16,185,129,.96),rgba(59,130,246,.96));
       color:#fff;font-weight:900;font-size:16px;padding:10px 18px;border-radius:999px;
-      white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
+      white-space:nowrap;max-width:92vw;overflow:visible;text-overflow:clip;
       box-shadow:0 10px 28px rgba(0,0,0,.45);
       animation:bannerFlyUp 4.5s linear forwards;
     }
@@ -420,7 +421,7 @@
       background:linear-gradient(90deg,rgba(16,185,129,.96),rgba(59,130,246,.96))!important;
       color:#fff!important;font-weight:900!important;font-size:17px!important;
       padding:12px 20px!important;border-radius:999px!important;
-      white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
+      white-space:nowrap;max-width:92vw;overflow:visible;text-overflow:clip;
       box-shadow:0 12px 32px rgba(0,0,0,.5)!important;
       animation:none!important; /* JS-driven full path */
       opacity:1!important;
@@ -688,37 +689,376 @@
     .theme-opt{border:1px solid rgba(148,163,184,.25);background:rgba(30,41,59,.9);color:#e2e8f0;border-radius:10px;padding:10px 12px;font-weight:800;font-size:13px;text-align:left;cursor:pointer}
     .theme-opt.on{border-color:#34d399;background:rgba(16,185,129,.2);color:#a7f3d0}
 
-    /* Amazon light */
-    body.theme-amazon{background:#eaeded;color:#0f1111}
-    body.theme-amazon .score-card,body.theme-amazon .panel,body.theme-amazon .sb-wrap,body.theme-amazon .team-card,body.theme-amazon .pbox,body.theme-amazon .over-box,body.theme-amazon .dash-slot.dashboard-open,body.theme-amazon .match-status-line,body.theme-amazon .viewer-bar,body.theme-amazon .theme-menu{
-      background:#ffffff!important;border-color:#d5d9d9!important;color:#0f1111!important;box-shadow:0 2px 8px rgba(15,17,17,.08)
-    }
-    body.theme-amazon .match-head .type,body.theme-amazon .team-card .name,body.theme-amazon .pbox .lbl,body.theme-amazon .sb-table th,body.theme-amazon .over-box .lbl{color:#c45500!important}
-    body.theme-amazon .team-card .score,body.theme-amazon .sb-table td.n,body.theme-amazon .crr-v,body.theme-amazon .live-dot,body.theme-amazon .viewers-live-label{color:#067d62!important;text-shadow:none!important}
-    body.theme-amazon .tab{background:#f0f2f2;color:#565959;border-color:#d5d9d9}
-    body.theme-amazon .tab.on{background:#ff9900;color:#111;border-color:#ff9900}
-    body.theme-amazon .hdr h1,body.theme-amazon .match-head .line,body.theme-amazon .team-card .role,body.theme-amazon .over-msg,body.theme-amazon .crr-nrr-line{color:#565959!important}
-    body.theme-amazon .gear-btn,body.theme-amazon .theme-opt,body.theme-amazon .cheer-toggle,body.theme-amazon .icon-btn,body.theme-amazon .pred-btn{background:#fff;color:#0f1111;border-color:#d5d9d9}
-    body.theme-amazon .emoji-rail{background:#fff;border-color:#d5d9d9}
-    body.theme-amazon .chase-flash{background:linear-gradient(135deg,#ff9900,#e47911)!important;color:#111!important;border-color:#e47911!important}
-    body.theme-amazon .sb-table td.nm{color:#0f1111!important;text-shadow:none!important}
-    body.theme-amazon .ob{background:#f0f2f2;color:#0f1111;border-color:#d5d9d9}
 
-    /* Sports light */
-    body.theme-sports{background:#eef3fb;color:#0b1220}
-    body.theme-sports .score-card,body.theme-sports .panel,body.theme-sports .sb-wrap,body.theme-sports .team-card,body.theme-sports .pbox,body.theme-sports .over-box,body.theme-sports .dash-slot.dashboard-open,body.theme-sports .match-status-line,body.theme-sports .viewer-bar,body.theme-sports .theme-menu{
-      background:#ffffff!important;border-color:#c5d4ea!important;color:#0b1220!important;box-shadow:0 4px 16px rgba(11,18,32,.08)
+    /* ========== Light themes: professional typography & contrast ========== */
+    body.theme-amazon,
+    body.theme-sports{
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      text-rendering:optimizeLegibility;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.45;
+      font-size:15px;
     }
-    body.theme-sports .match-head .type,body.theme-sports .team-card .name,body.theme-sports .pbox .lbl{color:#1d4ed8!important}
-    body.theme-sports .team-card .score,body.theme-sports .sb-table td.n,body.theme-sports .crr-v,body.theme-sports .live-dot,body.theme-sports .viewers-live-label{color:#0369a1!important;text-shadow:none!important}
-    body.theme-sports .tab{background:#e8eef8;color:#475569;border-color:#c5d4ea}
-    body.theme-sports .tab.on{background:#2563eb;color:#fff;border-color:#2563eb}
-    body.theme-sports .hdr h1,body.theme-sports .team-card .role,body.theme-sports .over-msg,body.theme-sports .crr-nrr-line,body.theme-sports .sb-table th{color:#64748b!important}
-    body.theme-sports .gear-btn,body.theme-sports .theme-opt,body.theme-sports .cheer-toggle,body.theme-sports .icon-btn,body.theme-sports .pred-btn{background:#fff;color:#0b1220;border-color:#c5d4ea}
-    body.theme-sports .emoji-rail{background:#fff;border-color:#c5d4ea}
-    body.theme-sports .chase-flash{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;border-color:#1d4ed8!important}
-    body.theme-sports .sb-table td.nm{color:#0b1220!important;text-shadow:none!important}
-    body.theme-sports .ob{background:#e8eef8;color:#0b1220;border-color:#c5d4ea}
+    body.theme-amazon *,
+    body.theme-sports *{
+      text-shadow:none!important;
+    }
+
+    /* Shared light surface + readable type */
+    body.theme-amazon .score-card,
+    body.theme-amazon .panel,
+    body.theme-amazon .sb-wrap,
+    body.theme-amazon .team-card,
+    body.theme-amazon .pbox,
+    body.theme-amazon .over-box,
+    body.theme-amazon .dash-slot.dashboard-open,
+    body.theme-amazon .match-status-line,
+    body.theme-amazon .viewer-bar,
+    body.theme-amazon .theme-menu,
+    body.theme-amazon .fan-team-card,
+    body.theme-amazon .emoji-rail,
+    body.theme-sports .score-card,
+    body.theme-sports .panel,
+    body.theme-sports .sb-wrap,
+    body.theme-sports .team-card,
+    body.theme-sports .pbox,
+    body.theme-sports .over-box,
+    body.theme-sports .dash-slot.dashboard-open,
+    body.theme-sports .match-status-line,
+    body.theme-sports .viewer-bar,
+    body.theme-sports .theme-menu,
+    body.theme-sports .fan-team-card,
+    body.theme-sports .emoji-rail{
+      background:#ffffff!important;
+      color:#0f172a!important;
+      box-shadow:0 1px 3px rgba(15,23,42,.06),0 4px 12px rgba(15,23,42,.04);
+    }
+
+    /* Body text on light */
+    body.theme-amazon,
+    body.theme-sports{background:#f4f6f8;color:#0f172a}
+    body.theme-sports{background:#f0f4fa}
+
+    body.theme-amazon .score-card,
+    body.theme-sports .score-card{border:1px solid #e2e8f0!important;border-radius:16px!important}
+
+    /* Headings */
+    body.theme-amazon .match-head .type{color:#c2410c!important;font-size:12px!important;letter-spacing:.12em;font-weight:800}
+    body.theme-sports .match-head .type{color:#1e40af!important;font-size:12px!important;letter-spacing:.12em;font-weight:800}
+
+    body.theme-amazon .match-clock-inline,
+    body.theme-sports .match-clock-inline,
+    body.theme-amazon .crr-nrr-line,
+    body.theme-sports .crr-nrr-line,
+    body.theme-amazon #v-match-clock,
+    body.theme-sports #v-match-clock{
+      color:#475569!important;font-size:12px!important;font-weight:600;line-height:1.4
+    }
+    body.theme-amazon .clock-elapsed,
+    body.theme-sports .clock-elapsed,
+    body.theme-amazon .crr-v,
+    body.theme-sports .crr-v{color:#0f766e!important;font-weight:700}
+
+    /* Status narrative */
+    body.theme-amazon .match-status-line,
+    body.theme-sports .match-status-line{
+      color:#334155!important;font-size:13px!important;line-height:1.5!important;
+      border:1px solid #e2e8f0!important;background:#f8fafc!important;padding:10px 12px!important
+    }
+
+    /* Team cards */
+    body.theme-amazon .team-card,
+    body.theme-sports .team-card{
+      border:1px solid #e2e8f0!important;min-height:auto;padding:12px 10px!important
+    }
+    body.theme-amazon .team-card .name,
+    body.theme-sports .team-card .name{
+      color:#0f172a!important;font-size:12px!important;font-weight:800;letter-spacing:.04em;
+      line-height:1.3;overflow:visible;white-space:nowrap
+    }
+    body.theme-amazon .team-card .name{color:#9a3412!important}
+    body.theme-sports .team-card .name{color:#1e3a8a!important}
+    body.theme-amazon .team-card .score,
+    body.theme-sports .team-card .score{
+      color:#0f766e!important;font-size:26px!important;font-weight:800;line-height:1.2;
+      margin-top:6px;overflow:visible
+    }
+    body.theme-amazon .team-card .role,
+    body.theme-sports .team-card .role{
+      color:#64748b!important;font-size:11px!important;line-height:1.3;margin-top:4px
+    }
+    body.theme-amazon .team-logo,
+    body.theme-sports .team-logo{background:#0f172a!important;color:#fff!important;border-color:#0f172a!important}
+
+    /* Tabs */
+    body.theme-amazon .tab,
+    body.theme-sports .tab{
+      background:#f1f5f9!important;color:#475569!important;border:1px solid #e2e8f0!important;
+      font-size:10px!important;font-weight:700;padding:8px 4px!important;line-height:1.2
+    }
+    body.theme-amazon .tab.on{background:#f59e0b!important;color:#111!important;border-color:#d97706!important}
+    body.theme-sports .tab.on{background:#2563eb!important;color:#fff!important;border-color:#1d4ed8!important}
+
+    /* Scoreboard / batsman-bowler tables */
+    body.theme-amazon .sb-wrap,
+    body.theme-sports .sb-wrap{border:1px solid #e2e8f0!important;padding:8px 10px!important}
+    body.theme-amazon .sb-table,
+    body.theme-sports .sb-table{font-size:13px!important;line-height:1.35}
+    body.theme-amazon .sb-table th,
+    body.theme-sports .sb-table th{
+      color:#64748b!important;font-size:10px!important;font-weight:700;
+      padding:8px 4px!important;border-bottom:1px solid #e2e8f0!important;
+      background:transparent!important;vertical-align:middle
+    }
+    body.theme-amazon .sb-table td,
+    body.theme-sports .sb-table td{
+      color:#0f172a!important;font-size:13px!important;font-weight:600;
+      padding:9px 4px!important;border-bottom:1px solid #f1f5f9!important;
+      vertical-align:middle;line-height:1.35;overflow:visible
+    }
+    body.theme-amazon .sb-table td.nm,
+    body.theme-sports .sb-table td.nm{
+      color:#0f172a!important;font-weight:700;font-size:14px!important;
+      white-space:nowrap;overflow:visible;text-overflow:clip
+    }
+    body.theme-amazon .sb-table td.n,
+    body.theme-sports .sb-table td.n{color:#0f766e!important;font-weight:700;font-variant-numeric:tabular-nums}
+
+    /* Stats panel tables */
+    body.theme-amazon table.stats,
+    body.theme-sports table.stats{width:100%;border-collapse:collapse;font-size:13px!important}
+    body.theme-amazon table.stats th,
+    body.theme-sports table.stats th{
+      background:#0f172a!important;color:#f8fafc!important;font-size:10px!important;
+      font-weight:700;letter-spacing:.04em;padding:10px 8px!important;
+      line-height:1.3;vertical-align:middle;white-space:nowrap
+    }
+    body.theme-amazon table.stats td,
+    body.theme-sports table.stats td{
+      background:#fff!important;color:#0f172a!important;font-size:13px!important;
+      font-weight:600;padding:10px 8px!important;line-height:1.4;
+      border-bottom:1px solid #e2e8f0!important;vertical-align:middle
+    }
+    body.theme-amazon table.stats td.num,
+    body.theme-sports table.stats td.num,
+    body.theme-amazon table.stats .num,
+    body.theme-sports table.stats .num{
+      color:#0f766e!important;font-weight:700;font-variant-numeric:tabular-nums;text-align:center
+    }
+    body.theme-amazon .sec-title,
+    body.theme-sports .sec-title{
+      color:#0f172a!important;font-size:11px!important;font-weight:800;
+      letter-spacing:.06em;padding:12px 4px 8px!important;line-height:1.3
+    }
+    body.theme-amazon .sec-title{color:#c2410c!important}
+    body.theme-sports .sec-title{color:#1d4ed8!important}
+
+    /* Fall of wickets block */
+    body.theme-amazon .fow-stats-wrap,
+    body.theme-sports .fow-stats-wrap{
+      background:#f8fafc!important;border:1px solid #e2e8f0!important;border-radius:12px;
+      padding:12px!important;margin-top:12px
+    }
+    body.theme-amazon .fow-stats-wrap .fow-h,
+    body.theme-sports .fow-stats-wrap .fow-h{color:#0f172a!important;font-size:12px!important;font-weight:800}
+    body.theme-amazon .fow-stats-table th,
+    body.theme-sports .fow-stats-table th{
+      color:#64748b!important;background:transparent!important;font-size:10px!important;
+      padding:8px 4px!important;border-bottom:1px solid #e2e8f0
+    }
+    body.theme-amazon .fow-stats-table td,
+    body.theme-sports .fow-stats-table td{
+      color:#0f172a!important;font-size:12px!important;padding:8px 4px!important;
+      line-height:1.4;border-bottom:1px solid #f1f5f9
+    }
+
+    /* Viewers panel */
+    body.theme-amazon .panel-hdr .ttl,
+    body.theme-sports .panel-hdr .ttl{color:#0f766e!important;font-weight:800;font-size:12px}
+    body.theme-amazon .panel,
+    body.theme-sports .panel{border:1px solid #e2e8f0!important}
+
+    /* Over / balls */
+    body.theme-amazon .over-box .lbl,
+    body.theme-sports .over-box .lbl{color:#64748b!important;font-size:10px!important;font-weight:700}
+    body.theme-amazon .over-msg,
+    body.theme-sports .over-msg{color:#475569!important;font-size:12px!important;line-height:1.4;font-style:normal}
+    body.theme-amazon .ob,
+    body.theme-sports .ob{
+      background:#f1f5f9!important;color:#0f172a!important;border-color:#cbd5e1!important;
+      font-weight:700;min-width:30px;height:30px;line-height:30px
+    }
+    body.theme-amazon .ob.w,body.theme-sports .ob.w{background:#fef2f2!important;color:#b91c1c!important;border-color:#fecaca!important}
+    body.theme-amazon .ob.b4,body.theme-sports .ob.b4{background:#ecfdf5!important;color:#047857!important;border-color:#a7f3d0!important}
+    body.theme-amazon .ob.b6,body.theme-sports .ob.b6{background:#ccfbf1!important;color:#0f766e!important;border-color:#99f6e4!important}
+
+    /* Header */
+    body.theme-amazon .live-dot,
+    body.theme-sports .live-dot,
+    body.theme-amazon .viewers-live-label,
+    body.theme-sports .viewers-live-label{color:#0f766e!important;font-weight:700;font-size:12px}
+    body.theme-amazon .gear-btn,
+    body.theme-sports .gear-btn{
+      background:#fff!important;color:#0f172a!important;border:1px solid #cbd5e1!important
+    }
+    body.theme-amazon .theme-opt,
+    body.theme-sports .theme-opt{
+      background:#fff!important;color:#0f172a!important;border:1px solid #e2e8f0!important;
+      font-size:13px!important;font-weight:600;padding:10px 12px!important
+    }
+    body.theme-amazon .theme-opt.on{border-color:#f59e0b!important;background:#fffbeb!important;color:#92400e!important}
+    body.theme-sports .theme-opt.on{border-color:#2563eb!important;background:#eff6ff!important;color:#1e40af!important}
+
+    /* Buttons */
+    body.theme-amazon .cheer-toggle,
+    body.theme-sports .cheer-toggle,
+    body.theme-amazon .icon-btn,
+    body.theme-sports .icon-btn,
+    body.theme-amazon .pred-btn,
+    body.theme-sports .pred-btn{
+      background:#fff!important;color:#0f172a!important;border:1px solid #cbd5e1!important;
+      font-weight:700;font-size:12px!important;line-height:1.2
+    }
+    body.theme-amazon .cheer-toggle.on,
+    body.theme-amazon .pred-btn.on{background:#f59e0b!important;color:#111!important;border-color:#d97706!important}
+    body.theme-sports .cheer-toggle.on,
+    body.theme-sports .pred-btn.on{background:#2563eb!important;color:#fff!important;border-color:#1d4ed8!important}
+
+    body.theme-amazon .chase-flash{
+      background:linear-gradient(135deg,#f59e0b,#d97706)!important;color:#111!important;
+      border-color:#b45309!important;font-size:14px!important;font-weight:800;line-height:1.3
+    }
+    body.theme-sports .chase-flash{
+      background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;
+      border-color:#1e40af!important;font-size:14px!important;font-weight:800;line-height:1.3
+    }
+
+    /* Feed / commentary on light */
+    body.theme-amazon #comm-list .feed-item,
+    body.theme-sports #comm-list .feed-item{
+      background:#f8fafc!important;border:1px solid #e2e8f0!important;color:#0f172a!important
+    }
+    body.theme-amazon #comm-list .feed-item .title,
+    body.theme-sports #comm-list .feed-item .title{color:#0f172a!important}
+    body.theme-amazon #comm-list .feed-item .body,
+    body.theme-sports #comm-list .feed-item .body{color:#475569!important}
+    body.theme-amazon .empty,
+    body.theme-sports .empty{color:#64748b!important;font-size:13px}
+
+    /* Subtabs summary */
+    body.theme-amazon .subtab,
+    body.theme-sports .subtab{
+      background:#f1f5f9!important;color:#475569!important;border:1px solid #e2e8f0!important;
+      font-size:11px!important;font-weight:700;padding:8px 10px!important;line-height:1.2
+    }
+    body.theme-amazon .subtab.on{background:#f59e0b!important;color:#111!important}
+    body.theme-sports .subtab.on{background:#2563eb!important;color:#fff!important}
+
+    /* Prevent clipping */
+    body.theme-amazon .panel,
+    body.theme-sports .panel{overflow:auto;-webkit-overflow-scrolling:touch}
+    body.theme-amazon table.stats td,
+    body.theme-sports table.stats td{word-break:normal;overflow-wrap:anywhere}
+  
+
+    /* ---- Pro tables: show FULL names & numbers (no ellipsis) ---- */
+    #stats-body,#sum-orange,#sum-purple,#sum-fow{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    table.stats{table-layout:auto;width:100%;min-width:300px;font-size:11px}
+    table.stats th{
+      white-space:nowrap;font-size:9px;padding:8px 4px;vertical-align:middle;
+      line-height:1.25
+    }
+    table.stats td{
+      white-space:nowrap;overflow:visible;text-overflow:clip;
+      font-size:11px;line-height:1.35;padding:8px 4px;vertical-align:middle
+    }
+    table.stats td.nm,
+    table.stats td:nth-child(2){
+      font-weight:700;color:#e2e8f0;font-size:11px;
+      white-space:nowrap;overflow:visible;text-overflow:clip;max-width:none
+    }
+    table.stats td.num,table.stats th.num{
+      text-align:center;font-variant-numeric:tabular-nums;
+      white-space:nowrap;overflow:visible;text-overflow:clip
+    }
+    table.stats td.how{white-space:normal;font-size:10px;color:#94a3b8;line-height:1.25}
+    table.stats tr.dim td{opacity:1}
+    table.stats tr.neon td.nm{color:#34d399}
+
+    .sb-table td.nm{
+      white-space:nowrap;overflow:visible;text-overflow:clip;font-size:13px
+    }
+    .sb-table td.n{white-space:nowrap;overflow:visible;text-overflow:clip}
+
+    /* Summary squad list - always readable */
+    .team-player-row{padding:10px 4px;border-bottom:1px solid rgba(148,163,184,.12)}
+    .team-player-row .pn{
+      font-size:14px;font-weight:700;line-height:1.4;
+      color:#e2e8f0;white-space:nowrap;overflow:visible;text-overflow:clip
+    }
+    .sec-title.squad-team{color:#fbbf24;font-size:13px;font-weight:800;margin-top:12px}
+
+    /* Light themes: force dark text on light surfaces */
+    body.theme-amazon .team-player-row .pn,
+    body.theme-sports .team-player-row .pn{
+      color:#0f172a!important;font-size:14px!important;font-weight:700!important;opacity:1!important
+    }
+    body.theme-amazon .sec-title.squad-team,
+    body.theme-sports .sec-title.squad-team,
+    body.theme-amazon .sec-title,
+    body.theme-sports .sec-title{color:#c2410c!important;opacity:1!important}
+    body.theme-sports .sec-title.squad-team,
+    body.theme-sports .sec-title{color:#1d4ed8!important}
+
+    body.theme-amazon table.stats td,
+    body.theme-sports table.stats td,
+    body.theme-amazon table.stats td.nm,
+    body.theme-sports table.stats td.nm,
+    body.theme-amazon table.stats td:nth-child(2),
+    body.theme-sports table.stats td:nth-child(2){
+      color:#0f172a!important;opacity:1!important;background:#fff!important;
+      white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important
+    }
+    body.theme-amazon table.stats th,
+    body.theme-sports table.stats th{
+      background:#0f172a!important;color:#f8fafc!important
+    }
+    body.theme-amazon table.stats td.num,
+    body.theme-sports table.stats td.num{color:#0f766e!important}
+    body.theme-amazon table.stats td.how,
+    body.theme-sports table.stats td.how{color:#475569!important;white-space:normal}
+
+    body.theme-amazon .team-card .name,
+    body.theme-sports .team-card .name{
+      color:#9a3412!important;opacity:1!important;-webkit-text-fill-color:#9a3412!important
+    }
+    body.theme-sports .team-card .name{
+      color:#1e3a8a!important;-webkit-text-fill-color:#1e3a8a!important
+    }
+    body.theme-amazon .team-card .score,
+    body.theme-sports .team-card .score{
+      color:#0f766e!important;-webkit-text-fill-color:#0f766e!important;opacity:1!important
+    }
+    body.theme-amazon .empty,
+    body.theme-sports .empty{color:#64748b!important;opacity:1!important}
+
+    /* Cap tables: give name column more room */
+    #sum-orange table.stats,
+    #sum-purple table.stats,
+    #stats-body table.stats{
+      font-size:11px
+    }
+    #sum-orange table.stats td.nm,
+    #sum-purple table.stats td.nm,
+    #stats-body table.stats td.nm{
+      font-size:11px;white-space:nowrap;overflow:visible;text-overflow:clip
+    }
+    #sum-orange table.stats td.num,
+    #sum-purple table.stats td.num,
+    #stats-body table.stats td.num{
+      font-size:11px;white-space:nowrap;overflow:visible
+    }
   
   </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
@@ -1060,7 +1400,7 @@
         el.setAttribute('data-float-bus','1');
         // Keep banner in upper band, slightly off-center so score stays readable
         var side = Math.random() < 0.5 ? 'left' : 'right';
-        el.style.cssText='position:fixed;z-index:99990;pointer-events:none;background:linear-gradient(90deg,rgba(16,185,129,.92),rgba(59,130,246,.92));color:#fff;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;white-space:nowrap;max-width:46vw;overflow:hidden;text-overflow:ellipsis;box-shadow:0 8px 24px rgba(0,0,0,.4)';
+        el.style.cssText='position:fixed;z-index:99990;pointer-events:none;background:linear-gradient(90deg,rgba(16,185,129,.92),rgba(59,130,246,.92));color:#fff;font-weight:900;font-size:14px;padding:8px 14px;border-radius:999px;white-space:nowrap;max-width:46vw;overflow:visible;text-overflow:clip;box-shadow:0 8px 24px rgba(0,0,0,.4)';
         el.innerHTML='<span style="opacity:.9;font-size:10px;margin-right:6px;text-transform:uppercase">'+__fbEsc(name||'Fan')+'</span> '+__fbEsc(text||'');
         var startY=window.innerHeight*0.52, endY=20;
         try{
@@ -2028,11 +2368,12 @@
     function paintTeamsWithCheers(data){
       var squadA=data.squadA||data.teamAPlayers||[],squadB=data.squadB||data.teamBPlayers||[];
       function squadHtml(teamName,squad){
-        return '<div class="sec-title" style="color:#fbbf24">'+esc(teamName||'Team')+'</div>'+
+        return '<div class="sec-title squad-team">'+esc(teamName||'Team')+'</div>'+
           (squad.length?squad.map(function(n,i){
             var nm=typeof n==='string'?n:(n&&n.name)||'';
-            // No smileys on player names
-            return '<div class="team-player-row"><div class="pn">'+(i+1)+'. '+esc(nm)+'</div></div>';
+            var extra='';
+            if(n&&typeof n==='object'){ if(n.captain||n.isCaptain||n.c) extra+=' (C)'; if(n.keeper||n.isKeeper||n.wk) extra+=' (WK)'; }
+            return '<div class="team-player-row"><div class="pn">'+(i+1)+'. '+esc(nm)+extra+'</div></div>';
           }).join(''):'<div class="empty">No players listed</div>');
       }
       if($('sum-teams'))$('sum-teams').innerHTML=squadHtml(data.teamA||'Team A',squadA)+squadHtml(data.teamB||'Team B',squadB);
@@ -2352,10 +2693,10 @@
         var isCur=cur && (p.name||'').toLowerCase()===cur;
         var ov=oversFromBalls(p.bowlBalls);
         var runs=p.bowlRuns|0, wk=p.wickets|0, ec=econ(p.bowlRuns,p.bowlBalls);
-        return '<tr class="'+(isCur?'neon':'dim')+'"><td>'+esc(p.name)+'</td><td class="num">'+ov+'</td><td class="num">'+runs+'</td><td class="num">'+wk+'</td><td class="num">'+(p.dots|0)+'</td><td class="num">'+ec+'</td></tr>';
+        return '<tr class="'+(isCur?'neon':'')+'"><td class="nm">'+esc(p.name)+'</td><td class="num">'+ov+'</td><td class="num">'+runs+'</td><td class="num">'+wk+'</td><td class="num">'+(p.dots|0)+'</td><td class="num">'+ec+'</td></tr>';
       }).join('');
     }
-    function statsBlock(title,batName,bowlName,batters,bowlers,cls){return'<div class="sec-title '+(cls||'')+'">'+esc(title)+' · Batting · '+esc(batName||'')+'</div><table class="stats"><thead><tr><th>Batter</th><th class="num">R</th><th class="num">B</th><th class="num">4/6</th><th class="num">SR</th><th>How out</th></tr></thead><tbody>'+batTable(batters,(lastData&&lastData.strikerName)||'')+'</tbody></table><div class="sec-title '+(cls||'')+'">'+esc(title)+' · Bowling · '+esc(bowlName||'')+'</div><table class="stats"><thead><tr><th>Bowler</th><th class="num">O</th><th class="num">R</th><th class="num">W</th><th class="num">Dots</th><th class="num">Econ</th></tr></thead><tbody>'+bowlTable(bowlers,(lastData&&lastData.bowlerName)||'')+'</tbody></table>'}
+    function statsBlock(title,batName,bowlName,batters,bowlers,cls){return'<div class="sec-title '+(cls||'')+'">'+esc(title)+' · Batting · '+esc(batName||'')+'</div><table class="stats"><thead><tr><th>Batter</th><th class="num">R</th><th class="num">B</th><th class="num">4/6</th><th class="num">SR</th><th>Out</th></tr></thead><tbody>'+batTable(batters,(lastData&&lastData.strikerName)||'')+'</tbody></table><div class="sec-title '+(cls||'')+'">'+esc(title)+' · Bowling · '+esc(bowlName||'')+'</div><table class="stats"><thead><tr><th>Bowler</th><th class="num">O</th><th class="num">R</th><th class="num">W</th><th class="num">Dots</th><th class="num">Econ</th></tr></thead><tbody>'+bowlTable(bowlers,(lastData&&lastData.bowlerName)||'')+'</tbody></table>'}
     function playAnim(type,data){
       if(!type)return;
       if(Date.now()<skipEventAnimUntil)return;
@@ -3010,10 +3351,10 @@
       // Cumulative orange/purple like Info tab (fallback to this-match if not pushed yet)
       var orange=data.cumulativeOrangeCap&&data.cumulativeOrangeCap.length?data.cumulativeOrangeCap:(data.orangeCap||[]);
       $('sum-orange').innerHTML='<div class="sec-title">🟠 Orange cap · all matches</div><table class="stats"><thead><tr><th>#</th><th>Batter</th><th class="num">R</th><th class="num">B</th><th class="num">4s</th><th class="num">6s</th><th class="num">SR</th></tr></thead><tbody>'+
-        (orange.length?orange.map(function(p,i){return'<tr><td class="num">'+(i+1)+'</td><td>'+esc(p.name)+'</td><td class="num">'+(p.runs|0)+'</td><td class="num">'+(p.balls|0)+'</td><td class="num">'+(p.fours|0)+'</td><td class="num">'+(p.sixes|0)+'</td><td class="num">'+(p.SR!=null?p.SR:sr(p.runs,p.balls))+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">No batting data</td></tr>')+'</tbody></table>';
+        (orange.length?orange.map(function(p,i){return'<tr><td class="num">'+(i+1)+'</td><td class="nm">'+esc(p.name)+'</td><td class="num">'+(p.runs|0)+'</td><td class="num">'+(p.balls|0)+'</td><td class="num">'+(p.fours|0)+'</td><td class="num">'+(p.sixes|0)+'</td><td class="num">'+(p.SR!=null?p.SR:sr(p.runs,p.balls))+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">No batting data</td></tr>')+'</tbody></table>';
       var purple=data.cumulativePurpleCap&&data.cumulativePurpleCap.length?data.cumulativePurpleCap:(data.purpleCap||[]);
       $('sum-purple').innerHTML='<div class="sec-title">🟣 Purple cap · all matches</div><table class="stats"><thead><tr><th>#</th><th>Bowler</th><th class="num">W</th><th class="num">R</th><th class="num">O</th><th class="num">Dots</th><th class="num">Econ</th></tr></thead><tbody>'+
-        (purple.length?purple.map(function(p,i){return'<tr><td class="num">'+(i+1)+'</td><td>'+esc(p.name)+'</td><td class="num">'+(p.wickets|0)+'</td><td class="num">'+(p.bowlRuns|0)+'</td><td class="num">'+oversFromBalls(p.bowlBalls)+'</td><td class="num">'+(p.dots|0)+'</td><td class="num">'+(p.Econ!=null?p.Econ:econ(p.bowlRuns,p.bowlBalls))+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">No bowling data</td></tr>')+'</tbody></table>';
+        (purple.length?purple.map(function(p,i){return'<tr><td class="num">'+(i+1)+'</td><td class="nm">'+esc(p.name)+'</td><td class="num">'+(p.wickets|0)+'</td><td class="num">'+(p.bowlRuns|0)+'</td><td class="num">'+oversFromBalls(p.bowlBalls)+'</td><td class="num">'+(p.dots|0)+'</td><td class="num">'+(p.Econ!=null?p.Econ:econ(p.bowlRuns,p.bowlBalls))+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">No bowling data</td></tr>')+'</tbody></table>';
       try{paintTeamsWithCheers(data)}catch(eT){
         var squadA=data.squadA||data.teamAPlayers||[],squadB=data.squadB||data.teamBPlayers||[];
         function squadHtml(teamName,squad){
