@@ -1083,6 +1083,22 @@
     body.theme-amazon .join-status-toast .jst-close,
     body.theme-sports .join-status-toast .jst-close{background:#f1f5f9;color:#0f172a}
   
+    #viewer-result{display:none!important}
+
+    .viewer-pred-sheet{
+      margin:10px 0;padding:10px;border-radius:12px;
+      background:rgba(15,23,42,.9);border:1px solid rgba(148,163,184,.25)
+    }
+    .viewer-pred-sheet.hidden{display:none!important}
+    .viewer-pred-sheet .vps-head{
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+      margin-bottom:8px;font-size:12px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:.06em
+    }
+    .viewer-name-link{
+      background:none;border:0;color:#34d399;font-weight:800;font-size:12px;
+      padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px
+    }
+  
   </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
@@ -1344,8 +1360,15 @@
           <button type="button" class="icon-btn" onclick="adminShowBlocks()" style="font-size:11px">Blocked list</button>
         </div>
         <div id="coins-board"><div class="empty">No viewers yet</div></div>
-        <div style="padding:8px 12px 4px;font-size:12px;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:.06em">All predictions</div>
-        <div id="all-preds-board"><div class="empty">No predictions yet</div></div>
+        <!-- All predictions table removed: open per-viewer by tapping name -->
+        <div id="viewer-pred-sheet" class="viewer-pred-sheet hidden">
+          <div class="vps-head">
+            <span id="viewer-pred-title">Predictions</span>
+            <button type="button" class="icon-btn" onclick="closeViewerPredSheet()" style="font-size:11px;padding:4px 8px">Close</button>
+          </div>
+          <div id="viewer-pred-body"><div class="empty">No predictions</div></div>
+        </div>
+        <div id="all-preds-board" class="hidden" style="display:none"></div>
       </div>
       <!-- name gate modal -->
       <div id="name-gate" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px">
@@ -2640,17 +2663,17 @@
       }catch(e2){}
     }
     function loadFansRank(){
-      try{loadAllPredictions()}catch(e0){}
       var el=$('coins-board')||$('sum-rank'); if(!el)return;
       function paint(rows){
         rows=(rows||[]).slice().sort(function(a,b){return (b.points|0)-(a.points|0)||(b.correct|0)-(a.correct|0)});
         if(!rows.length){ el.innerHTML='<div class="empty">No viewers yet</div>'; return; }
         var html='<div style="overflow:auto;max-height:280px"><table class="stats" style="font-size:12px"><thead><tr><th>#</th><th>Viewer</th><th class="num">Coins</th>'+(__adminKey?'<th></th>':'')+'</tr></thead><tbody>';
         rows.forEach(function(r,i){
-          html+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(r.name||'Fan')+'</td><td class="num">🪙 '+(r.points|0)+'</td>';
+          html+='<tr><td class="num">'+(i+1)+'</td><td><button type="button" class="viewer-name-link" onclick="openViewerPredictions(\''+esc(r.id||'')+'\',\''+esc(r.name||'Fan')+'\')">'+esc(r.name||'Fan')+'</button></td><td class="num">🪙 '+(r.points|0)+'</td>';
           if(__adminKey){
             html+='<td style="white-space:nowrap"><button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminResetCoinsOne(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Reset</button> ';
-            html+='<button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminBlockViewer(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Block</button></td>';
+            html+='<button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminRemoveViewer(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Remove</button> '+
+            '<button type="button" class="icon-btn" style="font-size:10px;padding:2px 6px" onclick="adminBlockViewer(\''+esc(r.id||'')+'\',\''+esc(r.name||'')+'\')">Block</button></td>';
           }
           html+='</tr>';
         });
@@ -3416,12 +3439,7 @@
       // All Matches first, then current Match Summary (no empty instruction block while live)
       $('sum-sum').innerHTML=histHtml+summaryNow;
       var vr=$('viewer-result');
-      if(vr){
-        if(data.matchEnded){
-          vr.classList.remove('hidden');
-          vr.innerHTML='<div class="vr-title">🏆 Match completed</div><div class="vr-result">'+esc(result||'Match completed')+'</div><div class="vr-score">'+esc(tA)+' · '+esc(scoreLineA)+'<br>'+esc(tB)+' · '+esc(scoreLineB)+'</div>'+(mom?'<div class="vr-mom">⭐ '+esc(mom)+'</div>':'')+(momReason?'<div class="vr-reason">'+esc(momReason)+'</div>':'');
-        }else{ vr.classList.add('hidden'); vr.innerHTML=''; }
-      }
+      if(vr){ vr.classList.add('hidden'); vr.innerHTML=''; vr.style.display='none'; }
       // Cumulative orange/purple like Info tab (fallback to this-match if not pushed yet)
       var orange=data.cumulativeOrangeCap&&data.cumulativeOrangeCap.length?data.cumulativeOrangeCap:(data.orangeCap||[]);
       $('sum-orange').innerHTML='<div class="sec-title">🟠 Orange cap · all matches</div><table class="stats"><thead><tr><th>#</th><th>Batter</th><th class="num">R</th><th class="num">B</th><th class="num">4s</th><th class="num">6s</th><th class="num">SR</th></tr></thead><tbody>'+
@@ -3892,6 +3910,48 @@
         .then(function(){ try{renderChat([])}catch(e){} alert('Chat cleared'); })
         .catch(function(){ alert('Clear failed'); });
     }
+    
+    function closeViewerPredSheet(){
+      try{ var s=$('viewer-pred-sheet'); if(s) s.classList.add('hidden'); }catch(e){}
+    }
+    function openViewerPredictions(id, name){
+      try{
+        var sheet=$('viewer-pred-sheet'), body=$('viewer-pred-body'), title=$('viewer-pred-title');
+        if(!sheet||!body) return;
+        if(title) title.textContent = (name||'Viewer') + ' · predictions';
+        body.innerHTML = '<div class="empty">Loading…</div>';
+        sheet.classList.remove('hidden');
+        if(!API_BASE){ body.innerHTML='<div class="empty">No server</div>'; return; }
+        fetch(API_BASE+'/predictions').then(function(r){ return r.json(); }).then(function(d){
+          var rows = (d.predictions||[]).filter(function(p){
+            var pid = String(p.id||p.viewerId||p.uid||'');
+            var pn = String(p.name||'');
+            return (id && pid && pid===String(id)) || (name && pn && pn.toLowerCase()===String(name).toLowerCase());
+          });
+          if(!rows.length){ body.innerHTML='<div class="empty">No predictions by '+esc(name||'viewer')+'</div>'; return; }
+          var html='<div style="overflow:auto;max-height:240px"><table class="stats" style="font-size:12px"><thead><tr><th>Ball</th><th>Over</th><th>Time</th></tr></thead><tbody>';
+          rows.slice(0,50).forEach(function(p){
+            var tm='—';
+            try{ if(p.ts) tm=new Date(p.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }catch(e){}
+            html+='<tr><td class="num">'+esc(p.ball!=null?p.ball:(p.pred!=null?p.pred:'—'))+'</td><td class="num">'+esc(p.over!=null?p.over:'—')+'</td><td>'+esc(tm)+'</td></tr>';
+          });
+          html+='</tbody></table></div>';
+          body.innerHTML=html;
+        }).catch(function(){ body.innerHTML='<div class="empty">Could not load predictions</div>'; });
+      }catch(e){}
+    }
+    function adminRemoveViewer(id, name){
+      if(!__adminKey||!API_BASE||!id) return;
+      if(!confirm('Remove viewer '+ (name||id) +' from list?')) return;
+      var body={key:__adminKey,id:id,name:name||'Fan'};
+      // try dedicated remove, then kick, then block as last resort option only via confirm already
+      function done(ok){ if(ok){ alert('Removed'); try{loadFansRank()}catch(e){} try{heartbeat()}catch(e2){} } else alert('Remove failed'); }
+      fetch(API_BASE+'/admin/remove-viewer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+        .then(function(r){ if(r.ok) return r.json().then(function(){ done(true); }); return fetch(API_BASE+'/admin/kick',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); })
+        .then(function(r){ if(!r) return; if(r.ok) return r.json().then(function(){ done(true); }); return fetch(API_BASE+'/admin/block',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(function(r2){ return r2.json(); }).then(function(d){ done(d&&d.ok); }); })
+        .catch(function(){ done(false); });
+    }
+
     function adminBlockViewer(id, name){
       if(!__adminKey||!API_BASE||!id) return;
       if(!confirm('Block '+ (name||id) +'?')) return;
