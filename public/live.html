@@ -108,7 +108,7 @@
     .crr-line .live-inline{color:#34d399;font-weight:900}
     .crr-line .live-inline.lost{color:#f87171}
     .crr-line .view-inline{color:#34d399;font-weight:900}
-    .chase-flash{display:none!important;margin:8px 0;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(251,191,36,.4);color:#fef3c7;font-weight:900;font-size:14px;text-align:center;animation:chasePulse 1.4s ease-in-out infinite}
+    .chase-flash{display:none;margin:8px 0;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(251,191,36,.4);color:#fef3c7;font-weight:900;font-size:14px;text-align:center;animation:chasePulse 1.4s ease-in-out infinite}
     .chase-flash.show{display:block}
     @keyframes chasePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.82;transform:scale(1.02)}}
     .comm-popup{display:none!important;margin:8px 0 0;z-index:5;position:relative}
@@ -648,7 +648,7 @@
     .inns-row.action-row{margin:0 0 6px!important;padding-bottom:4px!important}
     .sb-wrap{margin-bottom:4px;padding:4px 6px 2px}
     .over-box{margin-top:4px!important}
-    .dash-slot{margin:10px 0 4px;width:100%;scroll-margin-top:12px}
+    .dash-slot{margin:4px 0}
     .fow-stats-wrap{margin-top:12px;padding:10px;border-radius:12px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.15)}
     .fow-stats-wrap .fow-h{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#fbbf24;margin-bottom:8px}
     .fow-stats-table{width:100%;border-collapse:collapse;font-size:12px}
@@ -764,6 +764,11 @@
           </div>
         </div>
         <div class="over-box" style="margin-top:8px"><div class="lbl" id="v-over-lbl">This over</div><div class="over-balls" id="v-over-balls"></div><div class="over-msg" id="v-over-msg"></div></div>
+        <div class="match-activity" id="match-activity" style="margin:8px 0 2px;padding:10px 12px;border:1px solid rgba(148,163,184,.14);border-radius:12px;background:rgba(15,23,42,.55);text-align:center">
+          <div style="font-size:10px;color:#7da89d;text-transform:uppercase;letter-spacing:.08em;font-weight:900">Live match activity</div>
+          <div id="match-activity-text" style="margin-top:4px;font-size:12px;color:#cbd5e1;font-weight:700">Waiting for the next ball…</div>
+        </div>
+        <div id="dash-slot" class="dash-slot"></div>
         <div id="emoji-rail" class="emoji-rail" aria-label="Reactions">
           <div class="er" data-emoji="👍"><div class="e">👍</div><div class="n" id="er-thumbs">0</div></div>
           <div class="er" data-emoji="🔥"><div class="e">🔥</div><div class="n" id="er-fire">0</div></div>
@@ -774,7 +779,6 @@
           <div class="er" data-emoji="❤️"><div class="e">❤️</div><div class="n" id="er-heart">0</div></div>
           <div class="er" data-emoji="👏"><div class="e">👏</div><div class="n" id="er-clap">0</div></div>
         </div>
-        <div id="dash-slot" class="dash-slot"></div>
         
 <div class="engage-slot" id="engage-slot" style="min-height:0"></div>
         <div class="cheer-more" id="cheer-more">
