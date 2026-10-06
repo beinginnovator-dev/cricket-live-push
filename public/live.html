@@ -109,7 +109,7 @@
     .crr-line .live-inline.lost{color:#f87171}
     .crr-line .view-inline{color:#34d399;font-weight:900}
     .chase-flash{display:none;margin:8px 0;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(251,191,36,.4);color:#fef3c7;font-weight:900;font-size:14px;text-align:center;animation:chasePulse 1.4s ease-in-out infinite}
-    .chase-flash.show{display:block}
+    .chase-flash.show{display:block!important}
     @keyframes chasePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.82;transform:scale(1.02)}}
     .comm-popup{display:none!important;margin:8px 0 0;z-index:5;position:relative}
     .comm-popup.show{display:block;animation:commPopIn .28s ease}
@@ -648,7 +648,7 @@
     .inns-row.action-row{margin:0 0 6px!important;padding-bottom:4px!important}
     .sb-wrap{margin-bottom:4px;padding:4px 6px 2px}
     .over-box{margin-top:4px!important}
-    .dash-slot{margin:4px 0}
+    .dash-slot{margin:10px 0 4px;width:100%;scroll-margin-top:12px}
     .fow-stats-wrap{margin-top:12px;padding:10px;border-radius:12px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.15)}
     .fow-stats-wrap .fow-h{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#fbbf24;margin-bottom:8px}
     .fow-stats-table{width:100%;border-collapse:collapse;font-size:12px}
@@ -658,6 +658,67 @@
   
 
     .viewers-live-label{font-size:11px;color:#34d399;font-weight:800;white-space:nowrap}
+  
+
+    /* Remove inert activity placeholders */
+    .live-match-activity, #live-match-activity, .match-activity-box, #match-activity,
+    [data-activity-placeholder]{display:none!important}
+    .match-status-line{
+      margin:8px 0 4px;padding:10px 12px;border-radius:12px;
+      background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.18);
+      font-size:12px;line-height:1.5;color:#cbd5e1;font-weight:600;
+    }
+    .match-status-line b{color:#fbbf24;font-weight:800}
+  
+
+    .dash-slot{margin:8px 0 6px;min-height:0}
+    .dash-slot.dashboard-open{
+      padding:10px 10px 8px;border-radius:12px;
+      background:rgba(15,23,42,.75);border:1px solid rgba(148,163,184,.2);
+    }
+    .dash-slot .cheer-more.open,.dash-slot .pred-more.open{display:flex;margin-top:0}
+    /* never show inert activity placeholder */
+    .live-match-activity,#live-match-activity,.match-activity-box{display:none!important}
+  
+
+    .gear-btn{border:1px solid rgba(148,163,184,.35);background:rgba(30,41,59,.9);color:#e2e8f0;border-radius:999px;width:34px;height:34px;font-size:16px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0}
+    .theme-menu{margin:0 0 10px;padding:10px;border-radius:12px;background:rgba(15,23,42,.95);border:1px solid rgba(148,163,184,.25);display:flex;flex-direction:column;gap:6px}
+    .theme-menu.hidden{display:none!important}
+    .theme-menu-title{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:#94a3b8;margin-bottom:2px}
+    .theme-opt{border:1px solid rgba(148,163,184,.25);background:rgba(30,41,59,.9);color:#e2e8f0;border-radius:10px;padding:10px 12px;font-weight:800;font-size:13px;text-align:left;cursor:pointer}
+    .theme-opt.on{border-color:#34d399;background:rgba(16,185,129,.2);color:#a7f3d0}
+
+    /* Amazon light */
+    body.theme-amazon{background:#eaeded;color:#0f1111}
+    body.theme-amazon .score-card,body.theme-amazon .panel,body.theme-amazon .sb-wrap,body.theme-amazon .team-card,body.theme-amazon .pbox,body.theme-amazon .over-box,body.theme-amazon .dash-slot.dashboard-open,body.theme-amazon .match-status-line,body.theme-amazon .viewer-bar,body.theme-amazon .theme-menu{
+      background:#ffffff!important;border-color:#d5d9d9!important;color:#0f1111!important;box-shadow:0 2px 8px rgba(15,17,17,.08)
+    }
+    body.theme-amazon .match-head .type,body.theme-amazon .team-card .name,body.theme-amazon .pbox .lbl,body.theme-amazon .sb-table th,body.theme-amazon .over-box .lbl{color:#c45500!important}
+    body.theme-amazon .team-card .score,body.theme-amazon .sb-table td.n,body.theme-amazon .crr-v,body.theme-amazon .live-dot,body.theme-amazon .viewers-live-label{color:#067d62!important;text-shadow:none!important}
+    body.theme-amazon .tab{background:#f0f2f2;color:#565959;border-color:#d5d9d9}
+    body.theme-amazon .tab.on{background:#ff9900;color:#111;border-color:#ff9900}
+    body.theme-amazon .hdr h1,body.theme-amazon .match-head .line,body.theme-amazon .team-card .role,body.theme-amazon .over-msg,body.theme-amazon .crr-nrr-line{color:#565959!important}
+    body.theme-amazon .gear-btn,body.theme-amazon .theme-opt,body.theme-amazon .cheer-toggle,body.theme-amazon .icon-btn,body.theme-amazon .pred-btn{background:#fff;color:#0f1111;border-color:#d5d9d9}
+    body.theme-amazon .emoji-rail{background:#fff;border-color:#d5d9d9}
+    body.theme-amazon .chase-flash{background:linear-gradient(135deg,#ff9900,#e47911)!important;color:#111!important;border-color:#e47911!important}
+    body.theme-amazon .sb-table td.nm{color:#0f1111!important;text-shadow:none!important}
+    body.theme-amazon .ob{background:#f0f2f2;color:#0f1111;border-color:#d5d9d9}
+
+    /* Sports light */
+    body.theme-sports{background:#eef3fb;color:#0b1220}
+    body.theme-sports .score-card,body.theme-sports .panel,body.theme-sports .sb-wrap,body.theme-sports .team-card,body.theme-sports .pbox,body.theme-sports .over-box,body.theme-sports .dash-slot.dashboard-open,body.theme-sports .match-status-line,body.theme-sports .viewer-bar,body.theme-sports .theme-menu{
+      background:#ffffff!important;border-color:#c5d4ea!important;color:#0b1220!important;box-shadow:0 4px 16px rgba(11,18,32,.08)
+    }
+    body.theme-sports .match-head .type,body.theme-sports .team-card .name,body.theme-sports .pbox .lbl{color:#1d4ed8!important}
+    body.theme-sports .team-card .score,body.theme-sports .sb-table td.n,body.theme-sports .crr-v,body.theme-sports .live-dot,body.theme-sports .viewers-live-label{color:#0369a1!important;text-shadow:none!important}
+    body.theme-sports .tab{background:#e8eef8;color:#475569;border-color:#c5d4ea}
+    body.theme-sports .tab.on{background:#2563eb;color:#fff;border-color:#2563eb}
+    body.theme-sports .hdr h1,body.theme-sports .team-card .role,body.theme-sports .over-msg,body.theme-sports .crr-nrr-line,body.theme-sports .sb-table th{color:#64748b!important}
+    body.theme-sports .gear-btn,body.theme-sports .theme-opt,body.theme-sports .cheer-toggle,body.theme-sports .icon-btn,body.theme-sports .pred-btn{background:#fff;color:#0b1220;border-color:#c5d4ea}
+    body.theme-sports .emoji-rail{background:#fff;border-color:#c5d4ea}
+    body.theme-sports .chase-flash{background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;color:#fff!important;border-color:#1d4ed8!important}
+    body.theme-sports .sb-table td.nm{color:#0b1220!important;text-shadow:none!important}
+    body.theme-sports .ob{background:#e8eef8;color:#0b1220;border-color:#c5d4ea}
   
   </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
@@ -674,10 +735,17 @@
     <div class="hdr" style="margin-bottom:4px">
       <div class="live-dot" id="live-dot" style="font-size:12px"><i></i> <span id="live-dot-txt">LIVE</span></div>
       <div class="live-right" style="gap:8px;align-items:center">
+        <button type="button" class="gear-btn" id="gear-btn" onclick="toggleThemeMenu()" title="Theme">⚙️</button>
         <span class="count viewers-live-label" id="viewer-count">👤 <span id="viewer-count-n">0</span> Live Viewers</span>
         <span id="crr-viewers" style="display:none"><span id="crr-viewers-n">0</span></span>
         <span id="crr-live" style="display:none"></span>
       </div>
+    </div>
+    <div id="theme-menu" class="theme-menu hidden" role="dialog" aria-label="Themes">
+      <div class="theme-menu-title">Page theme</div>
+      <button type="button" class="theme-opt" data-theme="default" onclick="setLiveTheme('default')">Default · Dark</button>
+      <button type="button" class="theme-opt" data-theme="amazon" onclick="setLiveTheme('amazon')">Amazon · Light</button>
+      <button type="button" class="theme-opt" data-theme="sports" onclick="setLiveTheme('sports')">Sports · Light</button>
     </div>
     <div id="no-data" class="wait-only">Waiting for score updates…</div>
     <div id="live-root" class="hidden">
@@ -691,6 +759,7 @@
           </div>
           <div class="line" id="v-match-line" style="display:none"></div>
         </div>
+        <div class="match-status-line" id="match-status-line" style="display:none"></div>
         <div class="teams">
           <div class="team-card" onclick="openTeamModal('A')"><div class="name" id="v-team-a">Team A</div><div class="score" id="v-score-a">0-0</div><div class="role" id="v-role-a">—</div></div>
           <div class="team-card" onclick="openTeamModal('B')"><div class="name" id="v-team-b">Team B</div><div class="score" id="v-score-b">—</div><div class="role" id="v-role-b">—</div></div>
@@ -764,11 +833,7 @@
           </div>
         </div>
         <div class="over-box" style="margin-top:8px"><div class="lbl" id="v-over-lbl">This over</div><div class="over-balls" id="v-over-balls"></div><div class="over-msg" id="v-over-msg"></div></div>
-        <div class="match-activity" id="match-activity" style="margin:8px 0 2px;padding:10px 12px;border:1px solid rgba(148,163,184,.14);border-radius:12px;background:rgba(15,23,42,.55);text-align:center">
-          <div style="font-size:10px;color:#7da89d;text-transform:uppercase;letter-spacing:.08em;font-weight:900">Live match activity</div>
-          <div id="match-activity-text" style="margin-top:4px;font-size:12px;color:#cbd5e1;font-weight:700">Waiting for the next ball…</div>
-        </div>
-        <div id="dash-slot" class="dash-slot"></div>
+        <div id="dash-slot" class="dash-slot" aria-live="polite"></div>
         <div id="emoji-rail" class="emoji-rail" aria-label="Reactions">
           <div class="er" data-emoji="👍"><div class="e">👍</div><div class="n" id="er-thumbs">0</div></div>
           <div class="er" data-emoji="🔥"><div class="e">🔥</div><div class="n" id="er-fire">0</div></div>
@@ -780,7 +845,8 @@
           <div class="er" data-emoji="👏"><div class="e">👏</div><div class="n" id="er-clap">0</div></div>
         </div>
         
-<div class="engage-slot" id="engage-slot" style="min-height:0"></div>
+        
+
         <div class="cheer-more" id="cheer-more">
           <div class="ttl" style="margin-top:6px;margin-bottom:6px">Cheers · shout out</div>
           <div class="admin-row" id="admin-row" style="display:none;margin-bottom:6px">
@@ -1310,6 +1376,7 @@
       if(getChatName()){
         if($('name-gate'))$('name-gate').style.display='none';
         if($('chat-name-label'))$('chat-name-label').textContent=getChatName()+' · 🪙'+(typeof myCoins!=='undefined'?myCoins:10);
+        try{paintMatchStatus(lastData)}catch(e){}
         return;
       }
       if($('name-gate')){
@@ -1682,11 +1749,8 @@
       }catch(e){}
     }
     function mountEngage(el){
-      var slot=$('engage-slot'); if(!slot||!el)return;
-      try{
-        // keep other panels in DOM; only show active in slot area visually
-        if(el.parentNode!==slot) slot.appendChild(el);
-      }catch(e){}
+      // Use dash-slot between This Over and emoji rail (not engage-slot)
+      try{ mountDashboards(); }catch(e){}
     }
     function flashTreasureOnce(){
       var slot=$('engage-slot'); if(!slot)return;
@@ -1718,10 +1782,33 @@
     function mountDashboards(){
       try{
         var slot=$('dash-slot');
-        if(!slot) return;
+        if(!slot){
+          // create between this-over and emoji rail if missing
+          slot=document.createElement('div');
+          slot.id='dash-slot'; slot.className='dash-slot';
+          var over=document.querySelector('.over-box');
+          var rail=$('emoji-rail');
+          if(over && over.parentNode){
+            if(rail) over.parentNode.insertBefore(slot, rail);
+            else over.parentNode.appendChild(slot);
+          } else document.body.appendChild(slot);
+        }
         var c=$('cheer-more'), p=$('pred-more');
         if(c && c.parentNode!==slot) slot.appendChild(c);
         if(p && p.parentNode!==slot) slot.appendChild(p);
+        // remove any leftover activity placeholder nodes
+        try{
+          document.querySelectorAll('.live-match-activity,#live-match-activity,.match-activity-box').forEach(function(n){ n.remove(); });
+          // text-only placeholders near over
+          var over=document.querySelector('.over-box');
+          if(over && over.parentNode){
+            Array.prototype.slice.call(over.parentNode.children).forEach(function(n){
+              var tx=(n.textContent||'').replace(/\s+/g,' ').trim();
+              if(n.id==='dash-slot'||n.id==='emoji-rail') return;
+              if(/LIVE MATCH ACTIVITY/i.test(tx) && /Waiting for the next ball/i.test(tx)) n.remove();
+            });
+          }
+        }catch(eR){}
       }catch(e){}
     }
 
@@ -1750,9 +1837,9 @@
       if(pred){ pred.classList.remove('open'); pred.style.display='none'; }
       if(btnP) btnP.classList.remove('on');
       if(opening){
-        try{mountEngage(el)}catch(e){}
+        try{mountDashboards()}catch(e){}
         el.classList.add('open');
-        el.style.display='block';
+        el.style.display='flex';
         if(btnC) btnC.classList.add('on');
         try{void 0}catch(eS){}
         try{flashTreasureOnce()}catch(e){}
@@ -1775,9 +1862,9 @@
       if(cheer){ cheer.classList.remove('open'); cheer.style.display='none'; }
       if(btnC) btnC.classList.remove('on');
       if(opening){
-        try{mountEngage(el)}catch(e){}
+        try{mountDashboards()}catch(e){}
         el.classList.add('open');
-        el.style.display='block';
+        el.style.display='flex';
         if(btnP) btnP.classList.add('on');
         try{void 0}catch(eS){}
         try{flashTreasureOnce()}catch(e){}
@@ -2498,6 +2585,7 @@
 
     
     var __matchStartMs = null;
+    var __matchEndMs = null;
     var __matchStartKey = '';
     function parseMatchStart(data){
       try{
@@ -2524,34 +2612,117 @@
         return {date:date, time:time};
       }catch(e){ return {date:'—', time:'—'}; }
     }
+    
+    function oversFromBallsSafe(balls){
+      balls = balls|0;
+      return (balls/6|0) + '.' + (balls%6);
+    }
+    function buildMatchStatusText(data){
+      try{
+        if(!data) return '';
+        var a = data.teamA || 'Team A';
+        var b = data.teamB || 'Team B';
+        var tossWin = data.tossWinner || data.tossTeam || '';
+        var tossDec = data.tossDecision || data.tossChoose || data.electedTo || '';
+        var decTxt = /bowl/i.test(String(tossDec)) ? 'bowl' : (/bat/i.test(String(tossDec)) ? 'bat' : '');
+        var maxO = data.maxOvers || data.overs || data.totalOvers || '';
+        var inns = data.innings|0;
+
+        // First innings closed score
+        var fRuns = data.firstInningsScore;
+        var fWkts = data.firstInningsWickets;
+        var fOv = data.firstInningsOvers;
+        if(fRuns==null && inns>=2){
+          // batting side is 2nd; first score might be on non-batting team
+          fRuns = data.firstInningsScore;
+        }
+
+        var parts = [];
+        if(tossWin){
+          parts.push(tossWin + ' won the toss' + (decTxt ? (' and elected to ' + decTxt + ' first') : '') + '.');
+        }
+        if(maxO) parts.push('It is a ' + maxO + '-over match.');
+
+        if(data.matchEnded){
+          var res = data.resultText || data.statusText || 'Match completed.';
+          parts.push(res);
+          return parts.join(' ');
+        }
+
+        if(inns <= 1){
+          var bat = data.battingTeamName || (data.battingSide==='A'?a:b);
+          var runs = data.runs|0, wkts = data.wickets|0;
+          var ov = data.overs || oversFromBallsSafe(data.balls|0);
+          if((data.balls|0)>0 || runs>0){
+            parts.push(bat + ' are ' + runs + '/' + wkts + ' after ' + ov + ' overs.');
+          } else {
+            parts.push(bat + ' are about to begin their innings.');
+          }
+        } else {
+          // Chase
+          var bat2 = data.battingTeamName || (data.battingSide==='A'?a:b);
+          var bowl2 = data.bowlingTeamName || (data.battingSide==='A'?b:a);
+          var fiRuns = fRuns!=null ? fRuns : data.firstInningsScore;
+          var fiWkts = fWkts!=null ? fWkts : data.firstInningsWickets;
+          var fiOv = fOv || data.firstInningsOvers || '';
+          if(fiRuns!=null){
+            parts.push(bowl2 + ' posted ' + fiRuns + '/' + (fiWkts!=null?fiWkts:'?') + (fiOv?(' in '+fiOv+' overs'):'') + '.');
+          }
+          var need = data.targetScore!=null ? Math.max(0, (data.targetScore|0) - (data.runs|0)) : null;
+          parts.push(bat2 + ' are chasing' + (data.targetScore!=null?(' a target of '+(data.targetScore|0)):'') + ' and are currently ' + (data.runs|0) + '/' + (data.wickets|0) + ' in ' + (data.overs||oversFromBallsSafe(data.balls|0)) + ' overs' + (need!=null && need>0 ? (', needing ' + need + ' more runs') : '') + '.');
+        }
+        return parts.join(' ');
+      }catch(e){ return ''; }
+    }
+    function paintMatchStatus(data){
+      try{
+        var el = $('match-status-line');
+        if(!el) return;
+        // only after viewer has logged name
+        if(!getChatName()){ el.style.display='none'; el.textContent=''; return; }
+        var txt = buildMatchStatusText(data||lastData||{});
+        if(!txt){ el.style.display='none'; return; }
+        el.textContent = txt;
+        el.style.display = 'block';
+      }catch(e){}
+    }
     function updateMatchClock(data){
       try{
-        var key = (data && (data.liveMatchId || data.matchId || '')) + '|' + (data && (data.matchStartTime||data.startedAt||data.startTime||''));
-        var ms = parseMatchStart(data);
-        // New match → reset timer
-        if(key && key !== __matchStartKey){
-          __matchStartKey = key;
-          __matchStartMs = ms;
-        }
-        if(ms != null) __matchStartMs = ms;
-        // Fallback: first time we see activity
-        if(__matchStartMs == null && data && (data.balls>0 || data.runs!=null || data.ts)){
-          __matchStartMs = data.ts ? (data.ts < 1e12 ? data.ts*1000 : data.ts) : Date.now();
-        }
-        var startMs = __matchStartMs;
         var clockEl=$('v-match-clock');
-        if(startMs == null){
-          if(clockEl) clockEl.innerHTML='(Started <span class="clock-start">—</span> · <span class="clock-elapsed">00:00:00</span>)';
+        if(!clockEl) return;
+        data = data || lastData || {};
+        var matchKey = String(data.liveMatchId || data.matchId || LIVE_MATCH || 'current');
+        if(matchKey !== __matchStartKey){
+          __matchStartKey = matchKey;
+          __matchStartMs = null;
+          __matchEndMs = null;
+        }
+        // Start timer only when scoring has begun (first ball)
+        var scoringOn = ((data.balls|0) > 0) || ((data.runs|0) > 0) || ((data.wickets|0) > 0);
+        if(scoringOn && __matchStartMs == null){
+          var ms = parseMatchStart(data);
+          if(ms != null) __matchStartMs = ms;
+          else if(data.ts) __matchStartMs = data.ts < 1e12 ? data.ts*1000 : data.ts;
+          else __matchStartMs = Date.now();
+        }
+        // End timer when result declared
+        if(data.matchEnded){
+          if(__matchEndMs == null){
+            var end = parseMatchStart({startTime: data.matchEndTime || data.endedAt || data.endTime});
+            __matchEndMs = end || Date.now();
+          }
+        } else {
+          __matchEndMs = null;
+        }
+        if(__matchStartMs == null){
+          clockEl.innerHTML = '';
           return;
         }
-        var ft = fmtDateTime(startMs);
-        var elapsed = Date.now() - startMs;
-        if(data && data.matchEnded && data.matchEndTime){
-          var end = parseMatchStart({startTime:data.matchEndTime});
-          if(end) elapsed = end - startMs;
-        }
-        var clock = fmtClock(elapsed);
-        if(clockEl) clockEl.innerHTML='(Started <span class="clock-start">'+esc(ft.time)+'</span> <span class="clock-sep">•</span> <span class="clock-elapsed">'+clock+'</span>)';
+        var d = new Date(__matchStartMs);
+        var time = d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+        var endMs = __matchEndMs != null ? __matchEndMs : Date.now();
+        var elapsed = Math.max(0, endMs - __matchStartMs);
+        clockEl.innerHTML = '(Started '+time+' · <span class="clock-elapsed">'+fmtClock(elapsed)+'</span>)';
       }catch(e){}
     }
     setInterval(function(){ try{ updateMatchClock(lastData||{}); }catch(e){} }, 1000);
@@ -2675,11 +2846,11 @@
           var maxBalls=(data.maxOvers|0)*6;
           var ballsLeft=maxBalls>0?Math.max(0,maxBalls-(data.balls|0)):null;
           var ovLeft=ballsLeft!=null?((ballsLeft/6)|0)+'.'+(ballsLeft%6):'';
-          if(need>0 && ballsLeft!=null && ballsLeft<=18){
+          if(need>0 && ballsLeft!=null){
             el.textContent='⚡ Need '+need+' runs in '+ballsLeft+' balls ('+ovLeft+' ov left)';
             el.classList.add('show');
-          } else if(need>0 && ballsLeft!=null){
-            el.textContent='Need '+need+' off '+ballsLeft+' balls';
+          } else if(need>0){
+            el.textContent='⚡ Need '+need+' runs to win';
             el.classList.add('show');
           } else { el.classList.remove('show'); }
         } else { el.classList.remove('show'); }
@@ -2746,23 +2917,7 @@
           var ballsLeft=Math.max(0, 6-overLegal);
           msg+=' · '+ballsLeft+' ball'+(ballsLeft===1?'':'s')+' left';
         }
-        // Chase: runs to win + balls left in match (approx)
-        try{
-          if((data.innings|0)>=2 && data.targetScore!=null){
-            var need=Math.max(0, (data.targetScore|0) - (data.runs|0));
-            var maxBalls=(data.maxOvers|0)*6;
-            var ballsGone=data.balls|0;
-            var matchBallsLeft=maxBalls>0?Math.max(0, maxBalls-ballsGone):null;
-            if(need>0){
-              msg+=(msg?' · ':'')+need+' to win';
-              if(matchBallsLeft!=null) msg+=' · '+matchBallsLeft+' balls left';
-            } else if(data.matchEnded){
-              msg+=(msg?' · ':'')+(data.resultText||'Match over');
-            } else {
-              msg+=(msg?' · ':'')+'Target reached';
-            }
-          }
-        }catch(eT){}
+        
         $('v-over-msg').textContent=msg;
       })();
       try{ refreshCommentaryIfModeOn(); }catch(eCommMode){}
@@ -3515,7 +3670,23 @@
       }catch(e3){failCount++;setLiveDot(failCount);done()}
     }
     window.addEventListener('storage',function(e){if(e.key===LIVE_KEY){lastTs='';poll()}});
-    document.addEventListener('visibilitychange',function(){if(!document.hidden){lastTs='';pollBusy=false;poll();}});
+    document.addEventListener('visibilitychange',function(){if(!document.hidden){lastTs='';pollBusy=false;
+    // Local / offline open: don't stay on blank screen
+    try{
+      if(!API_BASE || location.protocol==='file:'){
+        try{
+          var raw=localStorage.getItem(LIVE_KEY);
+          if(raw){ applyData(JSON.parse(raw)); }
+          else {
+            // show shell so page is not blank
+            var nd=$('no-data'); if(nd){ nd.textContent='Open via shared live link, or wait for scorer on same device.'; nd.classList.remove('hidden'); }
+            var lr=$('live-root'); if(lr) lr.classList.remove('hidden');
+          }
+        }catch(eLoc){}
+      }
+    }catch(eBootLoc){}
+
+    poll();}});
     window.addEventListener('focus',function(){lastTs='';pollBusy=false;poll()});
     try{refreshPtsUI()}catch(e){}
     try{ensureNameGate()}catch(eG){}
@@ -3576,6 +3747,52 @@
       }catch(e){ console.log('scoreWs', e); }
     }
     // ===== end SCORE PUSH =====
+
+
+    // Remove inert "Live Match Activity / Waiting for next ball" placeholders
+    try{
+      document.querySelectorAll('div,section,p').forEach(function(n){
+        var tx=(n.textContent||'').replace(/\s+/g,' ').trim();
+        if(/^LIVE MATCH ACTIVITY/i.test(tx) || /^Waiting for the next ball/i.test(tx) || (tx.indexOf('LIVE MATCH ACTIVITY')>=0 && tx.indexOf('Waiting for the next ball')>=0 && tx.length<80)){
+          if(n.children && n.children.length<=3) n.style.display='none';
+        }
+      });
+    }catch(eActPh){}
+
+try{mountDashboards()}catch(e){}
+
+    var LIVE_THEME_KEY='cricket_live_theme_v1';
+    function toggleThemeMenu(){
+      var m=$('theme-menu'); if(!m) return;
+      m.classList.toggle('hidden');
+    }
+    function setLiveTheme(name){
+      name = name || 'default';
+      try{ localStorage.setItem(LIVE_THEME_KEY, name); }catch(e){}
+      document.body.classList.remove('theme-amazon','theme-sports');
+      if(name==='amazon') document.body.classList.add('theme-amazon');
+      else if(name==='sports') document.body.classList.add('theme-sports');
+      try{
+        document.querySelectorAll('.theme-opt').forEach(function(b){
+          b.classList.toggle('on', b.getAttribute('data-theme')===name);
+        });
+      }catch(e){}
+      var m=$('theme-menu'); if(m) m.classList.add('hidden');
+    }
+    function restoreLiveTheme(){
+      var n='default';
+      try{ n=localStorage.getItem(LIVE_THEME_KEY)||'default'; }catch(e){}
+      setLiveTheme(n);
+    }
+    try{ restoreLiveTheme(); }catch(eTh){}
+    document.addEventListener('click', function(ev){
+      try{
+        var m=$('theme-menu'), g=$('gear-btn');
+        if(!m || m.classList.contains('hidden')) return;
+        if(m.contains(ev.target) || (g && g.contains(ev.target))) return;
+        m.classList.add('hidden');
+      }catch(e){}
+    });
 
 try{setViewerTab('live')}catch(e){}
 try{mountDashboards()}catch(e){}
