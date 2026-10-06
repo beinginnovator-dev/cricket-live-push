@@ -17,6 +17,7 @@
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-live-512.png" />
   <link rel="apple-touch-icon" href="/icon-live-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
+
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
@@ -110,7 +111,7 @@
     .chase-flash{display:none;margin:8px 0;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(251,191,36,.4);color:#fef3c7;font-weight:900;font-size:14px;text-align:center;animation:chasePulse 1.4s ease-in-out infinite}
     .chase-flash.show{display:block}
     @keyframes chasePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.82;transform:scale(1.02)}}
-    .comm-popup{display:none;margin:8px 0 0;z-index:5;position:relative}
+    .comm-popup{display:none!important;margin:8px 0 0;z-index:5;position:relative}
     .comm-popup.show{display:block;animation:commPopIn .28s ease}
     @keyframes commPopIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     .comm-popup-inner{
@@ -223,6 +224,12 @@
     @keyframes ballBounce{0%{transform:translateY(40px) scale(.6);opacity:0}40%{transform:translateY(-12px) scale(1.15);opacity:1}70%{transform:translateY(6px) scale(.95)}100%{transform:translateY(0) scale(1);opacity:1}}
     .team-card .name{color:#fbbf24!important;opacity:1!important}
     .panel{background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.18);border-radius:1rem;min-height:220px;max-height:min(58vh,540px);overflow:auto;-webkit-overflow-scrolling:touch}
+    .panel.hidden{display:none!important}
+    #panel-comm:not(.hidden){display:block!important}
+    #panel-stats:not(.hidden){display:block!important}
+    #panel-fan:not(.hidden){display:block!important}
+    #panel-sum:not(.hidden){display:block!important}
+    #panel-live:not(.hidden){display:block!important}
     .panel.hidden{display:none}
     .panel-hdr{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px 0}
     .panel-hdr .ttl{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7da89d}
@@ -515,6 +522,143 @@
       box-shadow:inset 0 2px 6px rgba(0,0,0,.25),0 0 10px rgba(16,185,129,.3);
       transform:scale(0.98);
     }
+
+    .live-glow{display:inline-flex;align-items:center;gap:5px;color:#34d399;font-weight:900}
+    .live-pulse-dot{
+      width:8px;height:8px;border-radius:50%;background:#34d399;
+      box-shadow:0 0 0 0 rgba(52,211,153,.7);
+      animation:livePulse 1.4s ease-out infinite;
+      display:inline-block;
+    }
+    @keyframes livePulse{
+      0%{box-shadow:0 0 0 0 rgba(52,211,153,.7);opacity:1}
+      70%{box-shadow:0 0 0 10px rgba(52,211,153,0);opacity:.85}
+      100%{box-shadow:0 0 0 0 rgba(52,211,153,0);opacity:1}
+    }
+    .team-card.bat-glow .score{
+      animation:scoreGlow 0.9s ease;
+    }
+    @keyframes scoreGlow{
+      0%{text-shadow:0 0 4px rgba(52,211,153,.4);transform:scale(1)}
+      40%{text-shadow:0 0 22px rgba(52,211,153,.95),0 0 40px rgba(16,185,129,.5);color:#6ee7b7;transform:scale(1.06)}
+      100%{text-shadow:0 0 14px rgba(52,211,153,.55);transform:scale(1)}
+    }
+    .score-tabs{gap:4px}
+    .score-tabs .tab{font-size:9px;padding:8px 2px;letter-spacing:0}
+    .panel-live{padding:0;border:0;background:transparent}
+    .hdr .live-dot i, #live-dot i{
+      animation:livePulse 1.4s ease-out infinite;
+    }
+    .match-meta-line .view-inline{font-size:10px;color:#94a3b8;font-weight:700;text-transform:none;letter-spacing:0}
+    .match-meta-line .view-inline .vd{color:#34d399}
+  
+
+    /* Vertical smile stripes when Cheers / Predict open */
+    .smile-stripes{
+      position:fixed;top:12%;bottom:12%;width:36px;z-index:40;pointer-events:none;
+      display:none;flex-direction:column;align-items:center;justify-content:flex-start;
+      gap:10px;overflow:hidden;padding:8px 0;
+    }
+    .smile-stripes.on{display:flex}
+    .smile-stripes.left{display:none!important}
+    .smile-stripes.right{right:4px}
+    .smile-stripes span{
+      font-size:16px;opacity:.7;line-height:1;
+      animation:smileFloat 2.4s ease-in-out infinite;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
+    }
+    .smile-stripes span:nth-child(odd){animation-delay:.35s}
+    .smile-stripes span:nth-child(3n){animation-delay:.7s;font-size:14px;opacity:.5}
+    @keyframes smileFloat{
+      0%,100%{transform:translateY(0) scale(1);opacity:.45}
+      50%{transform:translateY(-6px) scale(1.08);opacity:.9}
+    }
+    /* Top-corner live wave */
+    .hdr .live-dot, #live-dot{
+      position:relative;
+    }
+    .hdr .live-dot i, #live-dot i{
+      position:relative;z-index:1;
+      width:9px;height:9px;border-radius:50%;background:#34d399;
+      box-shadow:0 0 8px #34d399;
+      animation:none;
+    }
+    .hdr .live-dot i::before, .hdr .live-dot i::after,
+    #live-dot i::before, #live-dot i::after{
+      content:'';position:absolute;left:50%;top:50%;
+      width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;
+      border:2px solid rgba(52,211,153,.65);
+      animation:liveWave 1.6s ease-out infinite;
+    }
+    .hdr .live-dot i::after, #live-dot i::after{animation-delay:.55s}
+    .hdr .live-dot.lost i, #live-dot.lost i{background:#f87171;box-shadow:0 0 8px #f87171}
+    .hdr .live-dot.lost i::before, .hdr .live-dot.lost i::after,
+    #live-dot.lost i::before, #live-dot.lost i::after{border-color:rgba(248,113,113,.6)}
+    @keyframes liveWave{
+      0%{transform:scale(1);opacity:.8}
+      100%{transform:scale(3.2);opacity:0}
+    }
+    #comm-list .feed-item{
+      padding:10px 12px;margin-bottom:8px;border-radius:12px;
+      background:rgba(15,23,42,.65);border:1px solid rgba(148,163,184,.12);
+    }
+    #comm-list .feed-item .t{font-size:10px;font-weight:900;letter-spacing:.1em;color:#34d399;margin-bottom:4px}
+    #comm-list .feed-item .title{font-weight:900;color:#f8fafc;font-size:14px;margin-bottom:2px}
+    #comm-list .feed-item .body{font-size:13px;color:#cbd5e1;line-height:1.4}
+    .fow-match-row{
+      display:flex;justify-content:space-between;gap:8px;padding:8px 10px;
+      border-bottom:1px solid rgba(148,163,184,.1);font-size:12px;
+    }
+    .fow-match-row .sc{color:#34d399;font-weight:900}
+    .fow-match-row .nm{color:#e2e8f0;font-weight:700}
+    .fow-match-row .ds{color:#94a3b8;font-size:11px;text-align:right}
+    .fow-inns-h{font-size:11px;font-weight:900;color:#fbbf24;margin:10px 0 4px;text-transform:uppercase;letter-spacing:.06em}
+  
+
+    .dash-slot{margin:6px 0 4px;width:100%;scroll-margin-top:12px}
+    .dash-slot .cheer-more,.dash-slot .pred-more{margin-top:0;width:100%}
+    .dash-slot:has(.open){padding:9px 8px 10px;border:1px solid rgba(52,211,153,.20);border-radius:14px;background:linear-gradient(180deg,rgba(15,23,42,.92),rgba(15,23,42,.68));box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 8px 22px rgba(0,0,0,.18);max-height:290px;overflow:auto}
+    .dash-slot:has(.open) .cheer-more.open,.dash-slot:has(.open) .pred-more.open{display:flex}
+    .dash-slot:has(.open) .cheer-more.open{display:grid;grid-template-columns:1fr;gap:6px}
+    .dash-slot:has(.open) .pred-more.open{display:flex}
+    .dash-slot:has(.open) .chat-list{max-height:92px!important}
+    .dash-slot:has(.open) .chat-compose{padding:0!important}
+    .dash-slot:has(.open) .pred-row{margin-bottom:4px}
+    .dash-slot:has(.open) .share-over-btn.sm{margin-top:4px}
+    .dash-slot:has(.open) .ttl{font-size:11px;color:#fbbf24;text-align:center;font-weight:900;letter-spacing:.07em}
+    .dash-slot:has(.open) .name-prompt{padding:6px 0!important}
+    .dash-slot:has(.open) .cheer-target{margin-bottom:5px}
+    .dash-slot:has(.open) .player-cheers{font-size:11px}
+    .dash-slot:has(.open) .pts-bar{margin:3px 0 0}
+    .dash-slot:has(.open) .pred-more>div:last-child{margin-top:4px!important}
+    .smile-stripes{display:none!important}
+
+
+    .match-head{margin-bottom:4px}
+    .match-clock-inline{display:block;margin-top:3px;font-size:12px;letter-spacing:.02em;text-transform:none;color:#94a3b8;font-weight:800;white-space:nowrap;line-height:1.35}
+    .match-clock-inline .clock-start{color:#dbeafe}
+    .match-clock-inline .clock-elapsed{color:#34d399;font-size:14px;font-variant-numeric:tabular-nums;font-weight:900}
+    .match-clock-inline .clock-sep{color:#64748b;margin:0 4px}
+    .crr-nrr-line{text-align:center;font-size:11px;font-weight:800;color:#94a3b8;margin:2px 0 6px;letter-spacing:.02em}
+    .crr-nrr-line .crr-v{color:#34d399;font-weight:900}
+    .crr-nrr-line .dot-sep{margin:0 6px;opacity:.5}
+    .team-card{min-height:72px;padding:8px 8px}
+    .team-card .score{font-size:22px;margin-top:4px}
+    .score-tabs{margin:6px 0 4px!important}
+    .inns-row.action-row{margin:0 0 6px!important;padding-bottom:4px!important}
+    .sb-wrap{margin-bottom:4px;padding:4px 6px 2px}
+    .over-box{margin-top:4px!important}
+    .dash-slot{margin:4px 0}
+    .fow-stats-wrap{margin-top:12px;padding:10px;border-radius:12px;background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.15)}
+    .fow-stats-wrap .fow-h{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#fbbf24;margin-bottom:8px}
+    .fow-stats-table{width:100%;border-collapse:collapse;font-size:12px}
+    .fow-stats-table th{font-size:9px;color:#7da89d;text-transform:uppercase;padding:4px 3px;text-align:left;border-bottom:1px solid rgba(148,163,184,.15)}
+    .fow-stats-table td{padding:6px 3px;border-bottom:1px solid rgba(148,163,184,.08);color:#e2e8f0}
+    .fow-stats-table td.num{text-align:center;color:#34d399;font-weight:700}
+  
+
+    .viewers-live-label{font-size:11px;color:#34d399;font-weight:800;white-space:nowrap}
+  
   </style>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 </head>
@@ -527,33 +671,40 @@
     </div>
   </div>
   <div class="wrap">
-    <div class="hdr" style="margin-bottom:8px">
+    <div class="hdr" style="margin-bottom:4px">
       <div class="live-dot" id="live-dot" style="font-size:12px"><i></i> <span id="live-dot-txt">LIVE</span></div>
-      <div class="live-right" style="gap:8px">
-        <span class="count" id="viewer-count" style="font-size:11px;color:#34d399;font-weight:800">🟢 0</span>
-        </div>
+      <div class="live-right" style="gap:8px;align-items:center">
+        <span class="count viewers-live-label" id="viewer-count">👤 <span id="viewer-count-n">0</span> Live Viewers</span>
+        <span id="crr-viewers" style="display:none"><span id="crr-viewers-n">0</span></span>
+        <span id="crr-live" style="display:none"></span>
+      </div>
     </div>
     <div id="no-data" class="wait-only">Waiting for score updates…</div>
     <div id="live-root" class="hidden">
       <div class="score-card">
         <div class="match-head">
-          <div class="type" id="v-match-type">MATCH</div>
-          <div class="match-meta-line">
-            <span class="live-inline" id="crr-live">● LIVE</span>
-            <span class="view-inline" id="crr-viewers">🟢 0</span>
+          <div class="type" id="v-match-type">MATCH <span class="match-clock-inline" id="v-match-clock">(Started — · 00:00:00)</span></div>
+          <div class="crr-nrr-line" id="v-crr-nrr">
+            <span>CRR <span class="crr-v" id="v-crr">0.00</span></span>
+            <span class="dot-sep">·</span>
+            <span>NRR <span class="crr-v" id="v-nrr">—</span></span>
           </div>
-          <div class="line" id="v-match-line"></div>
-        </div>
-        <div class="crr-line">
-          <span>CRR: <span class="crr-v" id="v-crr">0.00</span></span>
+          <div class="line" id="v-match-line" style="display:none"></div>
         </div>
         <div class="teams">
           <div class="team-card" onclick="openTeamModal('A')"><div class="name" id="v-team-a">Team A</div><div class="score" id="v-score-a">0-0</div><div class="role" id="v-role-a">—</div></div>
           <div class="team-card" onclick="openTeamModal('B')"><div class="name" id="v-team-b">Team B</div><div class="score" id="v-score-b">—</div><div class="role" id="v-role-b">—</div></div>
         </div>
-        <div class="inns-row action-row" style="display:flex;flex-wrap:nowrap;align-items:center;gap:6px;width:100%">
+        <div class="tabs score-tabs" style="grid-template-columns:repeat(5,1fr);margin:10px 0 8px">
+          <button type="button" class="tab on" id="tab-live" onclick="setViewerTab('live')">Live</button>
+          <button type="button" class="tab" id="tab-comm" onclick="setViewerTab('comm')">Commentary</button>
+          <button type="button" class="tab" id="tab-stats" onclick="setViewerTab('stats')">Stats</button>
+          <button type="button" class="tab" id="tab-fan" onclick="setViewerTab('fan')">Viewers</button>
+          <button type="button" class="tab" id="tab-sum" onclick="setViewerTab('sum')">Summary</button>
+        </div>
+        <div id="panel-live" class="panel panel-live">
+        <div class="inns-row action-row" style="display:flex;flex-wrap:nowrap;align-items:center;gap:8px;width:100%">
           <button type="button" class="cheer-toggle sm hdr-action-btn" id="btn-cheers" onclick="toggleCheerPad()"><span>😊</span><span>Cheers</span></button>
-          <button type="button" class="cheer-toggle sm hdr-action-btn" id="btn-comm-popup" onclick="toggleCommentaryMode()"><span>🎤</span><span>Commentary</span></button>
           <button type="button" class="cheer-toggle sm hdr-action-btn hdr-sound-btn" id="btn-sound-tts" onclick="toggleTts()" title="Commentary sound" aria-label="Sound on off">🔈</button>
           <button type="button" class="cheer-toggle pred-toggle sm hdr-action-btn" id="btn-predict" onclick="togglePredPad()"><span>🎯</span><span>Predict</span></button>
         </div>
@@ -613,6 +764,11 @@
           </div>
         </div>
         <div class="over-box" style="margin-top:8px"><div class="lbl" id="v-over-lbl">This over</div><div class="over-balls" id="v-over-balls"></div><div class="over-msg" id="v-over-msg"></div></div>
+        <div class="match-activity" id="match-activity" style="margin:8px 0 2px;padding:10px 12px;border:1px solid rgba(148,163,184,.14);border-radius:12px;background:rgba(15,23,42,.55);text-align:center">
+          <div style="font-size:10px;color:#7da89d;text-transform:uppercase;letter-spacing:.08em;font-weight:900">Live match activity</div>
+          <div id="match-activity-text" style="margin-top:4px;font-size:12px;color:#cbd5e1;font-weight:700">Waiting for the next ball…</div>
+        </div>
+        <div id="dash-slot" class="dash-slot"></div>
         <div id="emoji-rail" class="emoji-rail" aria-label="Reactions">
           <div class="er" data-emoji="👍"><div class="e">👍</div><div class="n" id="er-thumbs">0</div></div>
           <div class="er" data-emoji="🔥"><div class="e">🔥</div><div class="n" id="er-fire">0</div></div>
@@ -720,19 +876,9 @@
             <button type="button" onclick="closeCoinRules()" style="width:100%;padding:10px;border:0;border-radius:10px;background:#10b981;color:#042f2e;font-weight:900;cursor:pointer">Got it</button>
           </div>
         </div>
-        <div class="status" id="v-status" style="display:none"></div>
-      </div>
-      <div id="viewer-result" class="viewer-result hidden"></div>
-      <div class="viewer-bar" style="display:none">
-        <span class="names" id="viewer-names"></span>
-      </div>
-      <div class="tabs" style="grid-template-columns:1fr 1fr 1fr 1fr">
-        <button type="button" class="tab on" id="tab-comm" onclick="setViewerTab('comm')">Commentary</button>
-        <button type="button" class="tab" id="tab-stats" onclick="setViewerTab('stats')">Stats</button>
-        <button type="button" class="tab" id="tab-fan" onclick="setViewerTab('fan')">Viewers Coins</button>
-        <button type="button" class="tab" id="tab-sum" onclick="setViewerTab('sum')">Summary</button>
-      </div>
-      <div id="panel-comm" class="panel">
+        </div><!-- /panel-live -->
+        
+      <div id="panel-comm" class="panel hidden">
         <div class="panel-hdr" style="flex-wrap:wrap;row-gap:6px">
           <span class="ttl">Ball-by-ball</span>
           <select id="comm-tools-dd" class="icon-btn" style="padding:6px 10px;max-width:58%" onchange="onCommToolsChange(this.value)">
@@ -784,14 +930,23 @@
           <button type="button" class="subtab" id="st-viewers" onclick="setSumSub('viewers')">Viewers</button>
           <button type="button" class="subtab" id="st-orange" onclick="setSumSub('orange')">Orange cap</button>
           <button type="button" class="subtab" id="st-purple" onclick="setSumSub('purple')">Purple cap</button>
+          <button type="button" class="subtab" id="st-fow" onclick="setSumSub('fow')">Fall of wickets</button>
         </div>
         <div id="sum-teams"></div>
         <div id="sum-sum" class="hidden"></div>
         <div id="sum-viewers" class="hidden"></div>
         <div id="sum-orange" class="hidden"></div>
         <div id="sum-purple" class="hidden"></div>
+        <div id="sum-fow" class="hidden"></div>
         <div id="sum-owners" class="hidden"></div>
       </div>
+        <div class="status" id="v-status" style="display:none"></div>
+      </div>
+      <div id="viewer-result" class="viewer-result hidden"></div>
+      <div class="viewer-bar" style="display:none">
+        <span class="names" id="viewer-names"></span>
+      </div>
+      
     </div>
   </div>
   <script>
@@ -1110,14 +1265,47 @@
       setViewerSwipe(1,true);
       autoSwipeBack();
     }
-        function setViewerTab(t){ if(t==='sum'||t==='summary'){ try{setSumSub('sum')}catch(e){} } 
-      ['comm','stats','fan','sum'].forEach(function(x){
-        var tb=$('tab-'+x),pn=$('panel-'+x);
-        if(tb)tb.classList.toggle('on',t===x);
-        if(pn)pn.classList.toggle('hidden',t!==x);
+        function setViewerTab(t){
+      if(!t) t='live';
+      if(t==='summary') t='sum';
+      if(t==='viewers') t='fan';
+      if(t==='sum'){ try{setSumSub('teams')}catch(e){} }
+      var ids=['live','comm','stats','fan','sum'];
+      ids.forEach(function(x){
+        var tb=$('tab-'+x), pn=$('panel-'+x);
+        var on = (t===x);
+        if(tb) tb.classList.toggle('on', on);
+        if(pn){
+          pn.classList.toggle('hidden', !on);
+          pn.style.display = on ? 'block' : 'none';
+        }
       });
-      if(t==='fan')loadFansRank();
+      try{
+        if(t==='fan') loadFansRank();
+      }catch(e){}
+      try{
+        if(t==='comm'){
+          var list=$('comm-list');
+          if(list && lastData){
+            var d=lastData;
+            var arr=(typeof ttsLang!=='undefined' && ttsLang==='hi') ? (d.commentaryHi||d.commentary) : d.commentary;
+            var lines=(arr||[]).slice().filter(Boolean).reverse();
+            list.innerHTML = lines.length ? lines.map(function(line,i){
+              var parts = typeof formatCommentaryLine==='function' ? formatCommentaryLine(line) : {title:'',body:String(line)};
+              var html='';
+              if(i===0) html+='<div class="t">LATEST</div>';
+              if(parts.title) html+='<div class="title">'+(typeof highlightEventWords==='function'?highlightEventWords(parts.title):parts.title)+'</div>';
+              if(parts.body) html+='<div class="body">'+(typeof highlightEventWords==='function'?highlightEventWords(parts.body):parts.body)+'</div>';
+              if(!parts.title && !parts.body) html+=(typeof highlightEventWords==='function'?highlightEventWords(String(line)):String(line));
+              return '<div class="feed-item">'+html+'</div>';
+            }).join('') : '<div class="empty">No commentary yet</div>';
+          } else if(list && !list.innerHTML){
+            list.innerHTML='<div class="empty">No commentary yet</div>';
+          }
+        }
+      }catch(eC){ console.log('comm tab', eC); }
     }
+
     function ensureNameGate(){
       if(getChatName()){
         if($('name-gate'))$('name-gate').style.display='none';
@@ -1326,12 +1514,66 @@
       postDraft(picked);
     }
     function setSumSub(s){
-      ['teams','sum','viewers','orange','purple'].forEach(function(x){
+      ['teams','sum','viewers','orange','purple','fow'].forEach(function(x){
         var b=$('st-'+x),p=$('sum-'+x);
         if(b)b.classList.toggle('on',s===x);
         if(p)p.classList.toggle('hidden',s!==x);
       });
       if(s==='viewers'){ try{ paintViewersSummary(); }catch(e){} }
+      if(s==='fow'){ try{ paintFallOfWickets(); }catch(e){} }
+    }
+    
+    function buildFowStatsHtml(data){
+      try{
+        var fow=(data&&(data.fallOfWickets||data.fow||data.wicketsFall))||[];
+        var rows='';
+        if(fow.length){
+          fow.forEach(function(w,i){
+            var inn=w.innings!=null?w.innings:(w.inns!=null?w.inns:'—');
+            var bat=w.batsman||w.player||w.name||'—';
+            var dis=w.dismissal||w.how||'—';
+            var bowl=w.bowler||'—';
+            var ov=w.overs||w.over||'—';
+            var sc=w.score!=null?w.score:((w.runs!=null?w.runs:'')+(w.wickets!=null?('/'+w.wickets):''));
+            rows+='<tr><td class="num">'+(i+1)+'</td><td class="num">'+esc(String(inn))+'</td><td>'+esc(String(bat))+'</td><td>'+esc(String(dis))+'</td><td>'+esc(String(bowl))+'</td><td class="num">'+esc(String(ov))+'</td><td class="num">'+esc(String(sc||''))+'</td></tr>';
+          });
+        } else {
+          rows='<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:12px">No wickets fallen yet.</td></tr>';
+        }
+        return '<div class="fow-stats-wrap"><div class="fow-h">🏏 Fall of wickets</div><table class="fow-stats-table"><thead><tr><th>#</th><th>Inn</th><th>Batsman</th><th>Dismissal</th><th>Bowler</th><th>Ov</th><th>Score</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+      }catch(e){ return ''; }
+    }
+
+    function paintFallOfWickets(){
+      var el=$('sum-fow'); if(!el) return;
+      var d=lastData||{};
+      var fow=d.fallOfWickets||d.fow||d.wicketsFall||[];
+      if(!fow.length){
+        el.innerHTML='<div class="empty">No wickets fallen yet</div>';
+        return;
+      }
+      // Match-wise: group by innings if present
+      var byInns={};
+      fow.forEach(function(w,i){
+        var inn=w.innings!=null?w.innings:(w.inns!=null?w.inns:0);
+        if(!byInns[inn]) byInns[inn]=[];
+        byInns[inn].push(w);
+      });
+      var keys=Object.keys(byInns).sort(function(a,b){return (a|0)-(b|0)});
+      var html='';
+      keys.forEach(function(k){
+        var list=byInns[k];
+        var label=(k|0)>0 ? ('Innings '+(k|0)) : 'Match';
+        if(keys.length===1 && (k|0)===0) label='Match · Fall of wickets';
+        html+='<div class="fow-inns-h">'+label+'</div>';
+        list.forEach(function(w,idx){
+          var sc=w.score!=null?w.score:((w.runs!=null?w.runs:'')+(w.wickets!=null?('/'+w.wickets):''));
+          var nm=w.batsman||w.player||w.name||('Wicket '+(idx+1));
+          var ds=(w.dismissal||w.how||'')+(w.overs?(' · '+w.overs):'')+(w.bowler?(' · b '+w.bowler):'');
+          html+='<div class="fow-match-row"><span class="nm">'+esc(String(nm))+'</span><span class="sc">'+esc(String(sc))+'</span><span class="ds">'+esc(String(ds))+'</span></div>';
+        });
+      });
+      el.innerHTML=html||'<div class="empty">No wickets fallen yet</div>';
     }
     // Track viewers + activity for Summary → Viewers tab
     var __viewerMap = Object.create(null); // id -> {id,name,firstSeen,lastSeen,online,emojis:{},messages:[]}
@@ -1454,7 +1696,53 @@
       slot.insertBefore(t, slot.firstChild);
       setTimeout(function(){ try{var x=$('treasure-flash-tmp');if(x&&x.parentNode)x.parentNode.removeChild(x)}catch(e){} }, 1200);
     }
+    
+    function fillSmileStripes(){
+      var em=['😊','😄','😁','🙂','😆','🥳','🤩','😍','😎','🙌','❤️','👏'];
+      var el=$('smile-right'); if(!el) return;
+      var h='';
+      for(var i=0;i<12;i++) h+='<span style="animation-delay:'+(i*0.1)+'s">'+(em[i%em.length])+'</span>';
+      el.innerHTML=h;
+      var left=$('smile-left'); if(left){ left.innerHTML=''; left.classList.remove('on'); left.style.display='none'; }
+    }
+    function setSmileStripes(on){
+      try{
+        if(on) fillSmileStripes();
+        var a=$('smile-left'), b=$('smile-right');
+        if(a){ a.classList.remove('on'); a.style.display='none'; }
+        if(b) b.classList.toggle('on', !!on);
+      }catch(e){}
+    }
+
+    
+    function mountDashboards(){
+      try{
+        var slot=$('dash-slot');
+        if(!slot) return;
+        var c=$('cheer-more'), p=$('pred-more');
+        if(c && c.parentNode!==slot) slot.appendChild(c);
+        if(p && p.parentNode!==slot) slot.appendChild(p);
+      }catch(e){}
+    }
+
+    function revealEngagementDashboard(el){
+      try{
+        var slot=$('dash-slot');
+        if(slot) slot.classList.add('dashboard-open');
+        setTimeout(function(){
+          try{ if(slot) slot.scrollIntoView({behavior:'smooth',block:'nearest'}); }catch(e){}
+        },40);
+      }catch(e){}
+    }
+    function hideEngagementDashboard(){
+      try{
+        var slot=$('dash-slot');
+        if(slot) slot.classList.remove('dashboard-open');
+      }catch(e){}
+    }
+
     function toggleCheerPad(){
+      try{mountDashboards()}catch(e){}
       var el=$('cheer-more'); if(!el)return;
       var pred=$('pred-more');
       var btnC=$('btn-cheers'), btnP=$('btn-predict');
@@ -1466,15 +1754,20 @@
         el.classList.add('open');
         el.style.display='block';
         if(btnC) btnC.classList.add('on');
+        try{void 0}catch(eS){}
         try{flashTreasureOnce()}catch(e){}
+        revealEngagementDashboard(el);
       } else {
         el.classList.remove('open');
         el.style.display='none';
         if(btnC) btnC.classList.remove('on');
+        hideEngagementDashboard();
+        try{ var po=$('pred-more'); void 0; }catch(eS){}
       }
       try{updateCheerTargetLabel()}catch(e){}
     }
     function togglePredPad(){
+      try{mountDashboards()}catch(e){}
       var el=$('pred-more'); if(!el)return;
       var cheer=$('cheer-more');
       var btnC=$('btn-cheers'), btnP=$('btn-predict');
@@ -1486,11 +1779,15 @@
         el.classList.add('open');
         el.style.display='block';
         if(btnP) btnP.classList.add('on');
+        try{void 0}catch(eS){}
         try{flashTreasureOnce()}catch(e){}
+        revealEngagementDashboard(el);
       } else {
         el.classList.remove('open');
         el.style.display='none';
         if(btnP) btnP.classList.remove('on');
+        hideEngagementDashboard();
+        try{ var co=$('cheer-more'); void 0; }catch(eS){}
       }
     }
     function sendCheerEmoji(emoji){
@@ -1632,8 +1929,8 @@
         // Never show smileys on player names / cards
         var sn=lastData&&lastData.strikerName;
         var bn=lastData&&lastData.bowlerName;
-        if($('v-striker'))$('v-striker').textContent=sn||'—';
-        if($('v-bowler'))$('v-bowler').textContent=bn||'—';
+        if($('v-striker'))$('v-striker').textContent=sn ? (String(sn).replace(/\*+$/,'') + '*') : '—';
+        if($('v-bowler'))$('v-bowler').textContent=bn ? (String(bn).replace(/\*+$/,'') + '*') : '—';
         if($('v-striker-cheers'))$('v-striker-cheers').innerHTML='';
         if($('v-bowler-cheers'))$('v-bowler-cheers').innerHTML='';
         if(lastData&&$('sum-teams')&&!$('sum-teams').classList.contains('hidden')){
@@ -2017,19 +2314,52 @@
         var d=lastData;if(!d){return}
         var name=side==='A'?(d.teamA||'Team A'):(d.teamB||'Team B');
         var det=side==='A'?(d.teamADetail||{}):(d.teamBDetail||{});
-        var runs=det.runs!=null?det.runs:(d.battingSide===side?(d.runs|0):(d.firstInningsScore!=null?d.firstInningsScore:0));
-        var wkts=det.wickets!=null?det.wickets:(d.battingSide===side?(d.wickets|0):(d.firstInningsWickets|0));
+        var runs=det.runs!=null?det.runs:(d.battingSide===side?(d.runs|0):(d.firstInningsScore!=null?d.firstInningsScore:null));
+        var wkts=det.wickets!=null?det.wickets:(d.battingSide===side?(d.wickets|0):(d.firstInningsWickets!=null?d.firstInningsWickets:null));
         var balls=det.balls!=null?det.balls:(d.battingSide===side?(d.balls|0):0);
-        var ov=det.overs||oversFromBalls(balls);
-        var fow=(d.fallOfWickets||[]).filter(function(w){return true}).slice(-12);
+        var ov=det.overs||(balls?oversFromBalls(balls):(side!==d.battingSide && d.firstInningsOvers ? d.firstInningsOvers : '—'));
+        var scoreTxt = (runs==null && (side!==d.battingSide) && d.firstInningsScore==null) ? 'Yet to bat' : ((runs|0)+' / '+(wkts|0)+(ov!=null && ov!=='' ? ' ('+ov+')' : ''));
+        var maxOvers = d.maxOvers || d.overs || d.totalOvers || '';
+        var tossWin = d.tossWinner || d.tossTeam || d.toss || '';
+        var tossDec = d.tossDecision || d.tossChoose || d.electedTo || '';
+        var tossLine = '';
+        if(tossWin){
+          var decTxt = /bowl/i.test(String(tossDec)) ? 'bowl first' : (/bat/i.test(String(tossDec)) ? 'bat first' : (tossDec ? String(tossDec) : ''));
+          tossLine = esc(String(tossWin)) + ' won the toss' + (decTxt ? (' & decided to ' + esc(decTxt)) : '');
+        }
+        // Players for this team
+        var squad = side==='A' ? (d.squadA || d.teamAPlayers || d.playersA || []) : (d.squadB || d.teamBPlayers || d.playersB || []);
+        // Also try batters/bowlers lists with team flag
+        if(!squad.length && d.players){
+          squad = (d.players||[]).filter(function(p){ return (p.team===side || p.side===side || p.teamName===name); });
+        }
+        var playersHtml = '';
+        if(squad.length){
+          playersHtml = '<ol class="team-players-list" style="margin:8px 0 0;padding-left:18px;line-height:1.7">'+
+            squad.map(function(p,i){
+              var nm = typeof p==='string' ? p : (p.name||p.player||p.n||('Player '+(i+1)));
+              var cap = (p.captain||p.isCaptain||p.c) ? ' (C)' : '';
+              var wk = (p.keeper||p.isKeeper||p.wk) ? ' (WK)' : '';
+              return '<li style="color:#e2e8f0;font-weight:700">'+esc(String(nm))+cap+wk+'</li>';
+            }).join('')+'</ol>';
+        } else {
+          playersHtml = '<div class="empty" style="margin-top:8px">Player list not available</div>';
+        }
+        // FOW filtered for this team's batting if possible
+        var fow=(d.fallOfWickets||d.fow||[]).slice();
         var fowHtml=fow.length?fow.map(function(w){
-          return '<div class="fow-row"><span class="a">'+esc(w.batsman||'')+' · '+esc(String(w.score!=null?w.score:''))+'</span><span class="b">'+esc(w.dismissal||'')+(w.overs?(' · '+esc(w.overs)):'')+'</span></div>';
-        }).join(''):'<div class="empty">No wickets yet</div>';
+          return '<div class="fow-row"><span class="a">'+esc(w.batsman||w.player||'')+' · '+esc(String(w.score!=null?w.score:''))+'</span><span class="b">'+esc(w.dismissal||w.how||'')+(w.overs?(' · '+esc(w.overs)):'')+'</span></div>';
+        }).join(''):'<div class="empty">No wickets fallen yet</div>';
+
         $('modal-title').textContent=name;
-        $('modal-body').innerHTML=
-          '<div class="info-card"><h3>Score</h3><p style="font-size:22px;font-weight:900;color:#34d399">'+runs+'-'+wkts+'</p>'+
-          '<p style="margin-top:6px">Overs: <b>'+esc(String(ov))+'</b> · Balls: <b>'+(balls|0)+'</b> · Wickets: <b>'+wkts+'</b></p></div>'+
-          '<div class="sec-title">Fall of wickets</div>'+fowHtml;
+        var html = '';
+        html += '<div class="info-card"><h3>Score</h3><p style="font-size:22px;font-weight:900;color:#34d399">'+esc(String(scoreTxt))+'</p>';
+        if(maxOvers) html += '<p style="margin-top:6px;color:#94a3b8">'+esc(String(maxOvers))+' overs match</p>';
+        if(tossLine) html += '<p style="margin-top:6px;color:#cbd5e1">'+tossLine+'</p>';
+        html += '</div>';
+        html += '<div class="sec-title">Players</div>'+playersHtml;
+        html += '<div class="sec-title">Fall of wickets</div>'+fowHtml;
+        $('modal-body').innerHTML = html;
         $('modal-ov').classList.remove('hidden');
       }catch(e){console.log(e)}
     }
@@ -2166,10 +2496,70 @@
       for(var k=0;k<5;k++)setTimeout(rocket,k*120);requestAnimationFrame(frame);
     }
 
+    
+    var __matchStartMs = null;
+    var __matchStartKey = '';
+    function parseMatchStart(data){
+      try{
+        var st = data && (data.matchStartTime || data.startedAt || data.startTime || data.matchStart || data.startTs);
+        if(st == null || st === '') return null;
+        if(typeof st === 'number') return st < 1e12 ? st*1000 : st;
+        var d = new Date(st);
+        return isNaN(d.getTime()) ? null : d.getTime();
+      }catch(e){ return null; }
+    }
+    function fmtClock(ms){
+      if(ms==null || isNaN(ms)) return '00:00:00';
+      var s = Math.max(0, Math.floor(ms/1000));
+      var h = Math.floor(s/3600); s%=3600;
+      var m = Math.floor(s/60); s%=60;
+      function z(n){ return (n<10?'0':'')+n; }
+      return z(h)+':'+z(m)+':'+z(s);
+    }
+    function fmtDateTime(ms){
+      try{
+        var d = new Date(ms);
+        var date = d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'});
+        var time = d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+        return {date:date, time:time};
+      }catch(e){ return {date:'—', time:'—'}; }
+    }
+    function updateMatchClock(data){
+      try{
+        var key = (data && (data.liveMatchId || data.matchId || '')) + '|' + (data && (data.matchStartTime||data.startedAt||data.startTime||''));
+        var ms = parseMatchStart(data);
+        // New match → reset timer
+        if(key && key !== __matchStartKey){
+          __matchStartKey = key;
+          __matchStartMs = ms;
+        }
+        if(ms != null) __matchStartMs = ms;
+        // Fallback: first time we see activity
+        if(__matchStartMs == null && data && (data.balls>0 || data.runs!=null || data.ts)){
+          __matchStartMs = data.ts ? (data.ts < 1e12 ? data.ts*1000 : data.ts) : Date.now();
+        }
+        var startMs = __matchStartMs;
+        var clockEl=$('v-match-clock');
+        if(startMs == null){
+          if(clockEl) clockEl.innerHTML='(Started <span class="clock-start">—</span> · <span class="clock-elapsed">00:00:00</span>)';
+          return;
+        }
+        var ft = fmtDateTime(startMs);
+        var elapsed = Date.now() - startMs;
+        if(data && data.matchEnded && data.matchEndTime){
+          var end = parseMatchStart({startTime:data.matchEndTime});
+          if(end) elapsed = end - startMs;
+        }
+        var clock = fmtClock(elapsed);
+        if(clockEl) clockEl.innerHTML='(Started <span class="clock-start">'+esc(ft.time)+'</span> <span class="clock-sep">•</span> <span class="clock-elapsed">'+clock+'</span>)';
+      }catch(e){}
+    }
+    setInterval(function(){ try{ updateMatchClock(lastData||{}); }catch(e){} }, 1000);
+
     function render(data){
       var prevData=lastData;
       var wasEnded=!!lastViewerMatchEnded;
-      lastData=data; try{maybeShowOverLeaders(data)}catch(eOL){}
+      lastData=data; try{updateMatchClock(data)}catch(eClk){} try{maybeShowOverLeaders(data)}catch(eOL){}
       if(!data||!(data.ts||data.runs!=null||data.balls!=null||data.teamA||data.teamB)){$('no-data').classList.remove('hidden');$('live-root').classList.add('hidden');var gb=$('glow-ball');if(gb)gb.classList.add('paused');return}
       var legalNow=data.balls|0, legalPrev=prevData?(prevData.balls|0):-1;
       var overJustEnded=!!(prevData&&prevData.ts&&!(prevData.matchEnded)&&!data.matchEnded&&(data.innings|0)===(prevData.innings|0)&&legalNow>legalPrev&&legalNow>0&&(legalNow%6)===0);
@@ -2196,9 +2586,28 @@
         }
       }
       try{refreshPtsUI()}catch(eUp){}
-      $('v-match-type').textContent=(data.matchType||'MATCH').toUpperCase();
-      var line=data.innings===1?('1st innings · '+(data.battingTeamName||'')+' '+(data.runs|0)+' runs in '+(data.balls|0)+' balls'+((data.wickets|0)>0?(' for '+data.wickets+' wicket'+((data.wickets>1)?'s':'')):'')+(data.crr?(' · CRR '+data.crr):'')):('Innings '+data.innings+(data.targetScore!=null?(' · Target '+data.targetScore):''));
-      $('v-match-line').textContent=line;$('v-crr').textContent=(data.crr!=null?Number(data.crr).toFixed(2):'0.00');
+      // Keep the live match clock span when updating the match type.
+      var mt=$('v-match-type');
+      if(mt){
+        mt.innerHTML=esc((data.matchType||'MATCH').toUpperCase())+' <span class="match-clock-inline" id="v-match-clock">(Started <span class="clock-start">—</span> <span class="clock-sep">•</span> <span class="clock-elapsed">00:00:00</span>)</span>';
+        updateMatchClock(data);
+      }
+      var line='';
+      try{ if($('v-match-line')) $('v-match-line').textContent=''; }catch(e){}
+      if($('v-crr')) $('v-crr').textContent=(data.crr!=null?Number(data.crr).toFixed(2):'0.00');
+      (function(){
+        var nrrEl=$('v-nrr');
+        if(!nrrEl) return;
+        var nrr=data.nrr!=null?data.nrr:(data.rrr!=null?data.rrr:null);
+        if(nrr!=null && nrr!=='') nrrEl.textContent=Number(nrr).toFixed(2);
+        else if((data.innings|0)>=2 && data.targetScore!=null){
+          var need=Math.max(0,(data.targetScore|0)-(data.runs|0));
+          var maxBalls=(data.maxOvers|0)*6;
+          var left=maxBalls>0?Math.max(0,maxBalls-(data.balls|0)):0;
+          if(left>0) nrrEl.textContent=((need*6)/left).toFixed(2);
+          else nrrEl.textContent='—';
+        } else nrrEl.textContent='—';
+      })();
       /* team names+logos set below */
       function scoreHtml(runs, wkts, overs){
         return '<span class="sc-main">'+(runs|0)+' / '+(wkts|0)+'</span><span class="sc-ov">('+esc(String(overs!=null?overs:'—'))+')</span>';
@@ -2229,7 +2638,7 @@
         var r=data.strikerRuns|0,b=data.strikerBalls|0;
         var s=b>0?((r*100)/b).toFixed(1):'0.0';
         var f4=data.strikerFours|0, s6=data.strikerSixes|0;
-        if($('v-striker'))$('v-striker').textContent=(data.strikerName||'—')+(data.strikerName?'*':'');
+        if($('v-striker'))$('v-striker').textContent=(data.strikerName ? (data.strikerName.replace(/\*+$/,'') + '*') : '—');
         if($('v-str-r'))$('v-str-r').textContent=r;
         if($('v-str-b'))$('v-str-b').textContent=b;
         if($('v-str-46'))$('v-str-46').textContent=f4+'/'+s6;
@@ -2249,7 +2658,7 @@
         var runs=data.bowlerRuns|0, balls=data.bowlerBalls|0, wk=data.bowlerWickets|0;
         var ov=typeof oversFromBalls==='function'?oversFromBalls(balls):((balls/6|0)+'.'+(balls%6));
         var econ=balls>0?((runs*6)/balls).toFixed(2):'0.00';
-        if($('v-bowler'))$('v-bowler').textContent=data.bowlerName||'—';
+        if($('v-bowler'))$('v-bowler').textContent=data.bowlerName ? (String(data.bowlerName).replace(/\*+$/,'') + '*') : '—';
         if($('v-bowl-r'))$('v-bowl-r').textContent=runs;
         if($('v-bowl-o'))$('v-bowl-o').textContent=ov;
         if($('v-bowl-w'))$('v-bowl-w').textContent=wk;
@@ -2357,6 +2766,28 @@
         $('v-over-msg').textContent=msg;
       })();
       try{ refreshCommentaryIfModeOn(); }catch(eCommMode){}
+      // Glow batting team score every ball
+      try{
+        var prevB = window.__lastBallsForGlow;
+        var nowB = data.balls|0;
+        if(prevB!=null && nowB!==prevB){
+          var side = data.battingSide==='B' ? 'b' : 'a';
+          var card = document.querySelector('.team-card:nth-child('+(side==='a'?1:2)+')');
+          // more reliable: by role
+          var cards = document.querySelectorAll('.team-card');
+          cards.forEach(function(c){
+            c.classList.remove('bat-glow');
+            var role = c.querySelector('.role');
+            if(role && /batt/i.test(role.textContent||'')){
+              c.classList.remove('bat-glow');
+              void c.offsetWidth;
+              c.classList.add('bat-glow');
+              setTimeout(function(){ try{c.classList.remove('bat-glow')}catch(e){} }, 1000);
+            }
+          });
+        }
+        window.__lastBallsForGlow = nowB;
+      }catch(eG){}
       var lines=((ttsLang==='hi')?(data.commentaryHi||data.commentary):data.commentary||[]).slice().filter(Boolean).reverse();
       $('comm-list').innerHTML=lines.length?lines.map(function(line,i){var parts=formatCommentaryLine(line);var html='';if(i===0)html+='<div class="t">LATEST</div>';if(parts.title)html+='<div class="title">'+highlightEventWords(parts.title)+'</div>';if(parts.body)html+='<div class="body">'+highlightEventWords(parts.body)+'</div>';if(!parts.title&&!parts.body)html+=highlightEventWords(line);return'<div class="feed-item">'+html+'</div>'}).join(''):'<div class="empty">No commentary yet</div>';
       speakNewCommentary(data);
@@ -2370,7 +2801,7 @@
       } else {
         html+=statsBlock('Innings 1',data.innings1BatName||data.firstBattingName||data.battingTeamName,data.innings1BowlName||data.firstBowlingName||data.bowlingTeamName,i1Bat,i1Bowl,'');
       }
-      $('stats-body').innerHTML=html;
+      $('stats-body').innerHTML=html + buildFowStatsHtml(data);
       var swipeStats=null; if(false && $('v-swipe-stats-body')){ swipeStats.innerHTML=((data.innings|0)>=2?statsBlock('Innings '+(data.innings|0),data.battingTeamName,data.bowlingTeamName,i2Bat,i2Bowl,'inn2'):statsBlock('Innings 1',data.innings1BatName||data.firstBattingName||data.battingTeamName,data.innings1BowlName||data.firstBowlingName||data.bowlingTeamName,i1Bat,i1Bowl,''))+'<div class="v-swipe-hint">Swipe right for scoreboard · swipe left for stats</div>'; }
       var totRuns=(data.runs|0)+(data.firstInningsScore|0);
       var totWkts=(data.wickets|0)+(data.firstInningsWickets|0);
@@ -2822,8 +3253,9 @@
         list = list || [];
         var n = (count!=null ? count : list.length) | 0;
         var el = $('viewer-count');
-        if(el) el.textContent = '🟢 ' + n;
-        var cv=$('crr-viewers'); if(cv) cv.textContent = '🟢 ' + n;
+        if(el){ var nn=$('viewer-count-n'); if(nn) nn.textContent=n; else el.innerHTML='👤 <span id="viewer-count-n">'+n+'</span> Live Viewers'; }
+        var pfv=$('pf-viewers'); if(pfv) pfv.textContent=String(n);
+        var cv=$('crr-viewers'); if(cv) cv.innerHTML = '<span class="vd">🟢</span> <span id="crr-viewers-n">'+n+'</span> Viewers watching';
         var nowMap = {};
         var onlineIds = Object.create(null);
         list.forEach(function(v){
@@ -3145,6 +3577,8 @@
     }
     // ===== end SCORE PUSH =====
 
+try{setViewerTab('live')}catch(e){}
+try{mountDashboards()}catch(e){}
 // PUSH-FIRST boot: WebSocket for score + floats, light polling as backup only
     poll();
     try{ connectScoreWs(); }catch(e){}
